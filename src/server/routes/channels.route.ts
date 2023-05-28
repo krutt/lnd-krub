@@ -1,4 +1,4 @@
-// ~~/src/server/routes/info.route.ts
+// ~~/src/server/routes/channels.route.ts
 
 // imports
 import type { LNDKrubRequest, LNDKrubRouteFunc } from '@/server/routes'
@@ -17,8 +17,11 @@ export default (
    * @returns
    */
   async (request: LNDKrubRequest, response: Response) => {
-    console.log('/getinfo', [request.id])
-    return await promisify(lightning.getInfo).bind(lightning)({})
-      .then(info => response.send(info))
-      .catch(() => errorLnd(response))
+    console.log('/channels', [request.id])
+    return await promisify(lightning.listChannels).bind(lightning)({})
+      .then(result => response.send(result))
+      .catch(err => {
+        console.error(err)
+        return errorLnd(response)
+      })
   }

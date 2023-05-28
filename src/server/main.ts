@@ -82,6 +82,7 @@ import addInvoice from '@/server/routes/addInvoice.route'
 import balance from '@/server/routes/balance.route'
 import bitcoinAddress from '@/server/routes/bitcoinAddress.route'
 import chainInfo from '@/server/routes/chainInfo.route'
+import channels from '@/server/routes/channels.route'
 import checkPayment from '@/server/routes/checkPayment.route'
 import checkRouteInvoice from '@/server/routes/checkRouteInvoice.route'
 import createAccount from '@/server/routes/createAccount.route'
@@ -95,13 +96,14 @@ import userInvoices from '@/server/routes/userInvoices.route'
 router.post('/auth', postLimiter, authenticate(bitcoin, lightning, redis))
 router.post('/addinvoice', postLimiter, addInvoice(bitcoin, lightning, redis))
 router.get('/balance', postLimiter, balance(bitcoin, lightning, redis))
+router.get('/channels', channels(lightning))
 router.get('/checkpayment/:payment_hash', checkPayment(bitcoin, lightning, redis))
 router.get('/checkrouteinvoice', checkRouteInvoice(bitcoin, lightning, redis))
 router.post('/create', postLimiter, createAccount(bitcoin, lightning, redis))
 router.get('/decodeinvoice', postLimiter, decodeInvoice(bitcoin, lightning, redis))
 router.get('/getbtc', bitcoinAddress(bitcoin, lightning, redis))
 router.get('/getchaninfo/:chanid', chainInfo(lightning))
-router.get('/getinfo', postLimiter, info(bitcoin, lightning, redis))
+router.get('/getinfo', postLimiter, info(lightning))
 router.get('/getpending', postLimiter, pendingInvoices(bitcoin, lightning, redis))
 router.get('/gettxs', postLimiter, transactions(bitcoin, lightning, redis))
 router.get('/getuserinvoices', postLimiter, userInvoices(bitcoin, lightning, redis))
