@@ -2331,9 +2331,9 @@ vary@~1.1.2:
   resolved "https://registry.npmjs.org/vary/-/vary-1.1.2.tgz"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
 
-vite-express@*:
+vite-express@^0.8.0:
   version "0.8.0"
-  resolved "https://registry.npmjs.org/vite-express/-/vite-express-0.8.0.tgz"
+  resolved "https://registry.yarnpkg.com/vite-express/-/vite-express-0.8.0.tgz#e1aa29fa758fa9afccfd64efa5fbf4cef95a29b7"
   integrity sha512-6rTyHMnOpi6+7XIH49MZNKOh4Rv684pKj2fSiJ+mI0xKgomBQkEhzL+Y/6mAmvWcStXSCf4lr7ZR+rRVuVaNCg==
   dependencies:
     node-fetch "^2.0.0"

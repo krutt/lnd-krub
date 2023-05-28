@@ -2,9 +2,8 @@
 
 // imports
 import Redis from 'ioredis'
-import ViteExpress from 'vite-express'
 import bodyParser from 'body-parser'
-import express, { Express, Router } from 'express'
+import express, { Express, Response, Router } from 'express'
 import helmet from 'helmet'
 import morgan from 'morgan'
 import { promisify } from 'node:util'
@@ -111,6 +110,16 @@ router.post('/payinvoice', postLimiter, payInvoice(bitcoin, lightning, redis))
 router.get('/queryroutes/:source/:dest/:amt', queryRoutes(lightning))
 app.use('/', router)
 
+// static files
+let isProduction = process.env.NODE_ENV === 'production'
+
+// serve production template and static files
+if (isProduction) {
+  let staticDir = process.cwd() + '/dist'
+  app.use(express.static(staticDir))
+  app.get('*', (_, response: Response) => response.sendFile('index.html', { root: staticDir }))
+}
+
 // ######################## SMOKE TESTS ########################
 app.on('event:startup', () => {
   const MIN_BTC_BLOCK = 670000
@@ -158,8 +167,17 @@ app.on('event:startup', () => {
   })
 })
 
+// listen
 let port: number = parseInt(process.env.PORT || '3000')
-ViteExpress.listen(app, port, () => {
-  app.emit('event:startup')
-  console.log(`Server is listening on port ${port}...`)
-})
+if (isProduction) {
+  app.listen(port, () => {
+    app.emit('event:startup')
+    console.log(`Server is listening on port ${port}...`)
+  })
+} else {
+  const ViteExpress = require('vite-express')
+  ViteExpress.listen(app, port, () => {
+    app.emit('event:startup')
+    console.log(`Dev-server is listening on port ${port}...`)
+  })
+}
