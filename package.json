@@ -40,7 +40,7 @@
     "dev": "nodemon --require tsconfig-paths/register --watch src/server src/server/main.ts",
     "fmt": "prettier --write src",
     "preview": "vite preview",
-    "start": "NODE_ENV=production ts-node src/server/main.ts",
+    "start": "NODE_ENV=production nodemon --require tsconfig-paths/register src/server/main.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "version": "0.1.0"
