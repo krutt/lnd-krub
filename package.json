@@ -32,9 +32,8 @@
     "vite": "^4.0.4",
     "vite-express": "^0.8.0"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "name": "lnd-krub",
-  "private": true,
   "scripts": {
     "build": "vite build",
     "dev": "nodemon --require tsconfig-paths/register --watch src/server src/server/main.ts",
