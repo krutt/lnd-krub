@@ -155,7 +155,6 @@ let updateLightning = async () => {
   let baseUrl = 'http://' + import.meta.env.BASE_URL
   let qrCode: string = 'bluewallet:setlndhuburl?url=' + encodeURIComponent(baseUrl)
   let qrBuffer = await new AwesomeQR({text: qrCode, size: 500 }).draw()
-  console.log(qrBuffer)
   render(info, lightningListChannels, qrBuffer)
 }
 
