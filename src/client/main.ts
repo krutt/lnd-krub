@@ -4,7 +4,7 @@
 import '../assets/styles.css'
 import { AwesomeQR } from 'awesome-qr'
 import Mustache from 'mustache'
-import wellKnown from './pubkeys.json'
+import wellKnown from '../assets/pubkeys.json'
 
 let render = (info, channels, qrBuffer) => {
   document.querySelector<HTMLDivElement>('#app')!.innerHTML = Mustache.render(
