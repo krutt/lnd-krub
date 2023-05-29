@@ -1,4 +1,4 @@
-// ~~/src/server/main.js
+// ~~/src/server/index.ts
 
 // imports
 import Redis from 'ioredis'
