@@ -130,19 +130,21 @@ let render = (info, channels, qrBuffer) => {
 }
 
 let updateLightning = async () => {
-  let cookies = JSON.parse(
-    '{"' +
-      decodeURI(document.cookie).replace(/"/g, '\\"').replace(/;/g, '","').replace(/=/g, '":"') +
-      '"}'
-  )
-  let _csrf = cookies['xsrf-token']
-  console.log(_csrf)
+  let body = {}
+  let headers = { 'Content-Type': 'application/json' }
+  let method = 'PUT'
+  if (document.cookie) {
+    let cookies = document.cookie
+      .split(';')
+      .map((pair: string) => pair.split('='))
+      .reduce((acc, kv: string[]) => {
+        acc[decodeURIComponent(kv[0].trim())] = decodeURIComponent(kv[1].trim());
+        return acc;
+      }, {})
+    body['_csrf'] = cookies['xsrf-token']
+  }
   let dashboard = await (
-    await fetch('/dashboard', {
-      body: JSON.stringify({ _csrf }),
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-    })
+    await fetch('/dashboard', { body: JSON.stringify(body), method, headers})
   ).json()
   let info = dashboard[0]
   let lightningListChannels = dashboard[1]
@@ -172,5 +174,7 @@ let updateLightning = async () => {
   render(info, lightningListChannels, qrBuffer)
 }
 
-updateLightning()
-setInterval(updateLightning, 60000) // 60 seconds
+window.onload = () => {
+  updateLightning()
+  setInterval(updateLightning, 60000) // 60 seconds
+}
