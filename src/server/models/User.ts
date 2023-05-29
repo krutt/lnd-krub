@@ -16,15 +16,42 @@ let _invoice_ispaid_cache = {}
 let _listtransactions_cache = false
 let _listtransactions_cache_expiry_ts = 0
 
+// types
+type Invoice = {
+  amt: number
+  decoded: {
+    description: string
+    timestamp: number
+  }
+  description: string
+  expire_time: number
+  fee: number
+  ispaid: boolean
+  memo: string
+  pay_req: string
+  payment_error: string
+  payment_hash: string
+  payment_preimage: string
+  payment_request?: string
+  payment_route: {
+    total_fees: number
+    total_amt: number
+    total_amt_msat: number
+  }
+  timestamp: number
+  type: string
+  value: number
+}
+
 export class User {
   // member vars
   _balance: number
   _bitcoin: BitcoinService
   _lightning: LightningService
-  _login: string | boolean
-  _password: string | boolean
+  _login?: string | boolean
+  _password?: string
   _redis: Redis
-  _userid: string | boolean
+  _userid?: string
 
   // optionals
   _access_token?: string
@@ -35,9 +62,6 @@ export class User {
     this._bitcoin = bitcoin
     this._lightning = lightning
     this._redis = redis
-    this._userid = false
-    this._login = false
-    this._password = false
     this._balance = 0
   }
 
@@ -164,7 +188,7 @@ export class User {
    * @returns {Promise<number>} Balance available to spend
    */
   async getBalance() {
-    let balance = (await this._redis.get('balance_for_' + this._userid)) * 1
+    let balance = parseInt(await this._redis.get('balance_for_' + this._userid)) * 1
     if (!balance) {
       balance = await this.getCalculatedBalance()
       await this.saveBalance(balance)
@@ -275,8 +299,8 @@ export class User {
    * @see Invo._getIsPaymentHashMarkedPaidInDatabase
    * @see Invo.getIsMarkedAsPaidInDatabase
    */
-  async getPaymentHashPaid(payment_hash) {
-    return await this._redis.get('ispaid_' + payment_hash)
+  async getPaymentHashPaid(payment_hash): Promise<number> {
+    return parseInt(await this._redis.get('ispaid_' + payment_hash))
   }
 
   async syncInvoicePaid(payment_hash) {
@@ -301,8 +325,8 @@ export class User {
       range = range.slice(parseInt(limit) * -1)
     }
     let result = []
-    for (let invoice of range) {
-      invoice = JSON.parse(invoice)
+    for (let item of range) {
+      let invoice = JSON.parse(item) as Invoice
       let decoded = lightningPayReq.decode(invoice.payment_request)
       invoice.description = ''
       for (let tag of decoded.tags) {
@@ -315,6 +339,7 @@ export class User {
           }
         }
         if (tag.tagName === 'payment_hash') {
+          // @ts-ignore
           invoice.payment_hash = tag.data
         }
       }
@@ -379,8 +404,8 @@ export class User {
     }
 
     let range = await this._redis.lrange('txs_for_' + this._userid, 0, -1)
-    for (let invoice of range) {
-      invoice = JSON.parse(invoice)
+    for (let item of range) {
+      let invoice = JSON.parse(item) as Invoice
       invoice.type = 'paid_invoice'
 
       // for internal invoices it might not have properties `payment_route`  and `decoded`...
@@ -469,6 +494,7 @@ export class User {
       // @ts-ignore
       _listtransactions_cache = JSON.stringify(ret)
       _listtransactions_cache_expiry_ts = +new Date() + 5 * 60 * 1000 // 5 min
+      // @ts-ignore
       this._redis.set('listtransactions', _listtransactions_cache)
       return ret
     } catch (error) {
