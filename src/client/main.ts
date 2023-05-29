@@ -125,7 +125,7 @@ let render = (info, channels, qrBuffer) => {
       </footer>
     </div>
   `,
-  { ...info, ...channels, qrBuffer}
+    { ...info, ...channels, qrBuffer }
   )
 }
 
@@ -154,7 +154,7 @@ let updateLightning = async () => {
   // @ts-ignore
   let baseUrl = 'http://' + import.meta.env.BASE_URL
   let qrCode: string = 'bluewallet:setlndhuburl?url=' + encodeURIComponent(baseUrl)
-  let qrBuffer = await new AwesomeQR({text: qrCode, size: 500 }).draw()
+  let qrBuffer = await new AwesomeQR({ text: qrCode, size: 500 }).draw()
   render(info, lightningListChannels, qrBuffer)
 }
 
