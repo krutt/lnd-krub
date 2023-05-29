@@ -163,12 +163,12 @@ app.on('event:startup', () => {
 let port: number = parseInt(process.env.PORT || '3000')
 if (isProduction) {
   let rootDir = process.cwd() + '/dist'
+  // static files
+  app.use(express.static(rootDir))
   // front-end
   app.get('*', (_, response: Response) => {
     response.sendFile('index.html', { root: rootDir })
   })
-  // static files
-  app.use(express.static(rootDir))
   // listen
   app.listen(port, () => {
     app.emit('event:startup')
