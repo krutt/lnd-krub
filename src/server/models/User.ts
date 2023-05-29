@@ -125,7 +125,7 @@ export class User {
    * @returns {Promise<any>}
    */
   async generateAddress() {
-    let lock = new Lock(this._redis, 'generating_address_' + this._userid)
+    let lock = new Lock('generating_address_' + this._userid, this._redis)
     if (!(await lock.obtainLock())) {
       // someone's already generating address
       return
@@ -565,7 +565,7 @@ export class User {
 
       if (!already_imported && tx.category === 'receive') {
         // first, locking...
-        let lock = new Lock(this._redis, 'importing_' + tx.txid)
+        let lock = new Lock('importing_' + tx.txid, this._redis)
         if (!(await lock.obtainLock())) {
           // someone's already importing this tx
           return

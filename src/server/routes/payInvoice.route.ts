@@ -57,7 +57,7 @@ const subscribeInvoicesCallCallback = async (
     // obtaining a lock, to make sure we push to groundcontrol only once
     // since this web server can have several instances running, and each will get the same callback from LND
     // and dont release the lock - it will autoexpire in a while
-    let lock = new Lock(redis, 'groundcontrol_hash_' + LightningInvoiceSettledNotification.hash)
+    let lock = new Lock('groundcontrol_hash_' + LightningInvoiceSettledNotification.hash, redis)
     if (!(await lock.obtainLock())) {
       return
     }
@@ -133,7 +133,7 @@ export default (
     }
 
     // obtaining a lock
-    let lock = new Lock(redis, 'invoice_paying_for_' + user.getUserId())
+    let lock = new Lock('invoice_paying_for_' + user.getUserId(), redis)
     if (!(await lock.obtainLock())) {
       return errorGeneralServerError(response)
     }
