@@ -48,4 +48,4 @@ let macaroonCreds = grpc.credentials.createFromMetadataGenerator((_, callback) =
 })
 export const Creds = grpc.credentials.combineChannelCredentials(sslCreds, macaroonCreds)
 
-export default new LnRpc.Lightning(lnd.url, Creds)
+export default new LnRpc.Lightning(`${lnd.host}:${lnd.port}`, Creds)

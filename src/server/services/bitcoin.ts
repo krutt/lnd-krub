@@ -1,11 +1,11 @@
 // ~~/src/server/services/bitcoin.ts
 
 // imports
-import 'dotenv/config'
+import { bitcoind } from '@/configs'
 import jayson, { HttpClient } from 'jayson/promise'
 import { parse as parseUrl } from 'url'
 
-let rpc = parseUrl(process.env.BTC_RPC_URL)
+let rpc = parseUrl(bitcoind.rpc)
 // @ts-ignore
 rpc.timeout = 15000
 
