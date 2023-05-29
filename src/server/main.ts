@@ -124,7 +124,7 @@ app.on('event:startup', () => {
           console.error('bitcoind is not caught up')
           process.exit(1)
         }
-        console.log('bitcoind getblockchaininfo:', info)
+        // console.log('bitcoind getblockchaininfo:', info)
       }
     })
     .catch(err => {
@@ -135,7 +135,7 @@ app.on('event:startup', () => {
     .bind(lightning)({})
     .then(info => {
       // let identity_pubkey = false
-      console.info('lnd getinfo:', info)
+      // console.info('lnd getinfo:', info)
       if (!info.synced_to_chain) {
         console.error('lnd not synced')
         // process.exit(4);
@@ -143,7 +143,7 @@ app.on('event:startup', () => {
       // identity_pubkey = info.identity_pubkey
     })
     .catch(err => {
-      console.error('lnd failure')
+      // console.error('lnd failure')
       console.dir(err)
       process.exit(3)
     })
