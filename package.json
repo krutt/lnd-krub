@@ -19,9 +19,6 @@
     "mustache": "^4.1.0",
     "nodemon": "^2.0.20",
     "tiny-csrf": "^1.1.3",
-    "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.0.4",
     "uuid": "^8.3.2",
     "winston": "^3.3.3"
   },
@@ -32,13 +29,17 @@
     "@types/uuid": "^9.0.1",
     "awesome-qr": "^2.1.5-rc.0",
     "prettier": "^2.3.0",
+    "ts-node": "^10.9.1",
+    "tsc-alias": "^1.8.6",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.0.4",
     "vite": "^4.0.4",
     "vite-express": "^0.8.0"
   },
   "license": "MIT",
   "name": "lnd-krub",
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && tsc && tsc-alias",
     "dev": "nodemon --require tsconfig-paths/register --watch src/server src/index.ts",
     "fmt": "prettier --write src",
     "start": "NODE_ENV=production nodemon --require tsconfig-paths/register src/index.ts",

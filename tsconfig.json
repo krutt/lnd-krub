@@ -12,6 +12,7 @@
     "paths": {
       "@/*": ["./*"]
     },
+    "outDir": "./dist",
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": false,
