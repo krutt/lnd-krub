@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": "./src",
     "esModuleInterop": true,
     "isolatedModules": true,
     "module": "CommonJS",
@@ -10,7 +11,7 @@
     "noUnusedParameters": false,
     "lib": ["ESNext", "DOM"],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./*"]
     },
     "resolveJsonModule": true,
     "skipLibCheck": true,

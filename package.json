@@ -39,9 +39,9 @@
   "name": "lnd-krub",
   "scripts": {
     "build": "vite build",
-    "dev": "nodemon --require tsconfig-paths/register --watch src/server src/server/index.ts",
+    "dev": "nodemon --require tsconfig-paths/register --watch src/server src/index.ts",
     "fmt": "prettier --write src",
-    "start": "NODE_ENV=production nodemon --require tsconfig-paths/register src/server/index.ts",
+    "start": "NODE_ENV=production nodemon --require tsconfig-paths/register src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "version": "0.1.0"
