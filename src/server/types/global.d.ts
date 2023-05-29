@@ -1,3 +1,5 @@
+// ~~/src/server/types/global.d.ts
+
 declare module 'process' {
   global {
     namespace NodeJS {
