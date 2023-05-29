@@ -7,9 +7,7 @@ import type { Response } from 'express'
 import { errorLnd } from '@/server/exceptions'
 import { promisify } from 'node:util'
 
-export default (
-    lightning: LightningService,
-  ): LNDKrubRouteFunc =>
+export default (lightning: LightningService): LNDKrubRouteFunc =>
   /**
    *
    * @param request
@@ -18,7 +16,8 @@ export default (
    */
   async (request: LNDKrubRequest, response: Response) => {
     console.log('/channels', [request.id])
-    return await promisify(lightning.listChannels).bind(lightning)({})
+    return await promisify(lightning.listChannels)
+      .bind(lightning)({})
       .then(result => response.send(result))
       .catch(err => {
         console.error(err)
