@@ -1,4 +1,4 @@
-// ~~/src/models/index.ts
+// ~~/src/server/models/index.ts
 
 // imports
 export { Invo } from './Invo'
