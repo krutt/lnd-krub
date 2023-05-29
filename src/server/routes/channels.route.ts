@@ -1,13 +1,20 @@
 // ~~/src/server/routes/channels.route.ts
 
 // imports
+import type { BitcoinService } from '@/server/services/bitcoin'
 import type { LNDKrubRequest, LNDKrubRouteFunc } from '@/server/routes'
 import type { LightningService } from '@/server/services/lightning'
+import type { Redis } from 'ioredis'
 import type { Response } from 'express'
-import { errorLnd } from '@/server/exceptions'
+import { User } from '@/server/models'
+import { errorBadAuth, errorLnd } from '@/server/exceptions'
 import { promisify } from 'node:util'
 
-export default (lightning: LightningService): LNDKrubRouteFunc =>
+export default (
+    bitcoin: BitcoinService,
+    lightning: LightningService,
+    redis: Redis
+  ): LNDKrubRouteFunc =>
   /**
    *
    * @param request
@@ -16,6 +23,10 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
    */
   async (request: LNDKrubRequest, response: Response) => {
     console.log('/channels', [request.id])
+    let user = new User(bitcoin, lightning, redis)
+    if (!(await user.loadByAuthorization(request.headers.authorization))) {
+      return errorBadAuth(response)
+    }
     return await promisify(lightning.listChannels)
       .bind(lightning)({})
       .then(result => response.send(result))
