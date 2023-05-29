@@ -138,13 +138,13 @@ let updateLightning = async () => {
       .split(';')
       .map((pair: string) => pair.split('='))
       .reduce((acc, kv: string[]) => {
-        acc[decodeURIComponent(kv[0].trim())] = decodeURIComponent(kv[1].trim());
-        return acc;
+        acc[decodeURIComponent(kv[0].trim())] = decodeURIComponent(kv[1].trim())
+        return acc
       }, {})
     body['_csrf'] = cookies['xsrf-token']
   }
   let dashboard = await (
-    await fetch('/dashboard', { body: JSON.stringify(body), method, headers})
+    await fetch('/dashboard', { body: JSON.stringify(body), method, headers })
   ).json()
   let info = dashboard[0]
   let lightningListChannels = dashboard[1]
