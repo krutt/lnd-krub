@@ -130,9 +130,23 @@ let render = (info, channels, qrBuffer) => {
 }
 
 let updateLightning = async () => {
-  let info = await (await fetch('/getinfo')).json()
+  let cookies = JSON.parse(
+    '{"' +
+      decodeURI(document.cookie).replace(/"/g, '\\"').replace(/;/g, '","').replace(/=/g, '":"') +
+      '"}'
+  )
+  let _csrf = cookies['xsrf-token']
+  console.log(_csrf)
+  let dashboard = await (
+    await fetch('/dashboard', {
+      body: JSON.stringify({ _csrf }),
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+    })
+  ).json()
+  let info = dashboard[0]
+  let lightningListChannels = dashboard[1]
   let channels = []
-  let lightningListChannels = await (await fetch('/channels')).json()
   let max_chan_capacity = -1
   for (const channel of lightningListChannels.channels) {
     max_chan_capacity = Math.max(max_chan_capacity, channel.capacity)

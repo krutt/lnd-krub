@@ -3,7 +3,7 @@
 // imports
 import Redis from 'ioredis'
 import bodyParser from 'body-parser'
-import express, { Express, Response, Router } from 'express'
+import express, { Express, Request, Response, Router } from 'express'
 import helmet from 'helmet'
 import morgan from 'morgan'
 import { promisify } from 'node:util'
@@ -88,6 +88,7 @@ import channels from '@/server/routes/channels.route'
 import checkPayment from '@/server/routes/checkPayment.route'
 import checkRouteInvoice from '@/server/routes/checkRouteInvoice.route'
 import createAccount from '@/server/routes/createAccount.route'
+import dashboard from '@/server/routes/dashboard.route'
 import decodeInvoice from '@/server/routes/decodeInvoice.route'
 import info from '@/server/routes/info.route'
 import pendingInvoices from '@/server/routes/pendingInvoices.route'
@@ -111,6 +112,17 @@ router.get('/gettxs', postLimiter, transactions(bitcoin, lightning, redis))
 router.get('/getuserinvoices', postLimiter, userInvoices(bitcoin, lightning, redis))
 router.post('/payinvoice', postLimiter, payInvoice(bitcoin, lightning, redis))
 router.get('/queryroutes/:source/:dest/:amt', queryRoutes(lightning))
+/**
+ * production: limit dashboard endpoint with cross-site request forgery protection
+ */
+if (isProduction) {
+  let cookieParser = require('cookie-parser')
+  app.use(cookieParser(process.env.COOKIE_SECRET))
+  let csurf = require('tiny-csrf')
+  app.use(csurf(process.env.CSRF_SECRET, ['PUT']))
+}
+router.put('/dashboard', dashboard(lightning))
+
 app.use('/', router)
 
 // ######################## SMOKE TESTS ########################
@@ -163,12 +175,14 @@ app.on('event:startup', () => {
 let port: number = parseInt(process.env.PORT || '3000')
 if (isProduction) {
   let rootDir = process.cwd() + '/dist'
+  // front-end
+  app.get('/', (request: Request, response: Response) => {
+    let req: Request & { csrfToken?: Function } = request
+    let csrfToken: string | undefined = !!req.csrfToken ? req.csrfToken() : void 0
+    response.cookie('xsrf-token', csrfToken).sendFile('index.html', { root: rootDir })
+  })
   // static files
   app.use(express.static(rootDir))
-  // front-end
-  app.get('*', (_, response: Response) => {
-    response.sendFile('index.html', { root: rootDir })
-  })
   // listen
   app.listen(port, () => {
     app.emit('event:startup')
