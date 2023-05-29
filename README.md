@@ -47,8 +47,7 @@ Under renovation.
 
 ### Responsible disclosure
 
-Found critical bugs/vulnerabilities? Please email them to aekazitt+github@gmail.com Thanks!
-
+Found critical bugs/vulnerabilities? Please email them to aekasitt.g+github@siamintech.co.th Thanks!
 
 ## License
 
