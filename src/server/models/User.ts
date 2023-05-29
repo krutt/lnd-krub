@@ -158,7 +158,7 @@ export class User {
   }
 
   /**
-   * LndHub no longer relies on redis balance as source of truth, this is
+   * LNDKrub no longer relies on redis balance as source of truth, this is
    * more a cache now. See `this.getCalculatedBalance()` to get correct balance.
    *
    * @returns {Promise<number>} Balance available to spend
@@ -209,7 +209,7 @@ export class User {
   }
 
   /**
-   * LndHub no longer relies on redis balance as source of truth, this is
+   * LNDKrub no longer relies on redis balance as source of truth, this is
    * more a cache now. See `this.getCalculatedBalance()` to get correct balance.
    *
    * @param balance

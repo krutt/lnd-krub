@@ -63,12 +63,12 @@ export const errorSunset = (response: Response): Response =>
   response.send({
     error: true,
     code: 11,
-    message: 'This LNDHub instance is not accepting any more users',
+    message: 'This LNDKrub instance is not accepting any more users',
   })
 
 export const errorSunsetAddInvoice = (response: Response): Response =>
   response.send({
     error: true,
     code: 11,
-    message: 'This LNDHub instance is scheduled to shut down. Withdraw any remaining funds',
+    message: 'This LNDKrub instance is scheduled to shut down. Withdraw any remaining funds',
   })
