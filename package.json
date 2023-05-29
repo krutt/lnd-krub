@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.17",
+    "@types/ioredis": "^5.0.0",
     "@types/node": "^20.2.3",
     "@types/uuid": "^9.0.1",
     "awesome-qr": "^2.1.5-rc.0",
