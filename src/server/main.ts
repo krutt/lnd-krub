@@ -160,22 +160,16 @@ app.on('event:startup', () => {
   })
 })
 
-// serve production template and static files
+let port: number = parseInt(process.env.PORT || '3000')
 if (isProduction) {
   let rootDir = process.cwd() + '/dist'
-
   // front-end
   app.get('*', (_, response: Response) => {
     response.sendFile('index.html', { root: rootDir })
   })
-
   // static files
   app.use(express.static(rootDir))
-}
-
-// listen
-let port: number = parseInt(process.env.PORT || '3000')
-if (isProduction) {
+  // listen
   app.listen(port, () => {
     app.emit('event:startup')
     console.log(`Server is listening on port ${port}...`)
