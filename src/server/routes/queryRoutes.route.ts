@@ -1,4 +1,4 @@
-// ~~/src/server/routes/queryRoutes.ts
+// ~~/src/server/routes/queryRoutes.route.ts
 
 // imports
 import type { LNDKrubRequest, LNDKrubRouteFunc } from '@/server/routes'

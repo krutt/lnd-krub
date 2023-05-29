@@ -1,4 +1,4 @@
-// ~~/src/server/routes/getbtc.ts
+// ~~/src/server/routes/bitcoinAddress.route.ts
 
 // imports
 import type { BitcoinService } from '@/server/services/bitcoin'
