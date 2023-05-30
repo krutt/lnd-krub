@@ -17,7 +17,7 @@ let loaderOptions = {
   oneofs: true,
 }
 
-let packageDefinition = protoLoader.loadSync('./src/assets/rpc.proto', loaderOptions)
+let packageDefinition = protoLoader.loadSync(lnd.protoPath, loaderOptions)
 let protoDescriptor = grpc.loadPackageDefinition(packageDefinition)
 
 export type LightningService = {
