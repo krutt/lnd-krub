@@ -42,7 +42,7 @@
     "build": "vite build && tsc && tsc-alias",
     "dev": "nodemon --require tsconfig-paths/register --watch src/server src/index.ts",
     "fmt": "prettier --write src",
-    "start": "NODE_ENV=production nodemon --require tsconfig-paths/register src/index.ts",
+    "start": "NODE_ENV=production node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "version": "0.1.0"
