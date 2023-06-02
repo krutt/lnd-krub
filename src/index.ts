@@ -4,6 +4,7 @@
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import Redis from 'ioredis'
 import bodyParser from 'body-parser'
+import cors from '@/server/middlewares/cors'
 import express, { Express, Response, Router } from 'express'
 import helmet from 'helmet'
 import identifiable from '@/server/middlewares/identifiable'
@@ -57,18 +58,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
  * parse application/json
  */
 app.use(bodyParser.json(null))
-
-// @ts-ignore
-let allowCrossDomain = (_, reply, next) => {
-  reply.header(
-    'Access-Control-Allow-Headers',
-    'Authorization,Access-Control-Allow-Origin,Content-Type'
-  )
-  reply.header('Access-Control-Allow-Origin', '*')
-  reply.header('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT')
-  next()
-}
-app.use(allowCrossDomain)
+app.use(cors)
 
 // api routes
 let router: Router = Router()
