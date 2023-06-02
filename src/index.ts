@@ -166,32 +166,37 @@ app.on('event:startup', () => {
     }
   })
   redis.monitor(function (err, monitor) {
+    if (!monitor) return
     monitor.on('monitor', function (time, args, source, database) {
       // console.log('REDIS', JSON.stringify(args))
     })
   })
 })
 
-let port: number = parseInt(process.env.PORT || '3000')
-if (isProduction) {
-  let rootDir = process.cwd() + '/dist'
-  // front-end
-  app.get('/', (request: Request, response: Response) => {
-    let req: Request & { csrfToken?: Function } = request
-    let csrfToken: string | undefined = !!req.csrfToken ? req.csrfToken() : void 0
-    response.cookie('xsrf-token', csrfToken).sendFile('index.html', { root: rootDir })
-  })
-  // static files
-  app.use(express.static(rootDir))
-  // listen
-  app.listen(port, () => {
-    app.emit('event:startup')
-    console.log(`Server is listening on port ${port}...`)
-  })
-} else {
-  const ViteExpress = require('vite-express')
-  ViteExpress.listen(app, port, () => {
-    app.emit('event:startup')
-    console.log(`Dev-server is listening on port ${port}...`)
-  })
+if (require.main === module) {
+  let port: number = parseInt(process.env.PORT || '3000')
+  if (isProduction) {
+    let rootDir = process.cwd() + '/dist'
+    // front-end
+    app.get('/', (request: Request, response: Response) => {
+      let req: Request & { csrfToken?: Function } = request
+      let csrfToken: string | undefined = !!req.csrfToken ? req.csrfToken() : void 0
+      response.cookie('xsrf-token', csrfToken).sendFile('index.html', { root: rootDir })
+    })
+    // static files
+    app.use(express.static(rootDir))
+    // listen
+    app.listen(port, () => {
+      app.emit('event:startup')
+      console.log(`Server is listening on port ${port}...`)
+    })
+  } else {
+    const ViteExpress = require('vite-express')
+    ViteExpress.listen(app, port, () => {
+      app.emit('event:startup')
+      console.log(`Dev-server is listening on port ${port}...`)
+    })
+  }
 }
+
+export default app
