@@ -1,7 +1,7 @@
 // ~~/src/index.ts
 
 // imports
-import type { LNDKrubRequest } from '@/server/routes'
+import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import Redis from 'ioredis'
 import bodyParser from 'body-parser'
 import express, { Express, Response, Router } from 'express'

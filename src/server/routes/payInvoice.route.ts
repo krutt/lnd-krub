@@ -3,7 +3,8 @@
 // imports
 import type { BitcoinService } from '@/server/services/bitcoin'
 import Frisbee from 'frisbee'
-import type { LNDKrubRequest, LNDKrubRouteFunc } from '@/server/routes'
+import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
+import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
 import type { Redis } from 'ioredis'
 import type { Response } from 'express'

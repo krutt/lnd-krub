@@ -1,7 +1,8 @@
 // ~~/src/server/routes/queryRoutes.route.ts
 
 // imports
-import type { LNDKrubRequest, LNDKrubRouteFunc } from '@/server/routes'
+import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
+import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
 

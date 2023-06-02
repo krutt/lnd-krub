@@ -2,7 +2,7 @@
 
 // imports
 import type { Handler, NextFunction, Response } from 'express'
-import type { LNDKrubRequest } from '@/server/routes'
+import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import { v4 as uuid } from 'uuid'
 
 // define handler

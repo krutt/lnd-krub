@@ -2,8 +2,9 @@
 
 // imports
 import type { BitcoinService } from '@/server/services/bitcoin'
+import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
+import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
-import type { LNDKrubRequest, LNDKrubRouteFunc } from '@/server/routes'
 import { Invo, User } from '@/server/models'
 import type { Redis } from 'ioredis'
 import type { Response } from 'express'
