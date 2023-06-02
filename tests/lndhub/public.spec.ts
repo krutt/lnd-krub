@@ -2,7 +2,7 @@
 
 // imports
 import { Express } from 'express'
-import { createLNDHub } from 'τ/services/lndhub'
+import { createLNDHub } from 'τ/mocks/lndhub'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import supertest from 'supertest'
 
