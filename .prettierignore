@@ -1,6 +1,11 @@
-# Build
-dist
-
 # Icons
 **/*.svg
 
+# Build
+dist
+
+# Static files
+public
+
+# Scripts
+scripts
