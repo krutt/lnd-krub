@@ -1,10 +1,12 @@
 // ~~/src/index.ts
 
 // imports
+import type { LNDKrubRequest } from '@/server/routes'
 import Redis from 'ioredis'
 import bodyParser from 'body-parser'
-import express, { Express, Request, Response, Router } from 'express'
+import express, { Express, Response, Router } from 'express'
 import helmet from 'helmet'
+import identifiable from '@/server/middlewares/identifiable'
 import morgan from 'morgan'
 import { promisify } from 'node:util'
 import { postRateLimit, rateLimit, redis as redisUrl } from '@/configs'
@@ -33,37 +35,28 @@ let app: Express = express()
 app.enable('trust proxy')
 app.use(helmet.hsts())
 app.use(helmet.hidePoweredBy())
-app.use(
-  rateLimiter({
-    windowMs: 15 * 60 * 1000,
-    max: rateLimit || 200,
-  })
-)
+app.use(rateLimiter({ max: rateLimit || 200, windowMs: 15 * 60 * 1000 }))
 
-// special rate limiter for POST endpoints
-let postLimiter = rateLimiter({
-  max: postRateLimit || 100,
-  windowMs: 30 * 60 * 1000,
-})
+/**
+ * special rate limiter for POST endpoints
+ */
+let postLimiter = rateLimiter({ max: postRateLimit || 100, windowMs: 30 * 60 * 1000 })
 
-// @ts-ignore
-// TODO: Replace this with a service
-app.use((req, res, next) => {
-  // @ts-ignore
-  req.id = uuid()
-  next()
-})
-
-// @ts-ignore
-morgan.token('id', req => req.id)
+app.use(identifiable)
+morgan.token('uuid', (request: LNDKrubRequest) => request.uuid)
 app.use(
   morgan(
-    ':id :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
+    ':uuid :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
   )
 )
-
-app.use(bodyParser.urlencoded({ extended: false })) // parse application/x-www-form-urlencoded
-app.use(bodyParser.json(null)) // parse application/json
+/**
+ * parse application/x-www-form-urlencoded
+ */
+app.use(bodyParser.urlencoded({ extended: false }))
+/**
+ * parse application/json
+ */
+app.use(bodyParser.json(null))
 
 // @ts-ignore
 let allowCrossDomain = (_, reply, next) => {
@@ -178,8 +171,8 @@ if (require.main === module) {
   if (isProduction) {
     let rootDir = process.cwd() + '/dist'
     // front-end
-    app.get('/', (request: Request, response: Response) => {
-      let req: Request & { csrfToken?: Function } = request
+    app.get('/', (request: LNDKrubRequest, response: Response) => {
+      let req: LNDKrubRequest & { csrfToken?: Function } = request
       let csrfToken: string | undefined = !!req.csrfToken ? req.csrfToken() : void 0
       response.cookie('xsrf-token', csrfToken).sendFile('index.html', { root: rootDir })
     })

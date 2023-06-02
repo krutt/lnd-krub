@@ -21,7 +21,7 @@ export default (
    * @returns
    */
   async (request: LNDKrubRequest, response: Response) => {
-    console.log('/auth', [request.id])
+    console.log('/auth', [request.uuid])
     if (!((request.body.login && request.body.password) || request.body.refresh_token))
       return errorBadArguments(response)
     let user = new User(bitcoin, lightning, redis)

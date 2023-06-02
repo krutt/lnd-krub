@@ -21,7 +21,7 @@ export default (
    * @returns
    */
   async (request: LNDKrubRequest, response: Response) => {
-    console.log('/checkpayment', [request.id])
+    console.log('/checkpayment', [request.uuid])
     let user = new User(bitcoin, lightning, redis)
     await user.loadByAuthorization(request.headers.authorization)
 

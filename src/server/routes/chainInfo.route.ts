@@ -28,7 +28,7 @@ export default (_: LightningService): LNDKrubRouteFunc =>
    * @returns
    */
   async (request: LNDKrubRequest, response: Response) => {
-    console.log('/getchaninfo', [request.id])
+    console.log('/getchaninfo', [request.uuid])
     // @ts-ignore
     if (lightningDescribeGraph && lightningDescribeGraph.edges) {
       // @ts-ignore

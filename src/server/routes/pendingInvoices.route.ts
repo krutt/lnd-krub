@@ -21,12 +21,12 @@ export default (
    * @returns
    */
   async (request: LNDKrubRequest, response: Response) => {
-    console.log('/getpending', [request.id])
+    console.log('/getpending', [request.uuid])
     let user = new User(bitcoin, lightning, redis)
     if (!(await user.loadByAuthorization(request.headers.authorization))) {
       return errorBadAuth(response)
     }
-    console.log('/getpending', [request.id, 'userid: ' + user.getUserId()])
+    console.log('/getpending', [request.uuid, 'userid: ' + user.getUserId()])
 
     if (!(await user.getAddress())) await user.generateAddress() // onchain address needed further
 

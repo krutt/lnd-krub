@@ -4,7 +4,7 @@
 import type { NextFunction, Request, Response } from 'express'
 
 // types
-export type LNDKrubRequest = Request & { id: string }
+export type LNDKrubRequest = Request & { uuid: string }
 export type LNDKrubRouteFunc = (
   request: LNDKrubRequest,
   response: Response,

@@ -22,12 +22,12 @@ export default (
    * @returns
    */
   async (request: LNDKrubRequest, response: Response) => {
-    console.log('/gettxs', [request.id])
+    console.log('/gettxs', [request.uuid])
     let user = new User(bitcoin, lightning, redis)
     if (!(await user.loadByAuthorization(request.headers.authorization))) {
       return errorBadAuth(response)
     }
-    console.log('/gettxs', [request.id, 'userid: ' + user.getUserId()])
+    console.log('/gettxs', [request.uuid, 'userid: ' + user.getUserId()])
 
     if (!(await user.getAddress())) await user.generateAddress() // onchain addr needed further
     try {
@@ -47,7 +47,7 @@ export default (
       }
       return response.send(txs)
     } catch (err) {
-      console.log('', [request.id, 'error gettxs:', err.message, 'userid:', user.getUserId()])
+      console.log('', [request.uuid, 'error gettxs:', err.message, 'userid:', user.getUserId()])
       return response.send([])
     }
   }

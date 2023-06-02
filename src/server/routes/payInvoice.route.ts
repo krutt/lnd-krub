@@ -120,7 +120,7 @@ export default (
     }
 
     console.log('/payinvoice', [
-      request.id,
+      request.uuid,
       'userid: ' + user.getUserId(),
       'invoice: ' + request.body.invoice,
     ])
@@ -144,7 +144,7 @@ export default (
       userBalance = await user.getCalculatedBalance()
     } catch (err) {
       // @ts-ignore
-      console.log('', [request.id, 'error running getCalculatedBalance():', err.message])
+      console.log('', [request.uuid, 'error running getCalculatedBalance():', err.message])
       lock.releaseLock()
       return errorTryAgainLater(response)
     }
@@ -159,8 +159,7 @@ export default (
 
       // @ts-ignore
       console.log('/payinvoice', [
-        // @ts-ignore
-        request.id,
+        request.uuid,
         'userBalance: ' + userBalance,
         'num_satoshis: ' + info.num_satoshis,
       ])

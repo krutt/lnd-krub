@@ -22,7 +22,7 @@ export default (
    * @returns
    */
   async (request: LNDKrubRequest, response: Response) => {
-    console.log('/checkrouteinvoice', [request.id])
+    console.log('/checkrouteinvoice', [request.uuid])
     let user = new User(bitcoin, lightning, redis)
     if (!(await user.loadByAuthorization(request.headers.authorization))) {
       return errorBadAuth(response)

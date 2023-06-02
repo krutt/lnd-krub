@@ -15,7 +15,7 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
    * @returns
    */
   async (request: LNDKrubRequest, response: Response) => {
-    console.log('/dashboard', [request.id])
+    console.log('/dashboard', [request.uuid])
     let result = await Promise.all([
       promisify(lightning.getInfo).bind(lightning)({}),
       promisify(lightning.listChannels).bind(lightning)({}),

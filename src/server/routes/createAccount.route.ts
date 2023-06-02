@@ -22,7 +22,7 @@ export default (
    * @returns
    */
   async (request: LNDKrubRequest, response: Response) => {
-    console.log('/create', [request.id])
+    console.log('/create', [request.uuid])
     // Valid if the partnerid isn't there or is a string (same with accounttype)
     if (
       !(

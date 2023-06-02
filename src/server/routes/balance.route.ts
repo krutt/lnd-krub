@@ -23,18 +23,18 @@ export default (
   async (request: LNDKrubRequest, response: Response) => {
     let user = new User(bitcoin, lightning, redis)
     try {
-      console.log('/balance', [request.id])
+      console.log('/balance', [request.uuid])
       if (!(await user.loadByAuthorization(request.headers.authorization))) {
         return errorBadAuth(response)
       }
-      console.log('/balance', [request.id, 'userid: ' + user.getUserId()])
+      console.log('/balance', [request.uuid, 'userid: ' + user.getUserId()])
       if (!(await user.getAddress())) await user.generateAddress() // onchain address needed further
       await user.accountForPosibleTxids()
       let balance = await user.getBalance()
       if (balance < 0) balance = 0
       return response.send({ BTC: { AvailableBalance: balance } })
     } catch (err) {
-      console.error('', [request.id, 'error getting balance:', err, 'userid:', user.getUserId()])
+      console.error('', [request.uuid, 'error getting balance:', err, 'userid:', user.getUserId()])
       return errorGeneralServerError(response)
     }
   }

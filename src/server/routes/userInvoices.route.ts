@@ -21,12 +21,12 @@ export default (
    * @returns
    */
   async (request: LNDKrubRequest, response: Response) => {
-    console.log('/getuserinvoices', [request.id])
+    console.log('/getuserinvoices', [request.uuid])
     let user = new User(bitcoin, lightning, redis)
     if (!(await user.loadByAuthorization(request.headers.authorization))) {
       return errorBadAuth(response)
     }
-    console.log('/getuserinvoices', [request.id, 'userid: ' + user.getUserId()])
+    console.log('/getuserinvoices', [request.uuid, 'userid: ' + user.getUserId()])
 
     try {
       // @ts-ignore
@@ -34,7 +34,7 @@ export default (
       return response.send(invoices)
     } catch (err) {
       console.log('', [
-        request.id,
+        request.uuid,
         'error getting user invoices:',
         err.message,
         'userid:',

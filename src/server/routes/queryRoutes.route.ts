@@ -12,7 +12,7 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
    * @param response
    */
   async (request: LNDKrubRequest, response: Response) => {
-    console.log('/queryroutes', [request.id])
+    console.log('/queryroutes', [request.uuid])
 
     let query = {
       pub_key: request.params.dest,

@@ -28,12 +28,12 @@ export default (
    * @returns
    */
   async (request: LNDKrubRequest, response: Response) => {
-    console.log('/addinvoice', [request.id])
+    console.log('/addinvoice', [request.uuid])
     let user = new User(bitcoin, lightning, redis)
     if (!(await user.loadByAuthorization(request.headers.authorization))) {
       return errorBadAuth(response)
     }
-    console.log('/addinvoice', [request.id, 'userid: ' + user.getUserId()])
+    console.log('/addinvoice', [request.uuid, 'userid: ' + user.getUserId()])
 
     if (!request.body.amt || /*stupid NaN*/ !(request.body.amt > 0))
       return errorBadArguments(response)

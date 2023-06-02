@@ -22,7 +22,7 @@ export default (
    * @returns
    */
   async (request: LNDKrubRequest, response: Response) => {
-    console.log('/getbtc', [request.id])
+    console.log('/getbtc', [request.uuid])
     let user = new User(bitcoin, lightning, redis)
     await user.loadByAuthorization(request.headers.authorization)
     if (!user.getUserId()) return errorBadAuth(response)
