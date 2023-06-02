@@ -62,8 +62,8 @@ describe('GET /balance', () => {
       .set(authHeaders)
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((resp: { body: { BTC: { AvailableBalance: number } } }) => {
-        let { BTC } = resp.body
+      .then((response: { body: { BTC: { AvailableBalance: number } } }) => {
+        let { BTC } = response.body
         expect(BTC).toBeTruthy()
         expect(BTC.AvailableBalance).toBeTypeOf('number')
         expect(BTC.AvailableBalance).toBe(0)
@@ -112,13 +112,15 @@ describe('GET /getinfo', () => {
       .set(authHeaders)
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((resp: { body: { uris: string[]; chains: { chain: string; network: string }[] } }) => {
-        let { chains, uris } = resp.body
-        expect(uris).toBeTruthy() // not empty
-        expect(chains).toBeTruthy() // not empty
-        expect(chains[0].chain).toBe('bitcoin')
-        expect(chains[0].network).toBe('regtest')
-      })
+      .then(
+        (response: { body: { uris: string[]; chains: { chain: string; network: string }[] } }) => {
+          let { chains, uris } = response.body
+          expect(uris).toBeTruthy() // not empty
+          expect(chains).toBeTruthy() // not empty
+          expect(chains[0].chain).toBe('bitcoin')
+          expect(chains[0].network).toBe('regtest')
+        }
+      )
   })
 })
 
@@ -129,8 +131,8 @@ describe('GET /gettxs', () => {
       .set(authHeaders)
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((resp: { body: { transactions: Transaction[] } }) => {
-        let { transactions } = resp.body
+      .then((response: { body: { transactions: Transaction[] } }) => {
+        let { transactions } = response.body
         expect(transactions).toBeFalsy() //.toBeTruthy() // not empty
         // expect(transactions[0].amount).toBeTypeOf('string')
         // expect(transactions[0].block_height).toBeTypeOf('number')
@@ -185,10 +187,12 @@ describe('GET /payinvoice', () => {
       .set('Accept', 'application/json')
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((resp: { body: { msg: string } }) => expect(resp.body).toStrictEqual({
-        code: 8,
-        error: true,
-        message: 'Bad arguments',
-      }))
+      .then((response: { body: { msg: string } }) =>
+        expect(response.body).toStrictEqual({
+          code: 8,
+          error: true,
+          message: 'Bad arguments',
+        })
+      )
   })
 })

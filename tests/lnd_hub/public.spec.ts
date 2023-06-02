@@ -24,12 +24,14 @@ describe('GET /getinfo', () => {
       .get('/getinfo')
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((resp: { body: { uris: string[]; chains: { chain: string; network: string }[] } }) => {
-        let { chains, uris } = resp.body
-        expect(uris).toBeTruthy() // not empty
-        expect(chains).toBeTruthy() // not empty
-        expect(chains[0].chain).toBe('bitcoin')
-        expect(chains[0].network).toBe('regtest')
-      })
+      .then(
+        (response: { body: { uris: string[]; chains: { chain: string; network: string }[] } }) => {
+          let { chains, uris } = response.body
+          expect(uris).toBeTruthy() // not empty
+          expect(chains).toBeTruthy() // not empty
+          expect(chains[0].chain).toBe('bitcoin')
+          expect(chains[0].network).toBe('regtest')
+        }
+      )
   })
 })
