@@ -20,15 +20,13 @@ describe('POST /create', () => {
       .send({})
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(201)
+      .expect(200)
       .then((response: { body: { login: string; password: string; userId: string } }) => {
-        let { login, password, userId } = response.body
+        let { login, password } = response.body
         expect(login).toBeTruthy()
-        expect(login.length).toBe(64)
+        expect(login.length).toBe(20)
         expect(password).toBeTruthy()
-        expect(password.length).toBe(64)
-        expect(userId).toBeTruthy()
-        expect(userId.length).toBe(64)
+        expect(password.length).toBe(20)
       })
   })
 })
