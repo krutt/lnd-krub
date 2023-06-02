@@ -1,6 +1,9 @@
 // ~~/src/configs.ts
 
-import 'dotenv/config'
+if (process.env.NODE_ENV !== 'development') {
+  let dotenv = require('dotenv')
+  dotenv.config()
+}
 
 export const bitcoind = { rpc: process.env.BITCOIND_RPC_URL }
 export const enableUpdateDescribeGraph = false
