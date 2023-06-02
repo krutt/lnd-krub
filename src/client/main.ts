@@ -129,7 +129,7 @@ let render = (info, channels, qrBuffer) => {
   )
 }
 
-let updateLightning = async () => {
+let fetchInfo = async () => {
   let body = {}
   let headers = { 'Content-Type': 'application/json' }
   let method = 'PUT'
@@ -175,6 +175,6 @@ let updateLightning = async () => {
 }
 
 window.onload = () => {
-  updateLightning()
-  setInterval(updateLightning, 60000) // 60 seconds
+  fetchInfo()
+  setTimeout(() => location.replace(location.href), 60000) // 60 seconds
 }
