@@ -1,4 +1,4 @@
-/* ~~/tests/mock/litd.ts */
+/* ~~/tests/services/lnrpc.ts */
 
 // imports
 import grpc from '@grpc/grpc-js'

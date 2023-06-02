@@ -1,4 +1,4 @@
-/* ~~/tests/mock/lndhub.ts */
+/* ~~/tests/services/lndhub.ts */
 
 // imports
 // @ts-nocheck
