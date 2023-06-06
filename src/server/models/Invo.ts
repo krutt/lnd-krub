@@ -7,7 +7,7 @@ import lightningPayReq from 'bolt11'
 // types
 import type { BitcoinService } from '@/server/services/bitcoin'
 import type { LightningService } from '@/server/services/lightning'
-import type { Redis } from 'ioredis'
+import type { Redis as RedisService } from 'ioredis'
 
 export class Invo {
   // member vars
@@ -15,12 +15,12 @@ export class Invo {
   _bolt11: string | boolean
   _decoded: string | boolean
   _lightning: LightningService
-  _redis: Redis
+  _redis: RedisService
 
   // optional vars
   _isPaid?: boolean
 
-  constructor(bitcoin: BitcoinService, lightning: LightningService, redis: Redis) {
+  constructor(bitcoin: BitcoinService, lightning: LightningService, redis: RedisService) {
     this._bitcoin = bitcoin
     this._lightning = lightning
     this._redis = redis

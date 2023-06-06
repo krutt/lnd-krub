@@ -1,20 +1,20 @@
 // ~~/src/server/models/Lock.ts
 
 // imports
-import type Redis from 'ioredis'
+import type { Redis as RedisService } from 'ioredis'
 
 export class Lock {
-  _redis: Redis
   _lock_key: string
+  _redis: RedisService
 
   /**
    *
    * @param {String} lock_key
-   * @param {Redis} redis
+   * @param {RedisService} redis
    */
-  constructor(lock_key: string, redis: Redis) {
-    this._redis = redis
+  constructor(lock_key: string, redis: RedisService) {
     this._lock_key = lock_key
+    this._redis = redis
   }
 
   /**

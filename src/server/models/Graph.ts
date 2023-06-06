@@ -2,19 +2,19 @@
 
 // imports
 import type { LightningService } from '@/server/services/lightning'
-import type Redis from 'ioredis'
+import type { Redis as RedisService } from 'ioredis'
 import { promisify } from 'node:util'
 
 export class Graph {
   _lightning: LightningService
-  _redis: Redis
+  _redis: RedisService
 
   /**
    *
    * @param {LightningService} lightning
-   * @param {Redis} redis
+   * @param {RedisService} redis
    */
-  constructor(lightning: LightningService, redis: Redis) {
+  constructor(lightning: LightningService, redis: RedisService) {
     this._lightning = lightning
     this._redis = redis
   }
@@ -25,12 +25,12 @@ export class Graph {
       let graph: { edges: any } = await promisify(this._lightning.describeGraph)
         .bind(this._lightning)({ include_unannounced: true })
         .catch(console.error)
-      await this._redis.setex('lightning_describe_graph', 120000, JSON.stringify(graph))
+      if (graph) await this._redis.setex('lightning_describe_graph', 120000, JSON.stringify(graph))
     }
     return graph
   }
 
-  async release() {
+  async release(): Promise<void> {
     await this._redis.del('lightning_describe_graph')
   }
 }

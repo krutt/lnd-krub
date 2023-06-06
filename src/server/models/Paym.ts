@@ -3,14 +3,14 @@
 // imports
 import type { BitcoinService } from '@/server/services/bitcoin'
 import type { LightningService } from '@/server/services/lightning'
-import type { Redis } from 'ioredis'
+import type { Redis as RedisService } from 'ioredis'
 import { forwardReserveFee, intraHubFee } from '@/configs'
 import lightningPayReq from 'bolt11'
 
 export class Paym {
   _bitcoin: BitcoinService
   _lightning: LightningService
-  _redis: Redis
+  _redis: RedisService
   _decoded: {
     destination: string
     expiry: number
@@ -21,7 +21,13 @@ export class Paym {
   _bolt11: string | boolean
   _isPaid?: boolean
 
-  constructor(bitcoin?: BitcoinService, lightning?: LightningService, redis?: Redis) {
+  /**
+   *
+   * @param {BitcoinService} bitcoin
+   * @param {LightningService} lightning
+   * @param {RedisService} redis
+   */
+  constructor(bitcoin?: BitcoinService, lightning?: LightningService, redis?: RedisService) {
     this._bitcoin = bitcoin
     this._lightning = lightning
     this._redis = redis

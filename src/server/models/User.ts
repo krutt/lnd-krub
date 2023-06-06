@@ -2,12 +2,12 @@
 
 // imports
 import BigNumber from 'bignumber.js'
-import type { BitcoinService } from '../services/bitcoin'
-import type { LightningService } from '../services/lightning'
+import type { BitcoinService } from '@/server/services/bitcoin'
+import type { LightningService } from '@/server/services/lightning'
 import Lock from './Lock'
-import type { Redis } from 'ioredis'
+import type { Redis as RedisService } from 'ioredis'
 import crypto from 'crypto'
-import { decodeRawHex } from '../services/cypher'
+import { decodeRawHex } from '@/server/services/cypher'
 import lightningPayReq from 'bolt11'
 import { promisify } from 'node:util'
 
@@ -50,7 +50,7 @@ export class User {
   _lightning: LightningService
   _login?: string | boolean
   _password?: string
-  _redis: Redis
+  _redis: RedisService
   _userid?: string
 
   // optionals
@@ -58,7 +58,13 @@ export class User {
   _refresh_token?: string
 
   // constructor
-  constructor(bitcoin: BitcoinService, lightning: LightningService, redis: Redis) {
+  /**
+   *
+   * @param {BitcoinService} bitcoin
+   * @param {LightningService} lightning
+   * @param {RedisService} redis
+   */
+  constructor(bitcoin: BitcoinService, lightning: LightningService, redis: RedisService) {
     this._bitcoin = bitcoin
     this._lightning = lightning
     this._redis = redis
