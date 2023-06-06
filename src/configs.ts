@@ -1,6 +1,6 @@
 // ~~/src/configs.ts
 
-if (process.env.NODE_ENV !== 'development') {
+if (process.env.NODE_ENV !== 'production') {
   let dotenv = require('dotenv')
   dotenv.config()
 }
