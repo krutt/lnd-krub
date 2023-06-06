@@ -1,6 +1,7 @@
 // ~~/tests/lndkrub/addInvoice.spec.ts
 
 // imports
+import { Invoice } from 'τ/types'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import lndkrub from '@/index'
 import supertest from 'supertest'

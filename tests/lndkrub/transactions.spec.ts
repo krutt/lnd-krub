@@ -1,7 +1,7 @@
 // ~~/tests/lndkrub/transactions.spec.ts
 
 // imports
-import { Transaction } from 'τ/mocks/lndhub'
+import { Transaction } from 'τ/types'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import lndkrub from '@/index'
 import supertest from 'supertest'

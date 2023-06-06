@@ -4,6 +4,7 @@
 // @ts-nocheck
 import BearerStrategy from 'passport-http-bearer'
 import { Creds, LightningService, LnRpc } from 'τ/services/lnrpc'
+import { Invoice, Tag, Transactions } from 'τ/types'
 import bodyParser from 'body-parser'
 import { lnd } from 'τ/configs'
 import express, { Express } from 'express'
@@ -11,41 +12,6 @@ import { randomBytes } from 'crypto'
 import passport from 'passport'
 import { promisify } from 'node:util'
 import sqlite3, { Database, Statement } from 'sqlite3'
-
-// types
-export type Invoice = {
-  add_index: string
-  payment_request: string
-  r_hash: { type: 'Buffer'; data: number[] }
-  // optional attributes
-  amt?: number // amount
-  description?: string // memo
-  expire_time?: number // in seconds, defaults to 86400 (1d)
-  ispaid?: boolean
-  timestamp?: number // unix timestamp in seconds
-  type?: 'user_invoice'
-  userid?: string
-}
-
-export type Tag = {
-  tagName: string
-  data: string
-}
-
-export type Transaction = {
-  amount: string
-  block_hash: string
-  block_height: number
-  dest_addresses: string[]
-  label: string
-  num_confirmations: number
-  raw_tx_hex: string
-  time_stamp: string
-  total_fees: string
-  tx_hash: string
-  type?: string
-  value?: number
-}
 
 // server
 export const createLNDHub = (): Express => {

@@ -2,8 +2,9 @@
 
 // imports
 import { Express } from 'express'
-import { Invoice, Transaction, createLNDHub } from 'τ/mocks/lndhub'
+import { Invoice, Transaction } from 'τ/types'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { createLNDHub } from 'τ/mocks/lndhub'
 import supertest from 'supertest'
 
 let authHeaders: { Authorization: string }

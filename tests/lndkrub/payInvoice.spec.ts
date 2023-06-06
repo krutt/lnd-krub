@@ -1,8 +1,9 @@
 // ~~/tests/lndkrub/payInvoice.spec.ts
 
 // imports
-import lndkrub from '@/index'
+import { Invoice } from 'τ/types'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import lndkrub from '@/index'
 import supertest from 'supertest'
 
 let authHeaders: { Authorization: string }
@@ -56,7 +57,7 @@ beforeAll(async () => {
     .send({ amt: 100, memo: 'test recipient' })
     .expect(200)
     .expect('Content-Type', /json/)
-    .then((response: { body: { payment_request: string } }) => {
+    .then((response: { body: Invoice }) => {
       testPaymentRequest = response.body.payment_request
     })
 })
