@@ -38,15 +38,15 @@ beforeAll(async () => {
 describe('GET /channels', () => {
   it('responds with a list of channels connected to lightning node', async () => {
     await supertest(lndkrub)
-    .get('/channels')
-    .set(authHeaders)
-    .expect(200)
-    .expect('Content-Type', /json/)
-    // TODO: Improve typing
-    .then((response: { body: { channels: any[] } }) => {
-      let { channels } = response.body
-      expect(channels).toBeTruthy()
-      // TODO: Other validations
-    })
+      .get('/channels')
+      .set(authHeaders)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      // TODO: Improve typing
+      .then((response: { body: { channels: any[] } }) => {
+        let { channels } = response.body
+        expect(channels).toBeTruthy()
+        // TODO: Other validations
+      })
   })
 })
