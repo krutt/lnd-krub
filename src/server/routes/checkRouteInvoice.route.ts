@@ -17,9 +17,9 @@ export default (
     redis: Redis
   ): LNDKrubRouteFunc =>
   /**
-   * 
-   * @param {LNDKrubRequest} request 
-   * @param {Express.Response} response 
+   *
+   * @param {LNDKrubRequest} request
+   * @param {Express.Response} response
    * @returns {Express.Response}
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
