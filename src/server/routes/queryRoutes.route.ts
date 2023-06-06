@@ -16,12 +16,13 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/queryroutes', [request.uuid])
-    let query = promisify(lightning.queryRoutes).bind(lightning)({
-      pub_key: request.params.dest,
-      use_mission_control: true,
-      amt: request.params.amt,
-      source_pub_key: request.params.source
-    })
-    .catch(console.error)
+    let query = promisify(lightning.queryRoutes)
+      .bind(lightning)({
+        pub_key: request.params.dest,
+        use_mission_control: true,
+        amt: request.params.amt,
+        source_pub_key: request.params.source,
+      })
+      .catch(console.error)
     return response.send(query)
   }
