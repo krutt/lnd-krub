@@ -34,6 +34,26 @@ beforeAll(async () => {
       // persistence
       authHeaders = { Authorization: `Bearer ${access_token}` }
     })
+  await supertest(lndkrub)
+    .post('/addinvoice')
+    .send({ amt: 100, memo: 'test' })
+    .set(authHeaders)
+    .expect(200)
+    .expect('Content-Type', /json/)
+    .then(
+      (response: {
+        body: {
+          r_hash: { type: 'Buffer'; data: number[] }
+          payment_request: string
+          add_index: string
+        }
+      }) => {
+        let { r_hash, payment_request, add_index } = response.body
+        expect(r_hash).toBeTruthy()
+        expect(payment_request).toBeTruthy()
+        expect(add_index).toBeTruthy()
+      }
+    )
 })
 
 describe('GET /getuserinvoices', () => {
@@ -50,7 +70,7 @@ describe('GET /getuserinvoices', () => {
         for (let invoice of invoices) {
           expect(invoice.add_index).toBeTypeOf('string')
           expect(invoice.payment_request).toBeTypeOf('string')
-          expect(invoice.payment_request.length).toBe(267)
+          expect(invoice.payment_request.length).toBe(265)
           // https://github.com/lightning/bolts/blob/master/11-payment-encoding.md
           expect(invoice.payment_request.slice(0, 6)).toStrictEqual('lnbcrt') // regtest
           expect(invoice.r_hash.type).toStrictEqual('Buffer')
