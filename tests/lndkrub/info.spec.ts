@@ -1,4 +1,4 @@
-// ~~/tests/lndkrub/getInfo.spec.ts
+// ~~/tests/lndkrub/info.spec.ts
 
 // imports
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
