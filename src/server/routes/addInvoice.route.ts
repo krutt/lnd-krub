@@ -24,11 +24,11 @@ export default (
   ): LNDKrubRouteFunc =>
   /**
    *
-   * @param request
-   * @param response
-   * @returns
+   * @param {LNDKrubRequest} request
+   * @param {Express.Response} response
+   * @returns {Express.Response}
    */
-  async (request: LNDKrubRequest, response: Response) => {
+  async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/addinvoice', [request.uuid])
     let user = new User(bitcoin, lightning, redis)
     if (!(await user.loadByAuthorization(request.headers.authorization))) {

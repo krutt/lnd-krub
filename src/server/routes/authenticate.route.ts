@@ -17,11 +17,11 @@ export default (
   ): LNDKrubRouteFunc =>
   /**
    *
-   * @param request
-   * @param response
-   * @returns
+   * @param {LNDKrubRequest} request
+   * @param {Express.Response} response
+   * @returns {Express.Response}
    */
-  async (request: LNDKrubRequest, response: Response) => {
+  async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/auth', [request.uuid])
     if (!((request.body.login && request.body.password) || request.body.refresh_token))
       return errorBadArguments(response)

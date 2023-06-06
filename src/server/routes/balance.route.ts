@@ -17,11 +17,11 @@ export default (
   ): LNDKrubRouteFunc =>
   /**
    *
-   * @param request
-   * @param response
-   * @returns
+   * @param {LNDKrubRequest} request
+   * @param {Express.Response} response
+   * @returns {Express.Response}
    */
-  async (request: LNDKrubRequest, response: Response) => {
+  async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     let user = new User(bitcoin, lightning, redis)
     try {
       console.log('/balance', [request.uuid])

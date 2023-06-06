@@ -11,11 +11,11 @@ import type { Response } from 'express'
 export default (lightning: LightningService, redis: Redis): LNDKrubRouteFunc =>
   /**
    *
-   * @param request
-   * @param response
-   * @returns
+   * @param {LNDKrubRequest} request
+   * @param {Express.Response} response
+   * @returns {Express.Response}
    */
-  async (request: LNDKrubRequest, response: Response) => {
+  async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/getchaninfo', [request.uuid])
     let graph = new Graph(lightning, redis)
     let { edges } = await graph.describe()

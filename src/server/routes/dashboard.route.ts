@@ -11,11 +11,11 @@ import { promisify } from 'node:util'
 export default (lightning: LightningService): LNDKrubRouteFunc =>
   /**
    *
-   * @param request
-   * @param response
-   * @returns
+   * @param {LNDKrubRequest} request
+   * @param {Express.Response} response
+   * @returns {Express.Response}
    */
-  async (request: LNDKrubRequest, response: Response) => {
+  async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/dashboard', [request.uuid])
     let result = await Promise.all([
       promisify(lightning.getInfo).bind(lightning)({}),

@@ -18,11 +18,11 @@ export default (
   ): LNDKrubRouteFunc =>
   /**
    *
-   * @param request
-   * @param response
-   * @returns
+   * @param {LNDKrubRequest} request
+   * @param {Express.Response} response
+   * @returns {Express.Response}
    */
-  async (request: LNDKrubRequest, response: Response) => {
+  async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/create', [request.uuid])
     // Valid if the partnerid isn't there or is a string (same with accounttype)
     if (
