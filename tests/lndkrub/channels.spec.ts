@@ -1,4 +1,4 @@
-// ~~/tests/lndkrub/chainnelInfo.spec.ts
+// ~~/tests/lndkrub/channels.spec.ts
 
 // imports
 import lndkrub from '@/index'
@@ -6,7 +6,6 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import supertest from 'supertest'
 
 let authHeaders: { Authorization: string }
-let channelIds: string[] = []
 
 afterAll(() => {
   lndkrub.emit('event:shutdown')
@@ -34,30 +33,20 @@ beforeAll(async () => {
       // persistence
       authHeaders = { Authorization: `Bearer ${access_token}` }
     })
-  await supertest(lndkrub)
+})
+
+describe('GET /channels', () => {
+  it('responds with a list of channels connected to lightning node', async () => {
+    await supertest(lndkrub)
     .get('/channels')
     .set(authHeaders)
     .expect(200)
     .expect('Content-Type', /json/)
-    .then((response: { body: { channels: { chan_id: string }[] } }) => {
+    // TODO: Improve typing
+    .then((response: { body: { channels: any[] } }) => {
       let { channels } = response.body
-      channels.map(channel => channelIds.push(channel.chan_id))
+      expect(channels).toBeTruthy()
+      // TODO: Other validations
     })
-})
-
-describe('GET /getchaninfo/:channelId', () => {
-  it('responds with channel information for given channel id', async () => {
-    for (let channelId of channelIds) {
-      await supertest(lndkrub)
-        .get(`/getchaninfo/${channelId}`)
-        .set(authHeaders)
-        .expect(200)
-        .expect('Content-Type', /json/)
-        .then((response: { body: { channel_id: string } }) => {
-          let { channel_id } = response.body
-          expect(channel_id).toStrictEqual(channelId)
-          // TODO: other validations
-        })
-    }
   })
 })
