@@ -23,6 +23,7 @@ let protoDescriptor = grpc.loadPackageDefinition(packageDefinition)
 export type LightningService = {
   addInvoice: Function
   decodePayReq: Function
+  describeGraph: Function
   getInfo: Function
   getTransactions: Function
   listChannels: Function
