@@ -1,4 +1,4 @@
-// ~~/tests/lndkrub/create.spec.ts
+// ~~/tests/lndkrub/createAccount.spec.ts
 
 // imports
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
