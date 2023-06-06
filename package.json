@@ -48,6 +48,7 @@
     "build": "vite build && tsc && tsc-alias",
     "dev": "nodemon --require tsconfig-paths/register --watch src/server src/index.ts",
     "fmt": "prettier --write .",
+    "postbuild": "mv dist/src/* dist && rm -rf dist/src && rm -rf dist/tests",
     "start": "NODE_ENV=production node dist/index.js",
     "test": "vitest"
   },
