@@ -158,7 +158,6 @@ export default (
         info.num_satoshis = freeAmount
       }
 
-      // @ts-ignore
       console.log('/payinvoice', [
         request.uuid,
         'userBalance: ' + userBalance,
