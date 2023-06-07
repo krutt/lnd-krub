@@ -7,7 +7,8 @@ some creative differences, as followed:
 - TypeScript helps the project scale in the long-term.
 - Scrap monolithic structure for an easier to track modular one.
 - Dependency injection pattern for loose coupling.
-- Vite + Vitest (pending)
+- Vite for front-end construction.
+- Vitest for API testing and BlueWallet compatibility maintenance.
 - Paired with crontab for script-running.
 - Pending integration with Chaumian e-cash, [cashu-ts](https://github.com/cashubtc/cashu-ts)
 - Pending integration with Notes and Other Stuff Transmitted by Relays, [nostr-tools](https://github.com/nbd-wtf/nostr-tools)
