@@ -1,6 +1,7 @@
 // ~~/src/configs.ts
 
-if (process.env.NODE_ENV !== 'production') {
+const isProduction: boolean = process.env.NODE_ENV === 'production'
+if (!isProduction) {
   let dotenv = require('dotenv')
   dotenv.config()
 }
@@ -13,7 +14,7 @@ export const lnd = {
   host: process.env.LND_SERVICE_HOST || 'localhost',
   password: '',
   port: parseInt(process.env.LND_SERVICE_PORT || '10009'),
-  protoPath: process.env.NODE_ENV === 'production' ? './dist/rpc.proto' : './public/rpc.proto',
+  protoPath: isProduction ? './dist/rpc.proto' : './public/rpc.proto',
 }
 export const postRateLimit = 100
 export const rateLimit = 200
