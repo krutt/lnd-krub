@@ -73,6 +73,7 @@ import checkRouteInvoice from '@/server/routes/checkRouteInvoice.route'
 import createAccount from '@/server/routes/createAccount.route'
 import dashboard from '@/server/routes/dashboard.route'
 import decodeInvoice from '@/server/routes/decodeInvoice.route'
+import faucet from '@/server/routes/faucet.route'
 import info from '@/server/routes/info.route'
 import pendingInvoices from '@/server/routes/pendingInvoices.route'
 import payInvoice from '@/server/routes/payInvoice.route'
@@ -95,6 +96,7 @@ router.get('/gettxs', postLimiter, transactions(bitcoin, lightning, redis))
 router.get('/getuserinvoices', postLimiter, userInvoices(bitcoin, lightning, redis))
 router.post('/payinvoice', postLimiter, payInvoice(bitcoin, lightning, redis))
 router.get('/queryroutes/:source/:dest/:amt', queryRoutes(lightning))
+
 /**
  * production: limit dashboard endpoint with cross-site request forgery protection
  */
@@ -103,6 +105,11 @@ if (isProduction) {
   app.use(cookieParser(process.env.COOKIE_SECRET))
   let csurf = require('tiny-csrf')
   app.use(csurf(process.env.CSRF_SECRET, ['PUT']))
+} else {
+  /**
+   * development: unprotected dashboard endpoint and faucet endpoint
+   */
+  router.post('/faucet', faucet(bitcoin, lightning, redis))
 }
 router.put('/dashboard', dashboard(lightning))
 
