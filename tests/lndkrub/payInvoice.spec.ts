@@ -7,7 +7,7 @@ import lndkrub from '@/index'
 import supertest from 'supertest'
 
 let authHeaders: { Authorization: string }
-let testPaymentRequest: string
+let testInternalPaymentRequest: string
 
 afterAll(() => {
   lndkrub.emit('event:shutdown')
@@ -58,7 +58,7 @@ beforeAll(async () => {
     .expect(200)
     .expect('Content-Type', /json/)
     .then((response: { body: Invoice }) => {
-      testPaymentRequest = response.body.payment_request
+      testInternalPaymentRequest = response.body.payment_request
     })
 })
 
@@ -85,7 +85,7 @@ describe('POST /payinvoice with test payment request but insufficient balance', 
     await supertest(lndkrub)
       .post('/payinvoice')
       .set(authHeaders)
-      .send({ invoice: testPaymentRequest })
+      .send({ invoice: testInternalPaymentRequest })
       .set('Accept', 'application/json')
       .expect(200)
       .expect('Content-Type', /json/)
@@ -131,7 +131,7 @@ describe('POST /payinvoice with test payment request after receiving sats from f
     await supertest(lndkrub)
       .post('/payinvoice')
       .set(authHeaders)
-      .send({ invoice: testPaymentRequest })
+      .send({ invoice: testInternalPaymentRequest })
       .set('Accept', 'application/json')
       .expect(200)
       .expect('Content-Type', /json/)
