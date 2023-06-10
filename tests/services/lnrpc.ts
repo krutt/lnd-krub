@@ -2,9 +2,8 @@
 
 // imports
 
-
 import fs from 'fs'
-import grpc from '@grpc/grpc-js'
+import grpc, { ChannelCredentials } from '@grpc/grpc-js'
 import { lnd } from 'τ/configs'
 import * as protoLoader from '@grpc/proto-loader'
 
@@ -38,33 +37,16 @@ export const LnRpc = protoDescriptor.lnrpc as { Lightning: Constructable<Lightni
 // override process env var
 process.env.GRPC_SSL_CIPHER_SUITES = 'HIGH+ECDSA'
 
-let lndCert = fs.readFileSync(lnd.tlsCertPath)
-let sslCreds = grpc.credentials.createSsl(lndCert)
+export const createLNDCreds = (macaroonPath: string, tlsCertPath: string): ChannelCredentials => {
+  let lndCert = fs.readFileSync(tlsCertPath)
+  let sslCreds = grpc.credentials.createSsl(lndCert)
+  let macaroon = fs.readFileSync(macaroonPath).toString('hex')
+  let macaroonCreds = grpc.credentials.createFromMetadataGenerator((_, callback) => {
+    let metadata = new grpc.Metadata()
+    metadata.add('macaroon', macaroon)
+    callback(null, metadata)
+  })
+  return grpc.credentials.combineChannelCredentials(sslCreds, macaroonCreds)
+}
 
-let macaroon = fs.readFileSync(lnd.macaroonPath).toString('hex')
-let macaroonCreds = grpc.credentials.createFromMetadataGenerator((_, callback) => {
-  let metadata = new grpc.Metadata()
-  metadata.add('macaroon', macaroon)
-  callback(null, metadata)
-})
-export const Creds = grpc.credentials.combineChannelCredentials(sslCreds, macaroonCreds)
-
-// trying to unlock the wallet:
-// if (config.lnd.password) {
-//   process.env.VERBOSE && console.log('trying to unlock the wallet')
-//   var walletUnlocker = new lnrpc.WalletUnlocker(config.lnd.url, creds)
-//   walletUnlocker.unlockWallet(
-//     {
-//       wallet_password: Buffer.from(config.lnd.password).toString('base64'),
-//     },
-//     function (err, response) {
-//       if (err) {
-//         process.env.VERBOSE && console.log('unlockWallet failed, probably because its been aleady unlocked')
-//       } else {
-//         console.log('unlockWallet:', response)
-//       }
-//     },
-//   )
-// }
-
-export default { Creds, LnRpc }
+export default { LnRpc, createLNDCreds }
