@@ -1,6 +1,5 @@
 // ~~/tests/configs.ts
 
-import 'dotenv/config'
 export const lnd = {
   host: process.env.LND_SERVICE_HOST || 'localhost',
   macaroonPath: process.env.LND_MACAROON_PATH || './admin.macaroon',
