@@ -3,7 +3,7 @@
 // imports
 // @ts-nocheck
 import BearerStrategy from 'passport-http-bearer'
-import { Creds, LightningService, LnRpc } from 'τ/services/lnrpc'
+import { LightningService, LnRpc, createLNDCreds } from 'τ/services/lnrpc'
 import { Invoice, Tag, Transactions } from 'τ/types'
 import bodyParser from 'body-parser'
 import { lnd } from 'τ/configs'
@@ -18,7 +18,10 @@ export const createLNDHub = (): Express => {
   // initiate lndhub server and grpc client
   let app: Express = express().use(bodyParser.json())
   let db: Database = new sqlite3.Database(':memory:')
-  let lnsvc: LightningService = new LnRpc.Lightning(`${lnd.host}:${lnd.port}`, Creds)
+  let lnsvc: LightningService = new LnRpc.Lightning(
+    `${lnd.host}:${lnd.port}`,
+    createLNDCreds(lnd.macaroonPath, lnd.tlsCertPath)
+  )
 
   // set up database on startup
   app.on('event:startup', () => {
