@@ -24,6 +24,6 @@ describe('getInfo', () => {
 describe('listChannels', () => {
   it('list channels from lnd', async () => {
     let data: { channels: string[] } = await promisify(lnsvc.listChannels).bind(lnsvc)({})
-    expect(data.channels.length).toBeTruthy() // .toBe(0)
+    expect(data.channels.length).toBe(0)
   })
 })
