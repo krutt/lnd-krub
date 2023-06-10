@@ -266,9 +266,6 @@ export default (
         return errorNotEnoughBalance(response)
       }
     } catch (err) {
-      console.error('*-*-*-*-*')
-      console.error(err)
-      console.error('*-*-*-*-*')
       await lock.releaseLock()
       return errorNotAValidInvoice(response)
     }
