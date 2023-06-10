@@ -19,6 +19,7 @@ import {
   errorPaymentFailed,
   errorTryAgainLater,
 } from '@/server/exceptions'
+import { forwardReserveFee } from '@/configs'
 import { promisify } from 'node:util'
 
 // TODO: Relocate code
@@ -165,7 +166,7 @@ export default (
       ])
 
       // @ts-ignore
-      if (userBalance >= +info.num_satoshis + Math.floor(info.num_satoshis * forwardFee) + 1) {
+      if (userBalance >= +info.num_satoshis + Math.floor(info.num_satoshis * forwardReserveFee) + 1) {
         // got enough balance, including 1% of payment amount - reserve for fees
 
         if (identity_pubkey === info.destination) {
@@ -250,7 +251,7 @@ export default (
           payment_request: request.body.invoice,
           amt: info.num_satoshis, // amt is used only for 'tip' invoices
           // @ts-ignore
-          fee_limit: { fixed: Math.floor(info.num_satoshis * forwardFee) + 1 },
+          fee_limit: { fixed: Math.floor(info.num_satoshis * forwardReserveFee) + 1 },
         }
         try {
           await user.lockFunds(request.body.invoice, info)
@@ -265,6 +266,9 @@ export default (
         return errorNotEnoughBalance(response)
       }
     } catch (err) {
+      console.error('*-*-*-*-*')
+      console.error(err)
+      console.error('*-*-*-*-*')
       await lock.releaseLock()
       return errorNotAValidInvoice(response)
     }
