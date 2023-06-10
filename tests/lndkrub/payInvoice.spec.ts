@@ -80,8 +80,8 @@ describe('POST /payinvoice with no body', () => {
   })
 })
 
-describe('POST /payinvoice with test payment request', () => {
-  it('responds with bad arguments error`', async () => {
+describe('POST /payinvoice with test payment request but insufficient balance', () => {
+  it('responds with `not enough balance.` error', async () => {
     await supertest(lndkrub)
       .post('/payinvoice')
       .set(authHeaders)
@@ -91,9 +91,9 @@ describe('POST /payinvoice with test payment request', () => {
       .expect('Content-Type', /json/)
       .then((response: { body: { code: number; error: boolean; message: string } }) => {
         expect(response.body).toStrictEqual({
-          code: 4,
+          code: 2,
           error: true,
-          message: 'not a valid invoice',
+          message: 'not enough balance. Make sure you have at least 1% reserved for potential fees',
         })
       })
   })
