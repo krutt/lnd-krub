@@ -13,7 +13,7 @@ export const lndTarget = {
   macaroonPath: process.env.LND_TARGET_MACAROON_PATH || './target.macaroon',
   port: parseInt(process.env.LND_TARGET_PORT || '10010'),
   protoPath: './public/rpc.proto',
-  tlsCertPath: process.env.LND_TARGET_TLSCERT_PATH || './target.cert'
+  tlsCertPath: process.env.LND_TARGET_TLSCERT_PATH || './target.cert',
 }
 
 export default { lnd, lndTarget }
