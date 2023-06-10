@@ -126,7 +126,7 @@ export default (
     // @ts-ignore
     let userBalance
     try {
-      userBalance = await user.getBalance()
+      userBalance = await user.getCalculatedBalance()
     } catch (err) {
       // @ts-ignore
       console.log('', [request.uuid, 'error running getCalculatedBalance():', err.message])
