@@ -38,10 +38,10 @@ export const LnRpc = protoDescriptor.lnrpc as { Lightning: Constructable<Lightni
 // override process env var
 process.env.GRPC_SSL_CIPHER_SUITES = 'HIGH+ECDSA'
 
-let lndCert = fs.readFileSync(process.env.LND_TLSCERT_PATH || './tls.cert')
+let lndCert = fs.readFileSync(lnd.tlsCertPath)
 let sslCreds = grpc.credentials.createSsl(lndCert)
 
-let macaroon = fs.readFileSync(process.env.LND_MACAROON_PATH || './admin.macaroon').toString('hex')
+let macaroon = fs.readFileSync(lnd.macaroonPath).toString('hex')
 let macaroonCreds = grpc.credentials.createFromMetadataGenerator((_, callback) => {
   let metadata = new grpc.Metadata()
   metadata.add('macaroon', macaroon)
