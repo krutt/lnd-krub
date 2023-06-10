@@ -1,3 +1,6 @@
+> **Warning**
+> This project is in early development, it does however work with real sats! Always use amounts you don't mind losing.
+
 # LNDKrub
 
 Rewritten wrapper for Lightning Network Daemon in TypeScript based on [LNDHub](https://github.com/BlueWallet/LndHub).
