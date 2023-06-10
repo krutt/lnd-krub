@@ -19,13 +19,6 @@ import bitcoin from '@/server/services/bitcoin'
 import lightning from '@/server/services/lightning'
 let redis: Redis = new Redis(redisUrl)
 
-// overwrite process and environment variable
-process.on('uncaughtException', function (err) {
-  console.error(err)
-  console.log('Node NOT Exiting...')
-})
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-
 // run-time constants
 const isProduction = process.env.NODE_ENV === 'production'
 
