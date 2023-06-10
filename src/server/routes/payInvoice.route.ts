@@ -8,7 +8,7 @@ import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
 import type { Redis } from 'ioredis'
 import type { Response } from 'express'
-import { Invo, Lock, Paym, User } from '@/server/models'
+import { Invo, Lock, Node, User } from '@/server/models'
 import {
   errorBadAuth,
   errorBadArguments,
@@ -19,27 +19,8 @@ import {
   errorPaymentFailed,
   errorTryAgainLater,
 } from '@/server/exceptions'
-import { forwardReserveFee } from '@/configs'
+import { forwardReserveFee, intraHubFee } from '@/configs'
 import { promisify } from 'node:util'
-
-// TODO: Relocate code
-let identity_pubkey = false
-// lightning.getInfo({}, function (err, info) {
-//   if (err) {
-//     console.error('lnd failure')
-//     console.dir(err)
-//     process.exit(3)
-//   }
-//   if (info) {
-//     console.info('lnd getinfo:', info)
-//     // @ts-ignore
-//     if (!info.synced_to_chain && !configs.forceStart) {
-//       console.error('lnd not synced')
-//       // process.exit(4)
-//     }
-//     identity_pubkey = info.identity_pubkey
-//   }
-// })
 
 const subscribeInvoicesCallCallback = async (
   bitcoin: BitcoinService,
@@ -117,6 +98,8 @@ export default (
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     let user = new User(bitcoin, lightning, redis)
+    let node = new Node(lightning, redis)
+    let identity_pubkey = await node.identityPubkey()
     if (!(await user.loadByAuthorization(request.headers.authorization))) {
       return errorBadAuth(response)
     }
@@ -143,7 +126,7 @@ export default (
     // @ts-ignore
     let userBalance
     try {
-      userBalance = await user.getCalculatedBalance()
+      userBalance = await user.getBalance()
     } catch (err) {
       // @ts-ignore
       console.log('', [request.uuid, 'error running getCalculatedBalance():', err.message])
@@ -165,14 +148,16 @@ export default (
         'num_satoshis: ' + info.num_satoshis,
       ])
 
-      // @ts-ignore
-      if (userBalance >= +info.num_satoshis + Math.floor(info.num_satoshis * forwardReserveFee) + 1) {
+      if (
+        userBalance >=
+        +info.num_satoshis + Math.floor(info.num_satoshis * forwardReserveFee) + 1
+      ) {
         // got enough balance, including 1% of payment amount - reserve for fees
-
         if (identity_pubkey === info.destination) {
           // this is internal invoice
           // now, receiver add balance
           let userid_payee = await user.getUseridByPaymentHash(info.payment_hash)
+          console.log('Payee:', userid_payee)
           if (!userid_payee) {
             await lock.releaseLock()
             return errorGeneralServerError(response)
@@ -195,9 +180,9 @@ export default (
             timestamp: parseInt(+new Date() / 1000),
             type: 'paid_invoice',
             // @ts-ignore
-            value: +info.num_satoshis + Math.floor(info.num_satoshis * internalFee),
+            value: +info.num_satoshis + Math.floor(info.num_satoshis * intraHubFee),
             // @ts-ignore
-            fee: Math.floor(info.num_satoshis * internalFee),
+            fee: Math.floor(info.num_satoshis * intraHubFee),
             memo: decodeURIComponent(info.description),
             pay_req: request.body.invoice,
           })
@@ -223,44 +208,45 @@ export default (
 
         // else - regular lightning network payment:
 
-        var call = lightning.sendPayment()
-        call.on('data', async function (payment) {
-          // payment callback
-          await user.unlockFunds(request.body.invoice)
-          if (payment && payment.payment_route && payment.payment_route.total_amt_msat) {
-            let PaymentShallow = new Paym(null, null, null)
-            payment = PaymentShallow.processSendPaymentResponse(payment)
-            payment.pay_req = request.body.invoice
-            payment.decoded = info
-            await user.savePaidLndInvoice(payment)
-            await user.clearBalanceCache()
-            lock.releaseLock()
-            return response.send(payment)
-          } else {
-            // payment failed
-            lock.releaseLock()
-            return errorPaymentFailed(response)
-          }
-        })
-        if (!info.num_satoshis) {
-          // tip invoice, but someone forgot to specify amount
-          await lock.releaseLock()
-          return errorBadArguments(response)
-        }
-        let inv = {
-          payment_request: request.body.invoice,
-          amt: info.num_satoshis, // amt is used only for 'tip' invoices
-          // @ts-ignore
-          fee_limit: { fixed: Math.floor(info.num_satoshis * forwardReserveFee) + 1 },
-        }
-        try {
-          await user.lockFunds(request.body.invoice, info)
-          call.write(inv)
-          return null
-        } catch (Err) {
-          await lock.releaseLock()
-          return errorPaymentFailed(response)
-        }
+        // var call = lightning.sendPayment()
+        // let payment = await promisify(lightning.sendPayment).bind(lightning)()
+        // call.on('data', async function (payment) {
+        //   // payment callback
+        //   await user.unlockFunds(request.body.invoice)
+        //   if (payment && payment.payment_route && payment.payment_route.total_amt_msat) {
+        //     let PaymentShallow = new Paym(null, null, null)
+        //     payment = PaymentShallow.processSendPaymentResponse(payment)
+        //     payment.pay_req = request.body.invoice
+        //     payment.decoded = info
+        //     await user.savePaidLndInvoice(payment)
+        //     await user.clearBalanceCache()
+        //     lock.releaseLock()
+        //     return response.send(payment)
+        //   } else {
+        //     // payment failed
+        //     lock.releaseLock()
+        //     return errorPaymentFailed(response)
+        //   }
+        // })
+        // if (!info.num_satoshis) {
+        //   // tip invoice, but someone forgot to specify amount
+        //   await lock.releaseLock()
+        //   return errorBadArguments(response)
+        // }
+        // let inv = {
+        //   payment_request: request.body.invoice,
+        //   amt: info.num_satoshis, // amt is used only for 'tip' invoices
+        //   // @ts-ignore
+        //   fee_limit: { fixed: Math.floor(info.num_satoshis * forwardReserveFee) + 1 },
+        // }
+        // try {
+        //   await user.lockFunds(request.body.invoice, info)
+        //   call.write(inv)
+        //   return null
+        // } catch (Err) {
+        //   await lock.releaseLock()
+        //   return errorPaymentFailed(response)
+        // }
       } else {
         await lock.releaseLock()
         return errorNotEnoughBalance(response)

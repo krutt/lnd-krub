@@ -98,3 +98,49 @@ describe('POST /payinvoice with test payment request but insufficient balance', 
       })
   })
 })
+
+describe('POST /payinvoice with test payment request after receiving sats from faucet', () => {
+  let amount = 200
+  it('responds with new balance equal to requested amount', async () => {
+    await supertest(lndkrub)
+      .post('/faucet')
+      .send({ amt: amount })
+      .set(authHeaders)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then((response: { body: { balance: number } }) => {
+        let { balance } = response.body
+        expect(balance).toBeTypeOf('number')
+        expect(balance).toBe(amount)
+      })
+  })
+  it('responds with new balance equal to fauceted amount', async () => {
+    await supertest(lndkrub)
+      .get('/balance')
+      .set(authHeaders)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then((response: { body: { BTC: { AvailableBalance: number } } }) => {
+        let { BTC } = response.body
+        expect(BTC).toBeTruthy()
+        expect(BTC.AvailableBalance).toBeTypeOf('number')
+        expect(BTC.AvailableBalance).toBe(amount)
+      })
+  })
+  it('responds with successful payment', async () => {
+    await supertest(lndkrub)
+      .post('/payinvoice')
+      .set(authHeaders)
+      .send({ invoice: testPaymentRequest })
+      .set('Accept', 'application/json')
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then((response: { body: { description: string; num_satoshis: string } }) => {
+        let { description, num_satoshis } = response.body
+        expect(description).toBeTypeOf('string')
+        expect(description).toStrictEqual('test recipient')
+        expect(num_satoshis).toBeTypeOf('string')
+        expect(+num_satoshis).toBe(100)
+      })
+  })
+})

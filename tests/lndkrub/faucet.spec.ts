@@ -39,16 +39,16 @@ describe('POST /faucet then GET /balance', () => {
   let amt = 10
   it('responds with zero balance', async () => {
     await supertest(lndkrub)
-    .get('/balance')
-    .set(authHeaders)
-    .expect(200)
-    .expect('Content-Type', /json/)
-    .then((response: { body: { BTC: { AvailableBalance: number } } }) => {
-      let { BTC } = response.body
-      expect(BTC).toBeTruthy()
-      expect(BTC.AvailableBalance).toBeTypeOf('number')
-      expect(BTC.AvailableBalance).toBe(0)
-    })
+      .get('/balance')
+      .set(authHeaders)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then((response: { body: { BTC: { AvailableBalance: number } } }) => {
+        let { BTC } = response.body
+        expect(BTC).toBeTruthy()
+        expect(BTC.AvailableBalance).toBeTypeOf('number')
+        expect(BTC.AvailableBalance).toBe(0)
+      })
   })
   it('responds with new balance equal to requested amount', async () => {
     await supertest(lndkrub)
