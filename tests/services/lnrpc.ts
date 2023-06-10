@@ -1,9 +1,12 @@
 /* ~~/tests/services/lnrpc.ts */
 
 // imports
-import grpc from '@grpc/grpc-js'
-import * as protoLoader from '@grpc/proto-loader'
+
+
 import fs from 'fs'
+import grpc from '@grpc/grpc-js'
+import { lnd } from 'τ/configs'
+import * as protoLoader from '@grpc/proto-loader'
 
 // setup lnd rpc
 
@@ -16,7 +19,7 @@ let loaderOptions: any = {
   oneofs: true,
 }
 
-let packageDefinition = protoLoader.loadSync('./public/rpc.proto', loaderOptions)
+let packageDefinition = protoLoader.loadSync(lnd.protoPath, loaderOptions)
 let protoDescriptor = grpc.loadPackageDefinition(packageDefinition)
 
 export type LightningService = {
@@ -35,10 +38,10 @@ export const LnRpc = protoDescriptor.lnrpc as { Lightning: Constructable<Lightni
 // override process env var
 process.env.GRPC_SSL_CIPHER_SUITES = 'HIGH+ECDSA'
 
-let lndCert = fs.readFileSync(process.env.LND_TLSCERT_PATH || 'tls.cert')
+let lndCert = fs.readFileSync(lnd.tlsCertPath)
 let sslCreds = grpc.credentials.createSsl(lndCert)
 
-let macaroon = fs.readFileSync(process.env.LND_MACAROON_PATH || 'admin.macaroon').toString('hex')
+let macaroon = fs.readFileSync(lnd.macaroonPath).toString('hex')
 let macaroonCreds = grpc.credentials.createFromMetadataGenerator((_, callback) => {
   let metadata = new grpc.Metadata()
   metadata.add('macaroon', macaroon)
