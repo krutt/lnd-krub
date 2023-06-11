@@ -2,12 +2,18 @@
 
 // imports
 import { Invoice } from 'τ/types'
+import { LightningService, LnRpc, createLNDCreds } from 'τ/services/lnrpc'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { lndTarget } from 'τ/configs'
 import lndkrub from '@/index'
+import { promisify } from 'node:util'
+import { randomBytes } from 'crypto'
 import supertest from 'supertest'
 
 let authHeaders: { Authorization: string }
 let testInternalPaymentRequest: string
+let external: LightningService
+let testExternalPaymentRequest: string
 
 afterAll(() => {
   lndkrub.emit('event:shutdown')
@@ -60,6 +66,11 @@ beforeAll(async () => {
     .then((response: { body: Invoice }) => {
       testInternalPaymentRequest = response.body.payment_request
     })
+
+  // external invoice 
+  external = new LnRpc.Lightning(`${lndTarget.host}:${lndTarget.port}`, createLNDCreds(lndTarget.macaroonPath, lndTarget.tlsCertPath))
+  let testInvoice = await promisify(external.addInvoice).bind(external)({amt: 100, expiry: 20, memo: 'external', r_preimage: randomBytes(32).toString('base64')})
+  testExternalPaymentRequest = testInvoice.payment_request
 })
 
 describe('POST /payinvoice with no body', () => {
@@ -100,7 +111,7 @@ describe('POST /payinvoice with test payment request but insufficient balance', 
 })
 
 describe('POST /payinvoice with test payment request after receiving sats from faucet', () => {
-  let amount = 200
+  let amount = 500
   it('responds with new balance equal to requested amount', async () => {
     await supertest(lndkrub)
       .post('/faucet')
@@ -132,6 +143,25 @@ describe('POST /payinvoice with test payment request after receiving sats from f
       .post('/payinvoice')
       .set(authHeaders)
       .send({ invoice: testInternalPaymentRequest })
+      .set('Accept', 'application/json')
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then((response: { body: { description: string; num_satoshis: string } }) => {
+        let { description, num_satoshis } = response.body
+        expect(description).toBeTypeOf('string')
+        expect(description).toStrictEqual('test recipient')
+        expect(num_satoshis).toBeTypeOf('string')
+        expect(+num_satoshis).toBe(100)
+      })
+  })
+})
+
+describe('POST /payinvoice with test external payment request', () => {
+  it('responds with successful payment', async () => {
+    await supertest(lndkrub)
+      .post('/payinvoice')
+      .set(authHeaders)
+      .send({ invoice: testExternalPaymentRequest })
       .set('Accept', 'application/json')
       .expect(200)
       .expect('Content-Type', /json/)
