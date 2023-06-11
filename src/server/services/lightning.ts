@@ -27,6 +27,7 @@ export type LightningService = {
   getInfo: Function
   getTransactions: Function
   listChannels: Function
+  listInvoices: Function
   lookupInvoice: Function
   newAddress: Function
   queryRoutes: Function

@@ -40,7 +40,7 @@ export default (
       return errorBadArguments(response)
 
     if (sunset) return errorSunsetAddInvoice(response)
-    const invoice = new Invo(bitcoin, lightning, redis)
+    const invoice = new Invo(lightning, redis)
     const r_preimage = invoice.makePreimageHex()
     return await promisify(lightning.addInvoice)
       .bind(lightning)({

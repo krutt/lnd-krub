@@ -44,7 +44,7 @@ const subscribeInvoicesCallCallback = async (
     if (!(await lock.obtainLock())) {
       return
     }
-    let invoice = new Invo(bitcoin, lightning, redis)
+    let invoice = new Invo(lightning, redis)
     await invoice._setIsPaymentHashPaidInDatabase(
       LightningInvoiceSettledNotification.hash,
       LightningInvoiceSettledNotification.amt_paid_sat || 1
@@ -187,8 +187,8 @@ export default (
             pay_req: request.body.invoice,
           })
 
-          const invoice = new Invo(bitcoin, lightning, redis)
-          invoice.setInvoice(request.body.invoice)
+          const invoice = new Invo(lightning, redis)
+          invoice.setPaymentRequest(request.body.invoice)
           await invoice.markAsPaidInDatabase()
 
           // now, faking LND callback about invoice paid:
