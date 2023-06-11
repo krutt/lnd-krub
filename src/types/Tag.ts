@@ -1,4 +1,4 @@
-// ~~/tests/types/Tag.ts
+// ~~/src/types/Tag.ts
 
 // define type
 export type Tag = {

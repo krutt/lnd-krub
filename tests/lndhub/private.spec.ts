@@ -2,7 +2,7 @@
 
 // imports
 import { Express } from 'express'
-import { Invoice, Transaction } from 'τ/types'
+import { Invoice, Transaction } from '@/types'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createLNDHub } from 'τ/mocks/lndhub'
 import supertest from 'supertest'

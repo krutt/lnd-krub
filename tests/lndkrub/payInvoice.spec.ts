@@ -1,7 +1,7 @@
 // ~~/tests/lndkrub/payInvoice.spec.ts
 
 // imports
-import { Invoice } from 'τ/types'
+import { Invoice } from '@/types'
 import { LightningService, LnRpc, createLNDCreds } from 'τ/services/lnrpc'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { lndTarget } from 'τ/configs'

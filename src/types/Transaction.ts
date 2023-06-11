@@ -1,4 +1,4 @@
-// ~~/tests/types/Transaction.ts
+// ~~/src/types/Transaction.ts
 
 // define type
 export type Transaction = {

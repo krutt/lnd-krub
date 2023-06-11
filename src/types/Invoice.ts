@@ -1,4 +1,4 @@
-// ~~/tests/types/Invoice.ts
+// ~~/src/types/Invoice.ts
 
 // define type
 export type Invoice = {
