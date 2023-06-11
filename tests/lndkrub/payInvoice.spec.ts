@@ -67,9 +67,17 @@ beforeAll(async () => {
       testInternalPaymentRequest = response.body.payment_request
     })
 
-  // external invoice 
-  external = new LnRpc.Lightning(`${lndTarget.host}:${lndTarget.port}`, createLNDCreds(lndTarget.macaroonPath, lndTarget.tlsCertPath))
-  let testInvoice = await promisify(external.addInvoice).bind(external)({amt: 100, expiry: 20, memo: 'external', r_preimage: randomBytes(32).toString('base64')})
+  // external invoice
+  external = new LnRpc.Lightning(
+    `${lndTarget.host}:${lndTarget.port}`,
+    createLNDCreds(lndTarget.macaroonPath, lndTarget.tlsCertPath)
+  )
+  let testInvoice = await promisify(external.addInvoice).bind(external)({
+    amt: 100,
+    expiry: 20,
+    memo: 'external',
+    r_preimage: randomBytes(32).toString('base64'),
+  })
   testExternalPaymentRequest = testInvoice.payment_request
 })
 
