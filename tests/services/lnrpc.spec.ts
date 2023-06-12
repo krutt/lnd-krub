@@ -146,7 +146,7 @@ describe('call "newAddress" via grpc to ⚡️ service and external ⚡️ servi
   it('responds with new address when requesting newAddress via external ⚡️ service', async () => {
     let data: { address: string } = await promisify(lnext.newAddress).bind(lnext)({})
     expect(data).toBeTruthy()
-    let { address }= data
+    let { address } = data
     expect(address).toBeTruthy()
     expect(address).toBeTypeOf('string')
     expect(address.slice(0, 5)).toStrictEqual('bcrt1')
