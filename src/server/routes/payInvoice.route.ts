@@ -171,9 +171,9 @@ export default (
           return errorLnd(response)
         }
 
-        let UserPayee = new User(bitcoin, lightning, redis)
-        UserPayee._userid = recipient_id // hacky, fixme
-        await UserPayee.clearBalanceCache()
+        let recipient = new User(bitcoin, lightning, redis)
+        recipient._userid = recipient_id // hacky, fixme
+        await recipient.clearBalanceCache()
 
         // sender spent his balance:
         await user.clearBalanceCache()
