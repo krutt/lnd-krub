@@ -45,11 +45,8 @@ export class User {
   // private methods
 
   _generateTokens = async () => {
-    let buffer = randomBytes(20)
-    this._access_token = buffer.toString('hex')
-
-    buffer = randomBytes(20)
-    this._refresh_token = buffer.toString('hex')
+    this._access_token = randomBytes(20).toString('hex')
+    this._refresh_token = randomBytes(20).toString('hex')
 
     await this._redis.set('userid_for_' + this._access_token, this._userid)
     await this._redis.set('userid_for_' + this._refresh_token, this._userid)
