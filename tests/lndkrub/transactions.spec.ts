@@ -43,11 +43,10 @@ describe('GET /gettxs', () => {
       .set(authHeaders)
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((response: { body: { transactions: Transaction[] } }) => {
-        let { transactions } = response.body
-        expect(transactions).toBeFalsy() //.toBeTruthy() // not empty
-        // expect(transactions[0].amount).toBeTypeOf('string')
-        // expect(transactions[0].block_height).toBeTypeOf('number')
+      .then((response: { body: Transaction[] }) => {
+        let transactions = response.body
+        expect(transactions).toBeTruthy()
+        expect(transactions.length).toBe(0)
       })
   })
 })
