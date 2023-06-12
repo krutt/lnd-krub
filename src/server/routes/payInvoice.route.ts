@@ -158,9 +158,9 @@ export default (
       if (identityPubkey === decoded.destination) {
         // this is internal invoice
         // now, receiver add balance
-        let userid_payee = await user.getUseridByPaymentHash(decoded.payment_hash)
-        console.log('Payee:', userid_payee)
-        if (!userid_payee) {
+        let recipient_id = await user.getUseridByPaymentHash(decoded.payment_hash)
+        console.log('Recipient:', recipient_id)
+        if (!recipient_id) {
           await lock.releaseLock()
           return errorGeneralServerError(response)
         }
@@ -172,7 +172,7 @@ export default (
         }
 
         let UserPayee = new User(bitcoin, lightning, redis)
-        UserPayee._userid = userid_payee // hacky, fixme
+        UserPayee._userid = recipient_id // hacky, fixme
         await UserPayee.clearBalanceCache()
 
         // sender spent his balance:
