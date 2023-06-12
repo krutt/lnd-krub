@@ -10,78 +10,28 @@ import { promisify } from 'node:util'
 import { randomBytes } from 'crypto'
 import supertest from 'supertest'
 
-let authHeaders: { Authorization: string }
-let testInternalPaymentRequest: string
-let external: LightningService
-let testExternalPaymentRequest: string
-
 afterAll(() => {
   lndkrub.emit('event:shutdown')
 })
 
 beforeAll(async () => {
   lndkrub.emit('event:startup')
-  let testLogin: string = ''
-  let testPassword: string = ''
-  await supertest(lndkrub)
-    .post('/create')
-    .set('Accept', 'application/json')
-    .then((response: { body: { login: string; password: string; userId: string } }) => {
-      let { login, password } = response.body
-      // persistence
-      testLogin = login
-      testPassword = password
-    })
-  await supertest(lndkrub)
-    .post('/auth')
-    .send({ login: testLogin, password: testPassword })
-    .set('Accept', 'application/json')
-    .then((response: { body: { access_token: string; refresh_token: string } }) => {
-      let { access_token } = response.body
-      // persistence
-      authHeaders = { Authorization: `Bearer ${access_token}` }
-    })
-  let recipient: { access_token?: string; login: string; password: string }
-  await supertest(lndkrub)
-    .post('/create')
-    .set('Accept', 'application/json')
-    .then((response: { body: { login: string; password: string } }) => {
-      recipient = response.body
-    })
-  await supertest(lndkrub)
-    .post('/auth')
-    .send({ ...recipient })
-    .set('Accept', 'application/json')
-    .expect(200)
-    .expect('Content-Type', /json/)
-    .then((response: { body: { access_token: string } }) => {
-      recipient.access_token = response.body.access_token
-    })
-  await supertest(lndkrub)
-    .post('/addinvoice')
-    .set({ Authorization: `Bearer ${recipient.access_token}` })
-    .send({ amt: 100, memo: 'test recipient' })
-    .expect(200)
-    .expect('Content-Type', /json/)
-    .then((response: { body: Invoice }) => {
-      testInternalPaymentRequest = response.body.payment_request
-    })
-
-  // external invoice
-  external = new LnRpc.Lightning(
-    `${lndTarget.host}:${lndTarget.port}`,
-    createLNDCreds(lndTarget.macaroonPath, lndTarget.tlsCertPath)
-  )
-  let { payment_request } = await promisify(external.addInvoice).bind(external)({
-    amt: 100,
-    expiry: 20,
-    memo: 'external',
-    r_preimage: randomBytes(32).toString('base64'),
-  })
-  testExternalPaymentRequest = payment_request
-})
+})  
 
 describe('POST /payinvoice with no body', () => {
+  let authHeaders: { Authorization: string }
+  let login: string | null = null
+  let password: string | null = null
+  beforeAll(async () => {
+    await supertest(lndkrub).post('/create').then((response: { body: { login: string; password: string}}) => {
+      login = response.body.login
+      password = response.body.password
+    })
+    await supertest(lndkrub).post('/auth').send({login, password}).then((response: {body: { access_token: string}}) => {
+      authHeaders = { 'Authorization': `Bearer ${response.body.access_token}` }
+    })
+    await supertest(lndkrub).post('/faucet').set(authHeaders)
+  })
   it('responds with bad arguments error`', async () => {
     await supertest(lndkrub)
       .post('/payinvoice')
@@ -100,11 +50,43 @@ describe('POST /payinvoice with no body', () => {
 })
 
 describe('POST /payinvoice with test payment request but insufficient balance', () => {
+  let amt: number = 200
+  let authHeaders: { Authorization: string }
+  let invoice: string | null = null
+  let login: string | null = null
+  let memo: string = 'test receipient'
+  let password: string | null = null
+  let recipient: { access_token?: string; login: string; password: string }
+  beforeAll(async () => {
+    await supertest(lndkrub).post('/create').then((response: { body: { login: string; password: string}}) => {
+      login = response.body.login
+      password = response.body.password
+    })
+    await supertest(lndkrub).post('/auth').send({login, password}).then((response: {body: { access_token: string}}) => {
+      authHeaders = { 'Authorization': `Bearer ${response.body.access_token}` }
+    })
+    await supertest(lndkrub)
+    .post('/create')
+    .then((response: { body: { login: string; password: string } }) => recipient = response.body)
+    await supertest(lndkrub)
+      .post('/auth')
+      .send({ ...recipient })
+      .then((response: { body: { access_token: string } }) => {
+        recipient.access_token = response.body.access_token
+      })
+    await supertest(lndkrub)
+      .post('/addinvoice')
+      .set({ Authorization: `Bearer ${recipient.access_token}` })
+      .send({ amt, memo })
+      .then((response: { body: Invoice }) => {
+        invoice = response.body.payment_request
+      })
+  })
   it('responds with `not enough balance.` error', async () => {
     await supertest(lndkrub)
       .post('/payinvoice')
       .set(authHeaders)
-      .send({ invoice: testInternalPaymentRequest })
+      .send({ invoice })
       .set('Accept', 'application/json')
       .expect(200)
       .expect('Content-Type', /json/)
@@ -119,19 +101,99 @@ describe('POST /payinvoice with test payment request but insufficient balance', 
 })
 
 describe('POST /payinvoice with test payment request after receiving sats from faucet', () => {
-  let amount = 500
-  it('responds with new balance equal to requested amount', async () => {
+  let amt: number = 200
+  let authHeaders: { Authorization: string }
+  let faucetAmount: number = 500
+  let invoice: string | null = null
+  let login: string | null = null
+  let memo: string = 'test recipient'
+  let password: string | null = null
+  let recipient: { access_token?: string; login: string; password: string }
+  beforeAll(async () => {
+    await supertest(lndkrub).post('/create').then((response: { body: { login: string; password: string}}) => {
+      login = response.body.login
+      password = response.body.password
+    })
+    await supertest(lndkrub).post('/auth').send({login, password}).then((response: {body: { access_token: string}}) => {
+      authHeaders = { 'Authorization': `Bearer ${response.body.access_token}` }
+    })
+    
     await supertest(lndkrub)
-      .post('/faucet')
-      .send({ amt: amount })
+      .post('/create')
+      .then((response: { body: { login: string; password: string } }) => recipient = response.body)
+    await supertest(lndkrub).post('/faucet').set(authHeaders).send({amt: faucetAmount})
+    await supertest(lndkrub)
+      .post('/auth')
+      .send({ ...recipient })
+      .then((response: { body: { access_token: string } }) => {
+        recipient.access_token = response.body.access_token
+      })
+    await supertest(lndkrub)
+      .post('/addinvoice')
+      .set({ Authorization: `Bearer ${recipient.access_token}` })
+      .send({ amt, memo })
+      .then((response: { body: Invoice }) => {
+        invoice = response.body.payment_request
+      })
+  })
+
+  it('responds with new balance equal to fauceted amount', async () => {
+    await supertest(lndkrub)
+      .get('/balance')
       .set(authHeaders)
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((response: { body: { balance: number } }) => {
-        let { balance } = response.body
-        expect(balance).toBeTypeOf('number')
-        expect(balance).toBe(amount)
+      .then((response: { body: { BTC: { AvailableBalance: number } } }) => {
+        let { BTC } = response.body
+        expect(BTC).toBeTruthy()
+        expect(BTC.AvailableBalance).toBeTypeOf('number')
+        expect(BTC.AvailableBalance).toBe(faucetAmount)
       })
+  })
+  it('responds with successful payment', async () => {
+    await supertest(lndkrub)
+      .post('/payinvoice')
+      .set(authHeaders)
+      .send({ invoice })
+      .set('Accept', 'application/json')
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then((response: { body: { description: string; num_satoshis: string } }) => {
+        let { description, num_satoshis } = response.body
+        expect(description).toBeTypeOf('string')
+        expect(description).toStrictEqual('test recipient')
+        expect(num_satoshis).toBeTypeOf('string')
+        expect(+num_satoshis).toBe(amt)
+      })
+  })
+})
+
+describe('POST /payinvoice with test external payment request', () => {
+  let amt: number = 200
+  let authHeaders: { Authorization: string }
+  let faucetAmount: number = 500
+  let invoice: string | null = null
+  let login: string | null = null
+  let memo: string = 'external recipient'
+  let password: string | null = null
+  beforeAll(async () => {
+    await supertest(lndkrub).post('/create').then((response: { body: { login: string; password: string}}) => {
+      login = response.body.login
+      password = response.body.password
+    })
+    await supertest(lndkrub).post('/auth').send({login, password}).then((response: {body: { access_token: string}}) => {
+      authHeaders = { 'Authorization': `Bearer ${response.body.access_token}` }
+    })
+    await supertest(lndkrub).post('/faucet').set(authHeaders).send({amt: faucetAmount})
+    // external invoice
+    let lnext: LightningService = new LnRpc.Lightning(
+      `${lndTarget.host}:${lndTarget.port}`,
+      createLNDCreds(lndTarget.macaroonPath, lndTarget.tlsCertPath)
+    )
+    let { payment_request } = await promisify(lnext.addInvoice).bind(lnext)({
+      expiry: 20, memo, r_preimage: randomBytes(32).toString('base64'), value: amt
+    })
+    invoice = payment_request
   })
   it('responds with new balance equal to fauceted amount', async () => {
     await supertest(lndkrub)
@@ -143,33 +205,14 @@ describe('POST /payinvoice with test payment request after receiving sats from f
         let { BTC } = response.body
         expect(BTC).toBeTruthy()
         expect(BTC.AvailableBalance).toBeTypeOf('number')
-        expect(BTC.AvailableBalance).toBe(amount)
+        expect(BTC.AvailableBalance).toBe(faucetAmount)
       })
   })
   it('responds with successful payment', async () => {
     await supertest(lndkrub)
       .post('/payinvoice')
       .set(authHeaders)
-      .send({ invoice: testInternalPaymentRequest })
-      .set('Accept', 'application/json')
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .then((response: { body: { description: string; num_satoshis: string } }) => {
-        let { description, num_satoshis } = response.body
-        expect(description).toBeTypeOf('string')
-        expect(description).toStrictEqual('test recipient')
-        expect(num_satoshis).toBeTypeOf('string')
-        expect(+num_satoshis).toBe(100)
-      })
-  })
-})
-
-describe('POST /payinvoice with test external payment request', () => {
-  it('responds with successful payment', async () => {
-    await supertest(lndkrub)
-      .post('/payinvoice')
-      .set(authHeaders)
-      .send({ invoice: testExternalPaymentRequest })
+      .send({ invoice })
       .set('Accept', 'application/json')
       .expect(200)
       .expect('Content-Type', /json/)
