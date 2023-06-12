@@ -1,7 +1,7 @@
 // ~~/tests/lndkrub/payInvoice.spec.ts
 
 // imports
-import { Invoice } from '@/types'
+import { Invoice, Payment } from '@/types'
 import { LightningService, LnRpc, createLNDCreds } from 'τ/services/lnrpc'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { lndTarget } from 'τ/configs'
@@ -243,12 +243,12 @@ describe('POST /payinvoice with test external payment request', () => {
       .set('Accept', 'application/json')
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((response: { body: { description: string; num_satoshis: string } }) => {
-        let { description, num_satoshis } = response.body
+      .then((response: { body: Payment }) => {
+        let { description, num_satoshis } = response.body.decoded
         expect(description).toBeTypeOf('string')
-        expect(description).toStrictEqual('test recipient')
+        expect(description).toStrictEqual(memo)
         expect(num_satoshis).toBeTypeOf('string')
-        expect(+num_satoshis).toBe(100)
+        expect(+num_satoshis).toBe(amt)
       })
   })
 })

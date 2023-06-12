@@ -223,7 +223,6 @@ export default (
       })
       if (!payment || !!payment.payment_error) {
         // payment failed
-        // console.error(payment.payment_error)
         await lock.releaseLock()
         return errorPaymentFailed(response)
       }
