@@ -578,42 +578,6 @@ export class User {
   }
 
   /**
-   * Fetches all onchain txs for user's address, and compares them to
-   * already imported txids (stored in database); Ones that are not imported -
-   * get their balance added to user's balance, and its txid added to 'imported' list.
-   *
-   * @returns {Promise<void>}
-   */
-  async accountForPosibleTxids() {
-    return // TODO: remove
-    let onchain_txs = await this.getTxs()
-    let imported_txids = await this._redis.lrange('imported_txids_for_' + this._userid, 0, -1)
-    for (let tx of onchain_txs) {
-      if (tx.type !== 'bitcoind_tx') continue
-      let already_imported = false
-      for (let imported_txid of imported_txids) {
-        if (tx.txid === imported_txid) already_imported = true
-      }
-
-      if (!already_imported && tx.category === 'receive') {
-        // first, locking...
-        let lock = new Lock('importing_' + tx.txid, this._redis)
-        if (!(await lock.obtainLock())) {
-          // someone's already importing this tx
-          return
-        }
-
-        let userBalance = await this.getCalculatedBalance()
-        // userBalance += new BigNumber(tx.amount).multipliedBy(100000000).toNumber();
-        // no need to add since it was accounted for in `this.getCalculatedBalance()`
-        await this.saveBalance(userBalance)
-        await this._redis.rpush('imported_txids_for_' + this._userid, tx.txid)
-        await lock.releaseLock()
-      }
-    }
-  }
-
-  /**
    * Adds invoice to a list of user's locked payments.
    * Used to calculate balance till the lock is lifted (payment is in
    * determined state - succeded or failed).
