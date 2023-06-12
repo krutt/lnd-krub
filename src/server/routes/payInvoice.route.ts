@@ -204,44 +204,38 @@ export default (
 
         // else - regular lightning network payment:
 
-        var call = lightning.sendPayment()
-        call.on('data', async function (payment) {
-          // payment callback
-          await user.unlockFunds(request.body.invoice)
-          if (payment && payment.payment_route && payment.payment_route.total_amt_msat) {
-            let PaymentShallow = new Paym(null, null)
-            payment = PaymentShallow.processSendPaymentResponse(payment)
-            payment.pay_req = request.body.invoice
-            payment.decoded = info
-            await user.savePaidLndInvoice(payment)
-            await user.clearBalanceCache()
-            lock.releaseLock()
-            return response.send(payment)
-          } else {
-            // payment failed
-            lock.releaseLock()
-            return errorPaymentFailed(response)
-          }
-        })
         if (!info.num_satoshis) {
           // tip invoice, but someone forgot to specify amount
           await lock.releaseLock()
           return errorBadArguments(response)
         }
-        let inv = {
+        await user.lockFunds(request.body.invoice, info)
+        let payment = await promisify(lightning.sendPaymentSync).bind(lightning)({
+          // allow_self_payment: true,
           payment_request: request.body.invoice,
           amt: info.num_satoshis, // amt is used only for 'tip' invoices
-          // @ts-ignore
           fee_limit: { fixed: Math.floor(info.num_satoshis * forwardReserveFee) + 1 },
-        }
-        try {
-          await user.lockFunds(request.body.invoice, info)
-          call.write(inv)
-          return null
-        } catch (Err) {
+          // timeout_seconds: 60
+        })
+        if (!payment || !!payment.payment_error) {
+          // payment failed
+          // console.error(payment.payment_error)
           await lock.releaseLock()
           return errorPaymentFailed(response)
         }
+        // payment callback
+        await user.unlockFunds(request.body.invoice)
+        if (payment.payment_route && payment.payment_route.total_amt_msat) {
+          let PaymentShallow = new Paym(null, null)
+          payment = PaymentShallow.processSendPaymentResponse(payment)
+          payment.pay_req = request.body.invoice
+          payment.decoded = info
+          await user.savePaidLndInvoice(payment)
+          await user.clearBalanceCache()
+          await lock.releaseLock()
+          return response.send(payment)
+        }
+        return null
       } else {
         await lock.releaseLock()
         return errorNotEnoughBalance(response)

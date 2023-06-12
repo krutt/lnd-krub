@@ -33,6 +33,7 @@ export type LightningService = {
   newAddress: Function
   queryRoutes: Function
   sendPayment: Function
+  sendPaymentSync: Function
   sendToRouteSync: Function
 }
 // @ts-ignore
