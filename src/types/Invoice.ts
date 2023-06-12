@@ -4,7 +4,7 @@
 export type Invoice = {
   add_index: string
   payment_request: string
-  r_hash: { type: 'Buffer'; data: number[] }
+  r_hash: Buffer
   // optional attributes
   amt?: number // amount
   description?: string // memo
