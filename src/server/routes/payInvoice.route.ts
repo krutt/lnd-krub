@@ -213,7 +213,7 @@ export default (
           // payment callback
           await user.unlockFunds(request.body.invoice)
           if (payment && payment.payment_route && payment.payment_route.total_amt_msat) {
-            let PaymentShallow = new Paym(null, null, null)
+            let PaymentShallow = new Paym(null, null)
             payment = PaymentShallow.processSendPaymentResponse(payment)
             payment.pay_req = request.body.invoice
             payment.decoded = info
