@@ -106,7 +106,7 @@ export class Invo {
     await this._redis.expire(key, 3600 * 24 * 30) // 1 month
   }
 
-  setPaymentRequest(paymentRequest: string) {
+  setPaymentRequest = (paymentRequest: string) => {
     this._paymentRequest = paymentRequest
   }
 }
