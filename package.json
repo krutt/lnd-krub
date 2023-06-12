@@ -52,5 +52,5 @@
     "start": "NODE_ENV=production node dist/index.js",
     "test": "vitest"
   },
-  "version": "0.1.1"
+  "version": "0.1.2"
 }
