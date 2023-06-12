@@ -12,6 +12,7 @@ export class Paym {
   _lightning: LightningService
   _redis: RedisService
   _decoded?: {
+    description: string
     destination: string
     expiry: number
     num_satoshis: number

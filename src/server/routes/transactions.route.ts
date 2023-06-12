@@ -32,7 +32,6 @@ export default (
 
     if (!(await user.getAddress())) await user.generateAddress() // onchain addr needed further
     try {
-      await user.accountForPosibleTxids()
       let txs = await user.getTxs()
       let lockedPayments = await user.getLockedPayments()
       for (let locked of lockedPayments) {

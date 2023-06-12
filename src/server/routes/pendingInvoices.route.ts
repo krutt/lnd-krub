@@ -31,7 +31,6 @@ export default (
 
     if (!(await user.getAddress())) await user.generateAddress() // onchain address needed further
 
-    await user.accountForPosibleTxids()
     let txs = await user.getPendingTxs()
     return response.send(txs)
   }

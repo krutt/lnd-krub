@@ -30,7 +30,6 @@ export default (
       }
       console.log('/balance', [request.uuid, 'userid: ' + user.getUserId()])
       if (!(await user.getAddress())) await user.generateAddress() // onchain address needed further
-      await user.accountForPosibleTxids()
       let balance = await user.getBalance()
       if (balance < 0) balance = 0
       return response.send({ BTC: { AvailableBalance: balance } })
