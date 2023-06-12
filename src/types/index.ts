@@ -1,6 +1,6 @@
 // ~~/src/types/index.ts
 
-export type { Invoice } from './Invoice'
+export type { Invoice, InvoiceJSON } from './Invoice'
 export type { LNDKrubRequest } from './LNDKrubRequest'
 export type { LNDKrubRouteFunc } from './LNDKrubRouteFunc'
 export type { Payment } from './Payment'

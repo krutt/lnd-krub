@@ -72,13 +72,13 @@ beforeAll(async () => {
     `${lndTarget.host}:${lndTarget.port}`,
     createLNDCreds(lndTarget.macaroonPath, lndTarget.tlsCertPath)
   )
-  let testInvoice = await promisify(external.addInvoice).bind(external)({
+  let { payment_request } = await promisify(external.addInvoice).bind(external)({
     amt: 100,
     expiry: 20,
     memo: 'external',
     r_preimage: randomBytes(32).toString('base64'),
   })
-  testExternalPaymentRequest = testInvoice.payment_request
+  testExternalPaymentRequest = payment_request
 })
 
 describe('POST /payinvoice with no body', () => {

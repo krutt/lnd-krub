@@ -2,7 +2,7 @@
 
 // imports
 import { Express } from 'express'
-import { Invoice, Transaction } from '@/types'
+import { InvoiceJSON, Transaction } from '@/types'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createLNDHub } from 'τ/mocks/lndhub'
 import supertest from 'supertest'
@@ -48,7 +48,7 @@ describe('POST /addinvoice', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .then((response: { body: Invoice }) => {
+      .then((response: { body: InvoiceJSON }) => {
         let { add_index, payment_request, r_hash } = response.body
         expect(add_index).toBeTypeOf('string')
         expect(payment_request).toBeTypeOf('string')
@@ -131,8 +131,8 @@ describe('GET /getuserinvoices', () => {
       .set(authHeaders)
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((response: { body: Invoice[] }) => {
-        let invoices: Invoice[] = response.body
+      .then((response: { body: InvoiceJSON[] }) => {
+        let invoices: InvoiceJSON[] = response.body
         expect(invoices).toBeTruthy()
         expect(invoices.length).toBeGreaterThan(0)
         for (let invoice of invoices) {

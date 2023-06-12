@@ -1,7 +1,7 @@
 // ~~/tests/lndkrub/userInvoices.spec.ts
 
 // imports
-import { Invoice } from '@/types'
+import { InvoiceJSON } from '@/types'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import lndkrub from '@/index'
 import supertest from 'supertest'
@@ -63,8 +63,8 @@ describe('GET /getuserinvoices', () => {
       .set(authHeaders)
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((response: { body: Invoice[] }) => {
-        let invoices: Invoice[] = response.body
+      .then((response: { body: InvoiceJSON[] }) => {
+        let invoices: InvoiceJSON[] = response.body
         expect(invoices).toBeTruthy()
         expect(invoices.length).toBeGreaterThan(0)
         for (let invoice of invoices) {

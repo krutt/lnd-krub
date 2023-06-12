@@ -1,7 +1,7 @@
 // ~~/tests/lndkrub/addInvoice.spec.ts
 
 // imports
-import { Invoice } from '@/types'
+import { InvoiceJSON } from '@/types'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import lndkrub from '@/index'
 import supertest from 'supertest'
@@ -45,7 +45,7 @@ describe('POST /addinvoice', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
-      .then((response: { body: Invoice }) => {
+      .then((response: { body: InvoiceJSON }) => {
         let { add_index, payment_request, r_hash } = response.body
         expect(add_index).toBeTypeOf('string')
         expect(payment_request).toBeTypeOf('string')

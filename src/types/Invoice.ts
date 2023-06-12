@@ -15,4 +15,11 @@ export type Invoice = {
   userid?: string
 }
 
+export type InvoiceJSON = Invoice & {
+  r_hash: {
+    type: 'Buffer',
+    data: Array<number>
+  }
+}
+
 export default Invoice

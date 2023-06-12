@@ -99,7 +99,7 @@ export default (
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     let user = new User(bitcoin, lightning, redis)
     let node = new Node(lightning, redis)
-    let identity_pubkey = await node.identityPubkey()
+    let identityPubkey = await node.identityPubkey()
     if (!(await user.loadByAuthorization(request.headers.authorization))) {
       return errorBadAuth(response)
     }
@@ -124,11 +124,10 @@ export default (
     }
 
     // @ts-ignore
-    let userBalance
+    let userBalance: number
     try {
       userBalance = await user.getCalculatedBalance()
     } catch (err) {
-      // @ts-ignore
       console.log('', [request.uuid, 'error running getCalculatedBalance():', err.message])
       lock.releaseLock()
       return errorTryAgainLater(response)
@@ -153,7 +152,7 @@ export default (
         +info.num_satoshis + Math.floor(info.num_satoshis * forwardReserveFee) + 1
       ) {
         // got enough balance, including 1% of payment amount - reserve for fees
-        if (identity_pubkey === info.destination) {
+        if (identityPubkey === info.destination) {
           // this is internal invoice
           // now, receiver add balance
           let userid_payee = await user.getUseridByPaymentHash(info.payment_hash)
@@ -176,23 +175,20 @@ export default (
           // sender spent his balance:
           await user.clearBalanceCache()
           await user.savePaidLndInvoice({
-            // @ts-ignore
-            timestamp: parseInt(+new Date() / 1000),
+            timestamp: Math.floor(+new Date() / 1000),
             type: 'paid_invoice',
-            // @ts-ignore
             value: +info.num_satoshis + Math.floor(info.num_satoshis * intraHubFee),
-            // @ts-ignore
             fee: Math.floor(info.num_satoshis * intraHubFee),
             memo: decodeURIComponent(info.description),
             pay_req: request.body.invoice,
           })
 
-          const invoice = new Invo(lightning, redis)
+          let invoice = new Invo(lightning, redis)
           invoice.setPaymentRequest(request.body.invoice)
           await invoice.markAsPaidInDatabase()
 
           // now, faking LND callback about invoice paid:
-          const preimage = await invoice.getPreimage()
+          let preimage = await invoice.getPreimage()
           if (preimage) {
             subscribeInvoicesCallCallback(bitcoin, lightning, redis, {
               state: 'SETTLED',
