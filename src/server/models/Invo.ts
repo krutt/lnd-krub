@@ -4,6 +4,7 @@
 import type { Invoice } from '@/types'
 import type { LightningService } from '@/server/services/lightning'
 import type { Redis as RedisService } from 'ioredis'
+import type { Tag } from '@/types'
 import bolt11, { PaymentRequestObject, TagData } from 'bolt11'
 import crypto from 'crypto'
 import { promisify } from 'node:util'
@@ -40,7 +41,7 @@ export class Invo {
   getIsMarkedAsPaidInDatabase = async () => {
     if (!this._paymentRequest) throw new Error('BOLT11 payment request is not provided.')
     let decoded: PaymentRequestObject = bolt11.decode(this._paymentRequest)
-    let paymentTag = decoded.tags.find(tag => tag.tagName === 'payment_hash')
+    let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
     let paymentHash: TagData = paymentTag?.data
     if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
     return await this._getIsPaymentHashMarkedPaidInDatabase(paymentHash)
@@ -49,7 +50,7 @@ export class Invo {
   getPreimage = async (): Promise<any> => {
     if (!this._paymentRequest) throw new Error('BOLT11 payment request is not provided.')
     let decoded: PaymentRequestObject = bolt11.decode(this._paymentRequest)
-    let paymentTag = decoded.tags.find(tag => tag.tagName === 'payment_hash')
+    let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
     let paymentHash: TagData = paymentTag?.data
     if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
     return await this._redis.get('preimage_for_' + paymentHash)
@@ -80,7 +81,7 @@ export class Invo {
   markAsPaidInDatabase = async () => {
     if (!this._paymentRequest) throw new Error('BOLT11 payment request is not provided.')
     let decoded: PaymentRequestObject = bolt11.decode(this._paymentRequest)
-    let paymentTag = decoded.tags.find(tag => tag.tagName === 'payment_hash')
+    let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
     let paymentHash: TagData = paymentTag?.data
     if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
     return await this._setIsPaymentHashPaidInDatabase(paymentHash, decoded.satoshis)
@@ -89,7 +90,7 @@ export class Invo {
   markAsUnpaidInDatabase = async () => {
     if (!this._paymentRequest) throw new Error('BOLT11 payment request is not provided.')
     let decoded: PaymentRequestObject = bolt11.decode(this._paymentRequest)
-    let paymentTag = decoded.tags.find(tag => tag.tagName === 'payment_hash')
+    let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
     let paymentHash: TagData = paymentTag?.data
     if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
     return await this._setIsPaymentHashPaidInDatabase(paymentHash)
