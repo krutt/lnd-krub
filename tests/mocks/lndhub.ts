@@ -4,7 +4,7 @@
 // @ts-nocheck
 import BearerStrategy from 'passport-http-bearer'
 import { LightningService, LnRpc, createLNDCreds } from 'τ/services/lnrpc'
-import { Invoice, Tag, Transactions } from 'τ/types'
+import { Invoice, Tag, Transaction } from 'τ/types'
 import bodyParser from 'body-parser'
 import { lnd } from 'τ/configs'
 import express, { Express } from 'express'
