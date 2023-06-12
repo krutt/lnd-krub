@@ -17,6 +17,11 @@ export class Invo {
   _paymentRequest?: string
   _redis: RedisService
 
+  /**
+   *
+   * @param {LightningService} lightning
+   * @param {RedisService} redis
+   */
   constructor(lightning: LightningService, redis: RedisService) {
     this._lightning = lightning
     this._redis = redis
