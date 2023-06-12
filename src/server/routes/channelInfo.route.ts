@@ -5,10 +5,10 @@ import { Graph } from '@/server/models/Graph'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
-import type { Redis } from 'ioredis'
+import type { Redis as RedisService } from 'ioredis'
 import type { Response } from 'express'
 
-export default (lightning: LightningService, redis: Redis): LNDKrubRouteFunc =>
+export default (lightning: LightningService, redis: RedisService): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
