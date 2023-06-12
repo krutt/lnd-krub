@@ -23,7 +23,7 @@ export class Lock {
    *
    * @returns {Promise<boolean>}
    */
-  async obtainLock() {
+  obtainLock = async () => {
     const timestamp = +new Date()
     let setResult = await this._redis.setnx(this._lock_key, timestamp)
     if (!setResult) {
@@ -37,7 +37,10 @@ export class Lock {
     return true
   }
 
-  async releaseLock() {
+  /**
+   * Releases the lock set on redis
+   */
+  releaseLock = async () => {
     await this._redis.del(this._lock_key)
   }
 }
