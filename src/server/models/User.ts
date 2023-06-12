@@ -386,8 +386,8 @@ export class User {
    * @see Invo._getIsPaymentHashMarkedPaidInDatabase
    * @see Invo.getIsMarkedAsPaidInDatabase
    */
-  getPaymentHashPaid = async (payment_hash: string): Promise<number> => {
-    return parseInt(await this._redis.get('ispaid_' + payment_hash))
+  getPaymentHashPaid = async (paymentHash: string): Promise<number> => {
+    return parseInt(await this._redis.get('ispaid_' + paymentHash))
   }
 
   /**
