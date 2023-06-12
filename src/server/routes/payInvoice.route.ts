@@ -123,11 +123,10 @@ export default (
       return errorGeneralServerError(response)
     }
 
-    let balance: number = await user.getBalance()
-      .catch(err => {
-        console.log('', [request.uuid, 'error running getCalculatedBalance():', err.message])
-        return -1
-      })
+    let balance: number = await user.getBalance().catch(err => {
+      console.log('', [request.uuid, 'error running getCalculatedBalance():', err.message])
+      return -1
+    })
     if (balance < 0) {
       lock.releaseLock()
       return errorTryAgainLater(response)
