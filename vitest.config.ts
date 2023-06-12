@@ -11,6 +11,6 @@ export default defineConfig({
     // environment: 'jsdom',
     include: ['tests/**/*.spec.ts'],
     setupFiles: 'dotenv/config',
-    threads: false
+    threads: false,
   },
 })
