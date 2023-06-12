@@ -16,20 +16,25 @@ afterAll(() => {
 
 beforeAll(async () => {
   lndkrub.emit('event:startup')
-})  
+})
 
 describe('POST /payinvoice with no body', () => {
   let authHeaders: { Authorization: string }
   let login: string | null = null
   let password: string | null = null
   beforeAll(async () => {
-    await supertest(lndkrub).post('/create').then((response: { body: { login: string; password: string}}) => {
-      login = response.body.login
-      password = response.body.password
-    })
-    await supertest(lndkrub).post('/auth').send({login, password}).then((response: {body: { access_token: string}}) => {
-      authHeaders = { 'Authorization': `Bearer ${response.body.access_token}` }
-    })
+    await supertest(lndkrub)
+      .post('/create')
+      .then((response: { body: { login: string; password: string } }) => {
+        login = response.body.login
+        password = response.body.password
+      })
+    await supertest(lndkrub)
+      .post('/auth')
+      .send({ login, password })
+      .then((response: { body: { access_token: string } }) => {
+        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      })
     await supertest(lndkrub).post('/faucet').set(authHeaders)
   })
   it('responds with bad arguments error`', async () => {
@@ -58,16 +63,23 @@ describe('POST /payinvoice with test payment request but insufficient balance', 
   let password: string | null = null
   let recipient: { access_token?: string; login: string; password: string }
   beforeAll(async () => {
-    await supertest(lndkrub).post('/create').then((response: { body: { login: string; password: string}}) => {
-      login = response.body.login
-      password = response.body.password
-    })
-    await supertest(lndkrub).post('/auth').send({login, password}).then((response: {body: { access_token: string}}) => {
-      authHeaders = { 'Authorization': `Bearer ${response.body.access_token}` }
-    })
     await supertest(lndkrub)
-    .post('/create')
-    .then((response: { body: { login: string; password: string } }) => recipient = response.body)
+      .post('/create')
+      .then((response: { body: { login: string; password: string } }) => {
+        login = response.body.login
+        password = response.body.password
+      })
+    await supertest(lndkrub)
+      .post('/auth')
+      .send({ login, password })
+      .then((response: { body: { access_token: string } }) => {
+        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      })
+    await supertest(lndkrub)
+      .post('/create')
+      .then(
+        (response: { body: { login: string; password: string } }) => (recipient = response.body)
+      )
     await supertest(lndkrub)
       .post('/auth')
       .send({ ...recipient })
@@ -110,18 +122,25 @@ describe('POST /payinvoice with test payment request after receiving sats from f
   let password: string | null = null
   let recipient: { access_token?: string; login: string; password: string }
   beforeAll(async () => {
-    await supertest(lndkrub).post('/create').then((response: { body: { login: string; password: string}}) => {
-      login = response.body.login
-      password = response.body.password
-    })
-    await supertest(lndkrub).post('/auth').send({login, password}).then((response: {body: { access_token: string}}) => {
-      authHeaders = { 'Authorization': `Bearer ${response.body.access_token}` }
-    })
-    
     await supertest(lndkrub)
       .post('/create')
-      .then((response: { body: { login: string; password: string } }) => recipient = response.body)
-    await supertest(lndkrub).post('/faucet').set(authHeaders).send({amt: faucetAmount})
+      .then((response: { body: { login: string; password: string } }) => {
+        login = response.body.login
+        password = response.body.password
+      })
+    await supertest(lndkrub)
+      .post('/auth')
+      .send({ login, password })
+      .then((response: { body: { access_token: string } }) => {
+        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      })
+
+    await supertest(lndkrub)
+      .post('/create')
+      .then(
+        (response: { body: { login: string; password: string } }) => (recipient = response.body)
+      )
+    await supertest(lndkrub).post('/faucet').set(authHeaders).send({ amt: faucetAmount })
     await supertest(lndkrub)
       .post('/auth')
       .send({ ...recipient })
@@ -177,21 +196,29 @@ describe('POST /payinvoice with test external payment request', () => {
   let memo: string = 'external recipient'
   let password: string | null = null
   beforeAll(async () => {
-    await supertest(lndkrub).post('/create').then((response: { body: { login: string; password: string}}) => {
-      login = response.body.login
-      password = response.body.password
-    })
-    await supertest(lndkrub).post('/auth').send({login, password}).then((response: {body: { access_token: string}}) => {
-      authHeaders = { 'Authorization': `Bearer ${response.body.access_token}` }
-    })
-    await supertest(lndkrub).post('/faucet').set(authHeaders).send({amt: faucetAmount})
+    await supertest(lndkrub)
+      .post('/create')
+      .then((response: { body: { login: string; password: string } }) => {
+        login = response.body.login
+        password = response.body.password
+      })
+    await supertest(lndkrub)
+      .post('/auth')
+      .send({ login, password })
+      .then((response: { body: { access_token: string } }) => {
+        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      })
+    await supertest(lndkrub).post('/faucet').set(authHeaders).send({ amt: faucetAmount })
     // external invoice
     let lnext: LightningService = new LnRpc.Lightning(
       `${lndTarget.host}:${lndTarget.port}`,
       createLNDCreds(lndTarget.macaroonPath, lndTarget.tlsCertPath)
     )
     let { payment_request } = await promisify(lnext.addInvoice).bind(lnext)({
-      expiry: 20, memo, r_preimage: randomBytes(32).toString('base64'), value: amt
+      expiry: 20,
+      memo,
+      r_preimage: randomBytes(32).toString('base64'),
+      value: amt,
     })
     invoice = payment_request
   })
