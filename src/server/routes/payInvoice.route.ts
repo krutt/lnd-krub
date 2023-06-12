@@ -123,7 +123,7 @@ export default (
       return errorGeneralServerError(response)
     }
 
-    let balance: number = await user.getBalance().catch(err => {
+    let balance: number = await user.getCalculatedBalance().catch(err => {
       console.log('', [request.uuid, 'error running getCalculatedBalance():', err.message])
       return -1
     })
