@@ -67,7 +67,7 @@ export class Paym {
 
   /**
    * Returns NULL if unknown, true if its paid, false if its unpaid
-   * (judging by error in sendPayment response)
+   * (judging by error in sendPaymentSync response)
    *
    * @returns {boolean | null}
    */

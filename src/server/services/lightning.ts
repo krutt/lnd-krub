@@ -32,7 +32,6 @@ export type LightningService = {
   lookupInvoice: Function
   newAddress: Function
   queryRoutes: Function
-  sendPayment: Function
   sendPaymentSync: Function
   sendToRouteSync: Function
 }

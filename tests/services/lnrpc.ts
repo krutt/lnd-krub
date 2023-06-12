@@ -29,7 +29,7 @@ export type LightningService = {
   listChannels: Function
   newAddress: Function
   queryRoutes: Function
-  sendPayment: Function
+  sendPaymentSync: Function
 }
 // @ts-ignore
 export const LnRpc = protoDescriptor.lnrpc as { Lightning: Constructable<LightningService> }
