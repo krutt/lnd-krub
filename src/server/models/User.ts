@@ -522,14 +522,14 @@ export class User {
   }
 
   lookupInvoice = async (paymentHash: string) => {
-    try {
-      return await promisify(this._lightning.lookupInvoice).bind(this._lightning)({
+    return await promisify(this._lightning.lookupInvoice)
+      .bind(this._lightning)({
         r_hash_str: paymentHash,
       })
-    } catch (err) {
-      console.error(err)
-      return {}
-    }
+      .catch(err => {
+        console.error(err)
+        return {}
+      })
   }
 
   /**
