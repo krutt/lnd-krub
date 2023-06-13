@@ -29,7 +29,7 @@ beforeAll(async () => {
     .post('/auth')
     .send({ login: testLogin, password: testPassword })
     .set('Accept', 'application/json')
-    .then((response: { body: { access_token: string; refresh_token: string } }) => {
+    .then((response: { body: { access_token: string } }) => {
       let { access_token } = response.body
       // persistence
       authHeaders = { Authorization: `Bearer ${access_token}` }
