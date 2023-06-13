@@ -37,7 +37,7 @@ beforeAll(async () => {
 })
 
 describe('GET /gettxs', () => {
-  it('responds with transactions made by lightning node daemon', async () => {
+  it('responds with empty list of transactions', async () => {
     await supertest(lndkrub)
       .get('/gettxs')
       .set(authHeaders)
