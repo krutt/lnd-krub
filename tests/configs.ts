@@ -1,7 +1,7 @@
 // ~~/tests/configs.ts
 
 export const bitcoind = {
-  rpc: process.env.BITCOIND_RPC_URL || 'http://localhost:18443'
+  rpc: process.env.BITCOIND_RPC_URL || 'http://localhost:18443',
 }
 
 export const lnd = {
