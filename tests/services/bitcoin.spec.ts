@@ -1,7 +1,7 @@
 /* ~~/src/tests/services/bitcoin.spec.ts */
 
 // imports
-import { service as bitcoin } from "./bitcoin"
+import { service as bitcoin } from './bitcoin'
 import { describe, expect, it } from 'vitest'
 
 describe('get network information', () => {
