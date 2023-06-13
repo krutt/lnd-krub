@@ -13,5 +13,5 @@ let auth = !!url.password
 let rpc = { auth, hostname, port, timeout: 15000 }
 
 export type BitcoinService = HttpClient
-export const service: BitcoinService = jayson.client.http(url)
+export const service: BitcoinService = jayson.client.http(rpc)
 export default service
