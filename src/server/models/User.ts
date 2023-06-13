@@ -579,11 +579,11 @@ export class User {
     }
   }
 
-  watchAddress = async address => {
+  watchAddress = async (address: string) => {
     if (!address) return
-    // TODO: uncomment with logic change
-    // if (config.bitcoind)
-    //   return this._bitcoin.request('importaddress', [address, address, false])
+    if (!!this._bitcoin) {
+      return await this._bitcoin.request('importaddress', [address, address, false])
+    }
   }
 }
 
