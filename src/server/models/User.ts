@@ -14,8 +14,6 @@ import { promisify } from 'node:util'
 
 // static cache:
 let _invoice_ispaid_cache = {}
-let _listtransactions_cache = false
-let _listtransactions_cache_expiry_ts = 0
 
 export class User {
   // member vars
@@ -54,36 +52,6 @@ export class User {
     await this._redis.set('refresh_token_for_' + this._userid, this._refresh_token)
   }
 
-  _getChainTransactions = async () => {
-    return new Promise((resolve, reject) => {
-      this._lightning.getTransactions({}, (err, data) => {
-        if (err) return reject(err)
-        const { transactions } = data
-        const outTxns = []
-        // on lightning incoming transactions have no labels
-        // for now filter out known labels to reduce transactions
-        transactions
-          .filter(tx => tx.label !== 'external' && !tx.label.includes('openchannel'))
-          .map(tx => {
-            const decodedTx = decodeRawHex(tx.raw_tx_hex)
-            // @ts-ignore
-            decodedTx.outputs.forEach(vout =>
-              outTxns.push({
-                // mark all as received, since external is filtered out
-                category: 'receive',
-                confirmations: tx.num_confirmations,
-                amount: Number(vout.value),
-                address: vout.scriptPubKey.addresses[0],
-                time: tx.time_stamp,
-              })
-            )
-          })
-
-        resolve(outTxns)
-      })
-    })
-  }
-
   _hash = (value: string) => createHash('sha256').update(value).digest().toString('hex')
 
   /**
@@ -94,54 +62,56 @@ export class User {
    * @private
    */
   _listtransactions = async () => {
-    let response = _listtransactions_cache
-    if (response) {
-      if (+new Date() > _listtransactions_cache_expiry_ts) {
-        // invalidate cache
-        response = _listtransactions_cache = false
-      } else {
-        try {
-          // @ts-ignore
-          return JSON.parse(response)
-        } catch (_) {
-          // nop
-        }
-      }
-    }
-
-    try {
-      let ret = { result: [] }
-      // TODO: uncomment with logic change
-      // if (config.bitcoind) {
-      if (true) {
-        let txs = await this._bitcoin.request('listtransactions', ['*', 100500, 0, true])
-        // now, compacting response a bit
-        for (const tx of txs.result) {
-          ret.result.push({
-            category: tx.category,
-            amount: tx.amount,
-            confirmations: tx.confirmations,
-            address: tx.address,
-            time: tx.blocktime || tx.time,
+    let result = []
+    if (!!this._bitcoin) {
+      result = await this._bitcoin
+        .request('listtransactions', ['*', 100500, 0, true])
+        .then(data =>
+          data.result.map(transaction => {
+            let { address, amount, category, confirmations } = transaction
+            let time = transaction.blocktime || transaction.time
+            return { address, amount, category, confirmations, time }
           })
-        }
-      } else {
-        let txs = await this._getChainTransactions()
-        // @ts-ignore
-        ret.result.push(...txs)
-      }
-      // @ts-ignore
-      _listtransactions_cache = JSON.stringify(ret)
-      _listtransactions_cache_expiry_ts = +new Date() + 5 * 60 * 1000 // 5 min
-      // @ts-ignore
-      this._redis.set('listtransactions', _listtransactions_cache)
-      return ret
-    } catch (error) {
-      console.warn('listtransactions error:', error)
-      let _listtransactions_cache = await this._redis.get('listtransactions')
-      if (!_listtransactions_cache) return { result: [] }
-      return JSON.parse(_listtransactions_cache)
+        )
+        .catch(async err => {
+          console.warn('listtransactions error:', err)
+          let transactions = await this._redis.get('listtransactions')
+          return !transactions ? [] : JSON.parse(transactions)
+        })
+    } else if (!!this._lightning) {
+      console.log('get chain transactions via lnd')
+      let transactions = await promisify(this._lightning.getTransactions)
+        .bind(this._lightning)({})
+        .then((data: { transactions: Array<any> }) => data.transactions)
+        .catch(err => {
+          console.error(err)
+          return []
+        })
+      // on lightning incoming transactions have no labels
+      // for now filter out known labels to reduce transactions
+      transactions
+        .filter(txn => {
+          return txn.label !== 'external' && !txn.label.includes('openchannel')
+        })
+        .map(txn => {
+          let decoded = decodeRawHex(txn.raw_tx_hex)
+          // @ts-ignore
+          decoded.outputs.map(output => {
+            result.push({
+              // mark all as received, since external is filtered out
+              category: 'receive',
+              confirmations: txn.num_confirmations,
+              amount: Number(output.value),
+              address: output.scriptPubKey.addresses[0],
+              time: txn.time_stamp,
+            })
+          })
+        })
     }
+    if (result.length > 0) {
+      await this._redis.setex('listtransactions', 5 * 60 * 1000, JSON.stringify(result))
+    }
+    return { result }
   }
 
   _saveUserToDatabase = async () => {
@@ -359,16 +329,14 @@ export class User {
    * @returns {Promise<Array>}
    */
   getPendingTxs = async () => {
-    const addr = await this.getOrGenerateAddress()
-    let txs = await this._listtransactions()
-    txs = txs.result
-    let result = []
-    for (let tx of txs) {
-      if (tx.confirmations < 3 && tx.address === addr && tx.category === 'receive') {
-        result.push(tx)
-      }
-    }
-    return result
+    let address = await this.getOrGenerateAddress()
+    let transactions = await this._listtransactions()
+    return transactions.result.filter(
+      transaction =>
+        transaction.confirmations < 3 &&
+        transaction.address === address &&
+        transaction.category === 'receive'
+    )
   }
 
   getOrGenerateAddress = async () => {
@@ -397,16 +365,19 @@ export class User {
    * @returns {Promise<Array>}
    */
   getTxs = async () => {
-    const addr = await this.getOrGenerateAddress()
-    let txs = await this._listtransactions()
-    txs = txs.result
-    let result = []
-    for (let tx of txs) {
-      if (tx.confirmations >= 3 && tx.address === addr && tx.category === 'receive') {
-        tx.type = 'bitcoind_tx'
-        result.push(tx)
-      }
-    }
+    let address = await this.getOrGenerateAddress()
+    let transactions = await this._listtransactions()
+    let result = transactions.result
+      .filter(
+        transaction =>
+          transaction.confirmations >= 3 &&
+          transaction.address === address &&
+          transaction.category === 'receive'
+      )
+      .map(transaction => {
+        transaction.type = 'bitcoind_tx'
+        return transaction
+      })
 
     let range = await this._redis.lrange('txs_for_' + this._userid, 0, -1)
     for (let item of range) {
