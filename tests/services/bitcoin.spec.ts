@@ -29,3 +29,17 @@ describe('get network information', () => {
     expect(warnings).toBe('')
   })
 })
+
+describe('list transactions for all', () => {
+  it('responds with all available transactions', async () => {
+    let { error, id, result } = await bitcoin.request('listtransactions', ['*', 100500, 0, true])
+    expect(error).toBeFalsy()
+    expect(id).toBeTruthy()
+    expect(id).toBeTypeOf('string')
+    expect(id.length).toBe(36)
+    expect(id.replaceAll('-', '').length).toBe(32)
+    expect(result).toBeTypeOf('object') // array
+    expect(result.length).toBeTypeOf('number')
+    expect(result.length).toBeGreaterThan(0)
+  })
+})
