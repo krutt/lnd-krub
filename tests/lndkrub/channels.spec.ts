@@ -18,7 +18,7 @@ beforeAll(async () => {
   await supertest(lndkrub)
     .post('/create')
     .set('Accept', 'application/json')
-    .then((response: { body: { login: string; password: string; userId: string } }) => {
+    .then((response: { body: { login: string; password: string } }) => {
       let { login, password } = response.body
       // persistence
       testLogin = login
