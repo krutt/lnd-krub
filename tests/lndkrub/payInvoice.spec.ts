@@ -35,7 +35,6 @@ describe('POST /payinvoice with no body', () => {
       .then((response: { body: { access_token: string } }) => {
         authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
       })
-    await supertest(lndkrub).post('/faucet').set(authHeaders)
   })
   it('responds with bad arguments error`', async () => {
     await supertest(lndkrub)
