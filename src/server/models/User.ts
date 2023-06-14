@@ -295,32 +295,37 @@ export class User {
   /**
    * Asks LND for new address, and imports it to bitcoind
    *
-   * @returns {Promise<any>}
+   * @returns {Promise<void>}
    */
-  generateAddress = async () => {
+  generateAddress = async (): Promise<void> => {
     let lock = new Lock('generating_address_' + this._userid, this._redis)
     if (!(await lock.obtainLock())) {
       // someone's already generating address
       return
     }
-
-    let self = this
-    return new Promise(function (resolve: Function, reject) {
-      self._lightning.newAddress({ type: 0 }, async function (err, response) {
-        if (err) return reject('LND failure when trying to generate new address')
-        const addressAlreadyExists = await self.getAddress()
-        if (addressAlreadyExists) {
-          // one last final check, for a case of really long race condition
-          resolve()
-          return
+    let address = await this.getAddress()
+    if (!address) {
+      let request: { address: string } = await promisify(this._lightning.newAddress)
+        .bind(this._lightning)({ type: 0 })
+        .catch(() => {
+          console.error('LND failure when trying to generate new address')
+        })
+      address = request.address
+      if (!address) return
+      await this.addAddress(address)
+      if (this._bitcoin) {
+        let info: object | null = await this._bitcoin.request('getaddressinfo', [address])
+          .catch(err => {
+            console.error(err)
+            return null
+          })
+        if (!info) {
+          await this._bitcoin.request('importaddress', [address, address, false])
+            .catch(err => console.error(err))
         }
-        await self.addAddress(response.address)
-        // TODO: uncomment with logic change
-        // if (config.bitcoind)
-        //   self._bitcoin.request('importaddress', [response.address, response.address, false])
-        resolve()
-      })
-    })
+      }
+    }
+    await lock.releaseLock()
   }
 
   /**
@@ -580,10 +585,10 @@ export class User {
   }
 
   watchAddress = async (address: string) => {
-    if (!address) return
-    if (!!this._bitcoin) {
-      return await this._bitcoin.request('importaddress', [address, address, false])
-    }
+    // if (!address) return
+    // if (!!this._bitcoin) {
+    //   return await this._bitcoin.request('importaddress', [address, address, false])
+    // }
   }
 }
 
