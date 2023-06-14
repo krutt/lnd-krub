@@ -29,14 +29,12 @@ export default (
       return errorBadAuth(response)
     }
 
-    if (!request.query.invoice) return errorGeneralServerError(response)
+    let paymentRequest = request.query.invoice
+    if (!paymentRequest) return errorGeneralServerError(response)
 
-    try {
-      let info = await promisify(lightning.decodePayReq).bind(lightning)({
-        pay_req: request.query.invoice,
-      })
-      return response.send(info)
-    } catch (err) {
-      return errorNotAValidInvoice(response)
-    }
+    let info = await promisify(lightning.decodePayReq)
+      .bind(lightning)({ pay_req: paymentRequest })
+      .catch(console.error)
+    if (!info) return errorNotAValidInvoice(response)
+    return response.send(info)
   }
