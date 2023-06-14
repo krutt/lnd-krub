@@ -10,6 +10,7 @@ export type Invoice = {
   description?: string // memo
   expire_time?: number // in seconds, defaults to 86400 (1d)
   ispaid?: boolean
+  pay_req?: string // bluewallet: client backwards compatibility
   timestamp?: number // unix timestamp in seconds
   type?: 'user_invoice'
   userid?: string
