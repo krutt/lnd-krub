@@ -68,7 +68,7 @@ import dashboard from '@/server/routes/dashboard.route'
 import decodeInvoice from '@/server/routes/decodeInvoice.route'
 import faucet from '@/server/routes/faucet.route'
 import info from '@/server/routes/info.route'
-import pendingInvoices from '@/server/routes/pendingInvoices.route'
+import pendingTransactions from '@/server/routes/pendingTransactions.route'
 import payInvoice from '@/server/routes/payInvoice.route'
 import queryRoutes from '@/server/routes/queryRoutes.route'
 import transactions from '@/server/routes/transactions.route'
@@ -84,7 +84,7 @@ router.get('/decodeinvoice', postLimiter, decodeInvoice(bitcoin, lightning, redi
 router.get('/getbtc', bitcoinAddress(bitcoin, lightning, redis))
 router.get('/getchaninfo/:channelId', channelInfo(lightning, redis))
 router.get('/getinfo', postLimiter, info(bitcoin, lightning, redis))
-router.get('/getpending', postLimiter, pendingInvoices(bitcoin, lightning, redis))
+router.get('/getpending', postLimiter, pendingTransactions(bitcoin, lightning, redis))
 router.get('/gettxs', postLimiter, transactions(bitcoin, lightning, redis))
 router.get('/getuserinvoices', postLimiter, userInvoices(bitcoin, lightning, redis))
 router.post('/payinvoice', postLimiter, payInvoice(bitcoin, lightning, redis))

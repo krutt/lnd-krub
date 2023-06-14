@@ -333,14 +333,14 @@ export class User {
    *
    * @returns {Promise<Array>}
    */
-  getPendingTxs = async () => {
+  getPendingTransactions = async () => {
     let address = await this.getOrGenerateAddress()
     let transactions = await this._listtransactions()
     return transactions.result.filter(
       transaction =>
         transaction.confirmations < 3 &&
         transaction.address === address &&
-        transaction.category === 'receive'
+        ['receive', 'send'].includes(transaction.category)
     )
   }
 

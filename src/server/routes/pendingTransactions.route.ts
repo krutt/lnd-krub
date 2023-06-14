@@ -1,4 +1,4 @@
-// ~~/src/server/routes/pendingInvoices.route.ts
+// ~~/src/server/routes/pendingTransactions.route.ts
 
 // imports
 import type { BitcoinService } from '@/server/services/bitcoin'
@@ -31,6 +31,6 @@ export default (
 
     if (!(await user.getAddress())) await user.generateAddress() // onchain address needed further
 
-    let txs = await user.getPendingTxs()
-    return response.send(txs)
+    let transactions = await user.getPendingTransactions()
+    return response.send(transactions)
   }
