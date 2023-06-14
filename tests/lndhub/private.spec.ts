@@ -157,7 +157,6 @@ describe('GET /getuserinvoices', () => {
           expect(invoice.timestamp).toBeLessThan(Math.floor(new Date().getTime() / 1000))
           expect(invoice.type).toStrictEqual('user_invoice')
           expect(invoice.userid).toBeTruthy()
-          // @ts-ignore
           expect(invoice.userid.length).toBe(64)
         }
       })
