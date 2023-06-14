@@ -25,15 +25,12 @@ export default (
     console.log('/checkpayment', [request.uuid])
     let user = new User(bitcoin, lightning, redis)
     await user.loadByAuthorization(request.headers.authorization)
-
-    if (!user.getUserId()) {
-      return errorBadAuth(response)
-    }
+    if (!user.getUserId()) return errorBadAuth(response)
 
     let paid = true
     if (!(await user.getPaymentHashPaid(request.params.payment_hash))) {
       // Not found on cache
       paid = await user.syncInvoicePaid(request.params.payment_hash)
     }
-    return response.send({ paid: paid })
+    return response.send({ paid })
   }
