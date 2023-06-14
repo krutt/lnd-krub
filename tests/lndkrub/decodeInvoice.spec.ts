@@ -18,7 +18,7 @@ beforeAll(async () => {
   lndkrub.emit('event:startup')
 })
 
-describe('POST /decodeinvoice with no query', () => {
+describe('GET /decodeinvoice with no query', () => {
   let authHeaders: { Authorization: string }
   let login: string | null = null
   let password: string | null = null
@@ -52,7 +52,7 @@ describe('POST /decodeinvoice with no query', () => {
   })
 })
 
-describe('POST /decodeinvoice with test payment request created internally', () => {
+describe('GET /decodeinvoice with test payment request created internally', () => {
   let amt: number = 200
   let authHeaders: { Authorization: string }
   let invoice: string | null = null
@@ -112,7 +112,7 @@ describe('POST /decodeinvoice with test payment request created internally', () 
   })
 })
 
-describe('POST /decodeinvoice with test payment request created externally', () => {
+describe('GET /decodeinvoice with test payment request created externally', () => {
   let amt: number = 200
   let authHeaders: { Authorization: string }
   let invoice: string | null = null
