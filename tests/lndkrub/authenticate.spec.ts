@@ -1,4 +1,4 @@
-// ~~/tests/lndkrub/auth.spec.ts
+// ~~/tests/lndkrub/authenticate.spec.ts
 
 // imports
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
