@@ -10,7 +10,6 @@ import type { Response } from 'express'
 import { User } from '@/server/models'
 import { errorBadAuth } from '@/server/exceptions'
 
-// @ts-ignore
 export default (
     bitcoin: BitcoinService,
     lightning: LightningService,
