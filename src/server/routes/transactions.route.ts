@@ -9,6 +9,7 @@ import type { Redis as RedisService } from 'ioredis'
 import type { Response } from 'express'
 import { User } from '@/server/models'
 import { errorBadAuth } from '@/server/exceptions'
+import { forwardReserveFee } from '@/configs'
 
 export default (
     bitcoin: BitcoinService,
@@ -36,10 +37,8 @@ export default (
       for (let locked of lockedPayments) {
         txs.push({
           type: 'paid_invoice',
-          // @ts-ignore
-          fee: Math.floor(locked.amount * forwardFee) /* feelimit */,
-          // @ts-ignore
-          value: locked.amount + Math.floor(locked.amount * forwardFee) /* feelimit */,
+          fee: Math.floor(locked.amount * forwardReserveFee) /* feelimit */,
+          value: locked.amount + Math.floor(locked.amount * forwardReserveFee) /* feelimit */,
           timestamp: locked.timestamp,
           memo: 'Payment in transition',
         })
