@@ -70,7 +70,7 @@ import faucet from '@/server/routes/faucet.route'
 import info from '@/server/routes/info.route'
 import pendingTransactions from '@/server/routes/pendingTransactions.route'
 import payInvoice from '@/server/routes/payInvoice.route'
-import queryRoutes from '@/server/routes/queryRoutes.route'
+// import queryRoutes from '@/server/routes/queryRoutes.route'
 import transactions from '@/server/routes/transactions.route'
 import userInvoices from '@/server/routes/userInvoices.route'
 router.post('/auth', postLimiter, authenticate(bitcoin, lightning, redis))
@@ -88,7 +88,7 @@ router.get('/getpending', postLimiter, pendingTransactions(bitcoin, lightning, r
 router.get('/gettxs', postLimiter, transactions(bitcoin, lightning, redis))
 router.get('/getuserinvoices', postLimiter, userInvoices(bitcoin, lightning, redis))
 router.post('/payinvoice', postLimiter, payInvoice(bitcoin, lightning, redis))
-router.get('/queryroutes/:source/:dest/:amt', queryRoutes(lightning))
+// router.get('/queryroutes/:source/:dest/:amt', queryRoutes(lightning))
 
 /**
  * production: limit dashboard endpoint with cross-site request forgery protection
