@@ -34,7 +34,7 @@ export default (
     try {
       // at the momment does nothing.
       // TODO: decode and query actual route to destination
-      let info = promisify(lightning.decodePayReq).bind(lightning)({
+      let info = await promisify(lightning.decodePayReq).bind(lightning)({
         pay_req: request.query.invoice,
       })
       return response.send(info)
