@@ -6,6 +6,7 @@ import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
 import { Invo, User } from '@/server/models'
+import { Invoice } from '@/types'
 import type { Redis as RedisService } from 'ioredis'
 import type { Response } from 'express'
 import {
@@ -49,9 +50,8 @@ export default (
         expiry: 3600 * 24,
         r_preimage: Buffer.from(r_preimage, 'hex').toString('base64'),
       })
-      .then(async info => {
-        // @ts-ignore
-        invoice.pay_req = invoice.payment_request // client backwards compatibility
+      .then(async (info: Invoice) => {
+        info.pay_req = info.payment_request // bluewallet: client backwards compatibility
         await user.saveUserInvoice(info)
         await invoice.savePreimage(r_preimage)
         return response.send(info)
