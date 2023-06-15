@@ -10,7 +10,7 @@ import type { Payment } from '@/types'
 
 import bolt11 from 'bolt11'
 import { createHash, randomBytes } from 'crypto'
-import { decodeRawHex } from '@/server/services/cypher'
+import { decodeRawHex } from '@/cypher'
 import { promisify } from 'node:util'
 
 // static cache:
@@ -95,7 +95,6 @@ export class User {
         })
         .map(txn => {
           let decoded = decodeRawHex(txn.raw_tx_hex)
-          // @ts-ignore
           decoded.outputs.map(output => {
             result.push({
               // mark all as received, since external is filtered out
