@@ -314,12 +314,10 @@ export class User {
       if (!address) return
       await this.addAddress(address)
       if (this._bitcoin) {
-        let info: object | null = await this._bitcoin
-          .getAddressInfo(address)
-          .catch(err => {
-            console.error(err)
-            return null
-          })
+        let info: object | null = await this._bitcoin.getAddressInfo(address).catch(err => {
+          console.error(err)
+          return null
+        })
         if (!info) {
           await this._bitcoin.importAddress(address, address).catch(err => console.error(err))
         }
