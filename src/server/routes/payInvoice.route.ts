@@ -2,11 +2,11 @@
 
 // imports
 import type { BitcoinService } from '@/server/services/bitcoin'
+import type { CacheService } from '@/server/services/cache'
 import Frisbee from 'frisbee'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
-import type { CacheService } from '@/server/services/cache'
 import type { Response } from 'express'
 import { Invo, Lock, Node, Paym, User } from '@/server/models'
 import {
@@ -40,16 +40,16 @@ const subscribeInvoicesCallCallback = async (
     // obtaining a lock, to make sure we push to groundcontrol only once
     // since this web server can have several instances running, and each will get the same callback from LND
     // and dont release the lock - it will autoexpire in a while
-    let lock = new Lock('groundcontrol_hash_' + LightningInvoiceSettledNotification.hash, cache)
+    let lock = new Lock(cache, 'groundcontrol_hash_' + LightningInvoiceSettledNotification.hash)
     if (!(await lock.obtainLock())) {
       return
     }
-    let invoice = new Invo(lightning, cache)
+    let invoice = new Invo(cache, lightning)
     await invoice._setIsPaymentHashPaidInDatabase(
       LightningInvoiceSettledNotification.hash,
       LightningInvoiceSettledNotification.amt_paid_sat || 1
     )
-    const user = new User(bitcoin, lightning, cache)
+    const user = new User(bitcoin, cache, lightning)
     user._userid = await user.getUseridByPaymentHash(LightningInvoiceSettledNotification.hash)
     await user.clearBalanceCache()
     console.log(
@@ -87,8 +87,8 @@ const subscribeInvoicesCallCallback = async (
 
 export default (
     bitcoin: BitcoinService,
-    lightning: LightningService,
-    cache: CacheService
+    cache: CacheService,
+    lightning: LightningService
   ): LNDKrubRouteFunc =>
   /**
    *
@@ -97,8 +97,8 @@ export default (
    * @returns {Express.Response}
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-    let user = new User(bitcoin, lightning, cache)
-    let node = new Node(lightning, cache)
+    let user = new User(bitcoin, cache, lightning)
+    let node = new Node(cache, lightning)
     let identityPubkey = await node.identityPubkey()
     if (!(await user.loadByAuthorization(request.headers.authorization))) {
       return errorBadAuth(response)
@@ -118,7 +118,7 @@ export default (
     }
 
     // obtaining a lock
-    let lock = new Lock('invoice_paying_for_' + user.getUserId(), cache)
+    let lock = new Lock(cache, 'invoice_paying_for_' + user.getUserId())
     if (!(await lock.obtainLock())) {
       return errorGeneralServerError(response)
     }
@@ -171,7 +171,7 @@ export default (
           return errorLnd(response)
         }
 
-        let recipient = new User(bitcoin, lightning, cache)
+        let recipient = new User(bitcoin, cache, lightning)
         recipient._userid = recipient_id // hacky, fixme
         await recipient.clearBalanceCache()
 
@@ -186,7 +186,7 @@ export default (
           pay_req: request.body.invoice,
         })
 
-        let invoice = new Invo(lightning, cache)
+        let invoice = new Invo(cache, lightning)
         invoice.setPaymentRequest(request.body.invoice)
         await invoice.markAsPaidInDatabase()
 
@@ -228,7 +228,7 @@ export default (
       // payment callback
       await user.unlockFunds(request.body.invoice)
       if (payment.payment_route && payment.payment_route.total_amt_msat) {
-        let PaymentShallow = new Paym(null, null)
+        let PaymentShallow = new Paym(null)
         payment = PaymentShallow.processSendPaymentResponse(payment)
         payment.pay_req = request.body.invoice
         payment.decoded = decoded

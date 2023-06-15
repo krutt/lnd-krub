@@ -74,21 +74,21 @@ import payInvoice from '@/server/routes/payInvoice.route'
 // import queryRoutes from '@/server/routes/queryRoutes.route'
 import transactions from '@/server/routes/transactions.route'
 import userInvoices from '@/server/routes/userInvoices.route'
-router.post('/auth', postLimiter, authenticate(bitcoin, lightning, cache))
-router.post('/addinvoice', postLimiter, addInvoice(bitcoin, lightning, cache))
-router.get('/balance', postLimiter, balance(bitcoin, lightning, cache))
-router.get('/channels', channels(bitcoin, lightning, cache))
-router.get('/checkpayment/:payment_hash', checkPayment(bitcoin, lightning, cache))
-router.get('/checkrouteinvoice', checkRouteInvoice(bitcoin, lightning, cache))
-router.post('/create', postLimiter, createAccount(bitcoin, lightning, cache))
-router.get('/decodeinvoice', postLimiter, decodeInvoice(bitcoin, lightning, cache))
-router.get('/getbtc', bitcoinAddress(bitcoin, lightning, cache))
-router.get('/getchaninfo/:channelId', channelInfo(lightning, cache))
-router.get('/getinfo', postLimiter, info(bitcoin, lightning, cache))
-router.get('/getpending', postLimiter, pendingTransactions(bitcoin, lightning, cache))
-router.get('/gettxs', postLimiter, transactions(bitcoin, lightning, cache))
-router.get('/getuserinvoices', postLimiter, userInvoices(bitcoin, lightning, cache))
-router.post('/payinvoice', postLimiter, payInvoice(bitcoin, lightning, cache))
+router.post('/auth', postLimiter, authenticate(bitcoin, cache, lightning))
+router.post('/addinvoice', postLimiter, addInvoice(bitcoin, cache, lightning))
+router.get('/balance', postLimiter, balance(bitcoin, cache, lightning))
+router.get('/channels', channels(bitcoin, cache, lightning))
+router.get('/checkpayment/:payment_hash', checkPayment(bitcoin, cache, lightning))
+router.get('/checkrouteinvoice', checkRouteInvoice(bitcoin, cache, lightning))
+router.post('/create', postLimiter, createAccount(bitcoin, cache, lightning))
+router.get('/decodeinvoice', postLimiter, decodeInvoice(bitcoin, cache, lightning))
+router.get('/getbtc', bitcoinAddress(bitcoin, cache, lightning))
+router.get('/getchaninfo/:channelId', channelInfo(cache, lightning))
+router.get('/getinfo', postLimiter, info(bitcoin, cache, lightning))
+router.get('/getpending', postLimiter, pendingTransactions(bitcoin, cache, lightning))
+router.get('/gettxs', postLimiter, transactions(bitcoin, cache, lightning))
+router.get('/getuserinvoices', postLimiter, userInvoices(bitcoin, cache, lightning))
+router.post('/payinvoice', postLimiter, payInvoice(bitcoin, cache, lightning))
 // router.get('/queryroutes/:source/:dest/:amt', queryRoutes(lightning))
 
 /**
@@ -103,7 +103,7 @@ if (isProduction) {
   /**
    * development: unprotected dashboard endpoint and faucet endpoint
    */
-  router.post('/faucet', faucet(bitcoin, lightning, cache))
+  router.post('/faucet', faucet(bitcoin, cache, lightning))
 }
 router.put('/dashboard', dashboard(lightning))
 

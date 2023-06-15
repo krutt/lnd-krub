@@ -3,10 +3,11 @@
 // imports
 import BigNumber from 'bignumber.js'
 import type { BitcoinService } from '@/server/services/bitcoin'
+import type { CacheService } from '@/server/services/cache'
 import type { LightningService } from '@/server/services/lightning'
 import Lock from './Lock'
 import type { Payment } from '@/types'
-import type { Redis as RedisService } from 'ioredis'
+
 import bolt11 from 'bolt11'
 import { createHash, randomBytes } from 'crypto'
 import { decodeRawHex } from '@/server/services/cypher'
@@ -20,23 +21,23 @@ export class User {
   _access_token?: string
   _balance: number
   _bitcoin: BitcoinService
+  _cache: CacheService
   _lightning: LightningService
   _login?: string
   _password?: string
   _refresh_token?: string
-  _redis: RedisService
   _userid?: string
 
   /**
    *
    * @param {BitcoinService} bitcoin
+   * @param {CacheService} cache
    * @param {LightningService} lightning
-   * @param {RedisService} redis
    */
-  constructor(bitcoin: BitcoinService, lightning: LightningService, redis: RedisService) {
+  constructor(bitcoin: BitcoinService, cache: CacheService, lightning: LightningService) {
     this._bitcoin = bitcoin
+    this._cache = cache
     this._lightning = lightning
-    this._redis = redis
     this._balance = 0
   }
 
@@ -46,10 +47,10 @@ export class User {
     this._access_token = randomBytes(20).toString('hex')
     this._refresh_token = randomBytes(20).toString('hex')
 
-    await this._redis.set('userid_for_' + this._access_token, this._userid)
-    await this._redis.set('userid_for_' + this._refresh_token, this._userid)
-    await this._redis.set('access_token_for_' + this._userid, this._access_token)
-    await this._redis.set('refresh_token_for_' + this._userid, this._refresh_token)
+    await this._cache.set('userid_for_' + this._access_token, this._userid)
+    await this._cache.set('userid_for_' + this._refresh_token, this._userid)
+    await this._cache.set('access_token_for_' + this._userid, this._access_token)
+    await this._cache.set('refresh_token_for_' + this._userid, this._refresh_token)
   }
 
   _hash = (value: string) => createHash('sha256').update(value).digest().toString('hex')
@@ -75,7 +76,7 @@ export class User {
         )
         .catch(async err => {
           console.warn('listtransactions error:', err)
-          let transactions = await this._redis.get('listtransactions')
+          let transactions = await this._cache.get('listtransactions')
           return !transactions ? [] : JSON.parse(transactions)
         })
     } else if (!!this._lightning) {
@@ -109,24 +110,24 @@ export class User {
         })
     }
     if (result.length > 0) {
-      await this._redis.setex('listtransactions', 5 * 60 * 1000, JSON.stringify(result))
+      await this._cache.setex('listtransactions', 5 * 60 * 1000, JSON.stringify(result))
     }
     return { result }
   }
 
   _saveUserToDatabase = async () => {
     let key = 'user_' + this._login + '_' + this._hash(this._password)
-    await this._redis.set(key, this._userid)
+    await this._cache.set(key, this._userid)
   }
 
   // public methods
 
   addAddress = async (address: string) => {
-    await this._redis.set('bitcoin_address_for_' + this._userid, address)
+    await this._cache.set('bitcoin_address_for_' + this._userid, address)
   }
 
   clearBalanceCache = async () => {
-    return this._redis.del('balance_for_' + this._userid)
+    return this._cache.del('balance_for_' + this._userid)
   }
 
   create = async () => {
@@ -150,7 +151,7 @@ export class User {
   }
 
   getAddress = async () => {
-    return await this._redis.get('bitcoin_address_for_' + this._userid)
+    return await this._cache.get('bitcoin_address_for_' + this._userid)
   }
 
   /**
@@ -160,7 +161,7 @@ export class User {
    * @returns {Promise<number>} Balance available to spend
    */
   getBalance = async () => {
-    let balance = parseInt(await this._redis.get('balance_for_' + this._userid)) * 1
+    let balance = parseInt(await this._cache.get('balance_for_' + this._userid)) * 1
     if (!balance) {
       balance = await this.getCalculatedBalance()
       await this.saveBalance(balance)
@@ -209,7 +210,7 @@ export class User {
   }
 
   getLockedPayments = async () => {
-    let payments = await this._redis.lrange('locked_payments_for_' + this._userid, 0, -1)
+    let payments = await this._cache.lrange('locked_payments_for_' + this._userid, 0, -1)
     let result = []
     for (let paym of payments) {
       let json
@@ -249,7 +250,7 @@ export class User {
       amount: +decodedInvoice.num_satoshis,
       timestamp: Math.floor(+new Date() / 1000),
     }
-    return this._redis.rpush('locked_payments_for_' + this._userid, JSON.stringify(doc))
+    return this._cache.rpush('locked_payments_for_' + this._userid, JSON.stringify(doc))
   }
 
   /**
@@ -260,7 +261,7 @@ export class User {
   loadByAuthorization = async (authorization: string) => {
     if (!authorization) return false
     let access_token = authorization.replace('Bearer ', '')
-    let userid = await this._redis.get('userid_for_' + access_token)
+    let userid = await this._cache.get('userid_for_' + access_token)
 
     if (userid) {
       this._userid = userid
@@ -271,7 +272,7 @@ export class User {
   }
 
   loadByRefreshToken = async (refresh_token: string) => {
-    let userid = await this._redis.get('userid_for_' + refresh_token)
+    let userid = await this._cache.get('userid_for_' + refresh_token)
     if (userid) {
       this._userid = userid
       await this._generateTokens()
@@ -281,7 +282,7 @@ export class User {
   }
 
   loadByLoginAndPassword = async (login: string, password: string) => {
-    let userid = await this._redis.get('user_' + login + '_' + this._hash(password))
+    let userid = await this._cache.get('user_' + login + '_' + this._hash(password))
     if (userid) {
       this._userid = userid
       this._login = login
@@ -298,7 +299,7 @@ export class User {
    * @returns {Promise<void>}
    */
   generateAddress = async (): Promise<void> => {
-    let lock = new Lock('generating_address_' + this._userid, this._redis)
+    let lock = new Lock(this._cache, 'generating_address_' + this._userid)
     if (!(await lock.obtainLock())) {
       // someone's already generating address
       return
@@ -358,7 +359,7 @@ export class User {
    * @see Invo.getIsMarkedAsPaidInDatabase
    */
   getPaymentHashPaid = async (paymentHash: string): Promise<number> => {
-    return parseInt(await this._redis.get('ispaid_' + paymentHash))
+    return parseInt(await this._cache.get('ispaid_' + paymentHash))
   }
 
   /**
@@ -382,7 +383,7 @@ export class User {
         return transaction
       })
 
-    let range = await this._redis.lrange('txs_for_' + this._userid, 0, -1)
+    let range = await this._cache.lrange('txs_for_' + this._userid, 0, -1)
     for (let item of range) {
       let payment = JSON.parse(item) as Payment
       payment.type = 'paid_invoice'
@@ -427,7 +428,7 @@ export class User {
   }
 
   getUserInvoices = async (limit?: string) => {
-    let range = await this._redis.lrange('userinvoices_for_' + this._userid, 0, -1)
+    let range = await this._cache.lrange('userinvoices_for_' + this._userid, 0, -1)
     if (limit && !isNaN(parseInt(limit))) {
       range = range.slice(parseInt(limit) * -1)
     }
@@ -492,7 +493,7 @@ export class User {
    * Doent belong here, FIXME
    */
   getUseridByPaymentHash = async (paymentHash: string): Promise<string> => {
-    return await this._redis.get('payment_hash_' + paymentHash)
+    return await this._cache.get('payment_hash_' + paymentHash)
   }
 
   lookupInvoice = async (paymentHash: string) => {
@@ -514,15 +515,15 @@ export class User {
    */
   saveBalance = async (balance: number) => {
     const key = 'balance_for_' + this._userid
-    await this._redis.set(key, balance)
-    await this._redis.expire(key, 1800)
+    await this._cache.set(key, balance)
+    await this._cache.expire(key, 1800)
   }
 
   saveMetadata = async (metadata: any): Promise<'OK'> =>
-    await this._redis.set('metadata_for_' + this._userid, JSON.stringify(metadata))
+    await this._cache.set('metadata_for_' + this._userid, JSON.stringify(metadata))
 
   savePaidLndInvoice = async (doc: any): Promise<number> =>
-    await this._redis.rpush('txs_for_' + this._userid, JSON.stringify(doc))
+    await this._cache.rpush('txs_for_' + this._userid, JSON.stringify(doc))
 
   saveUserInvoice = async (doc: any) => {
     let decoded = bolt11.decode(doc.payment_request)
@@ -533,8 +534,8 @@ export class User {
       }
     }
 
-    await this._redis.set('payment_hash_' + payment_hash, this._userid)
-    return await this._redis.rpush('userinvoices_for_' + this._userid, JSON.stringify(doc))
+    await this._cache.set('payment_hash_' + payment_hash, this._userid)
+    return await this._cache.rpush('userinvoices_for_' + this._userid, JSON.stringify(doc))
   }
 
   /**
@@ -543,7 +544,7 @@ export class User {
    * @see Invo.markAsPaidInDatabase
    */
   setPaymentHashPaid = async (paymentHash: string, settleAmountSat) => {
-    return await this._redis.set('ispaid_' + paymentHash, settleAmountSat)
+    return await this._cache.set('ispaid_' + paymentHash, settleAmountSat)
   }
 
   syncInvoicePaid = async (payment_hash: string) => {
@@ -576,9 +577,9 @@ export class User {
       }
     }
 
-    await this._redis.del('locked_payments_for_' + this._userid)
+    await this._cache.del('locked_payments_for_' + this._userid)
     for (let doc of saveBack) {
-      await this._redis.rpush('locked_payments_for_' + this._userid, JSON.stringify(doc))
+      await this._cache.rpush('locked_payments_for_' + this._userid, JSON.stringify(doc))
     }
   }
 

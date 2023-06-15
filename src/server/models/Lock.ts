@@ -1,20 +1,20 @@
 // ~~/src/server/models/Lock.ts
 
 // imports
-import type { Redis as RedisService } from 'ioredis'
+import type { CacheService } from '@/server/services/cache'
 
 export class Lock {
+  _cache: CacheService
   _lock_key: string
-  _redis: RedisService
 
   /**
    *
+   * @param {CacheService} cache
    * @param {String} lock_key
-   * @param {RedisService} redis
    */
-  constructor(lock_key: string, redis: RedisService) {
+  constructor(cache: CacheService, lock_key: string) {
+    this._cache = cache
     this._lock_key = lock_key
-    this._redis = redis
   }
 
   /**
@@ -25,14 +25,14 @@ export class Lock {
    */
   obtainLock = async () => {
     const timestamp = +new Date()
-    let setResult = await this._redis.setnx(this._lock_key, timestamp)
+    let setResult = await this._cache.setnx(this._lock_key, timestamp)
     if (!setResult) {
       // it already held a value - failed locking
       return false
     }
 
     // success - got lock
-    await this._redis.expire(this._lock_key, 5 * 60)
+    await this._cache.expire(this._lock_key, 5 * 60)
     // lock expires in 5 mins just for any case
     return true
   }
@@ -41,7 +41,7 @@ export class Lock {
    * Releases the lock set on redis
    */
   releaseLock = async () => {
-    await this._redis.del(this._lock_key)
+    await this._cache.del(this._lock_key)
   }
 }
 

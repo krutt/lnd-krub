@@ -3,14 +3,11 @@
 // imports
 import type { LightningService } from '@/server/services/lightning'
 import type { Payment } from '@/types'
-import type { Redis as RedisService } from 'ioredis'
 import bolt11, { PaymentRequestObject, TagsObject } from 'bolt11'
 import { forwardReserveFee, intraHubFee } from '@/configs'
 import { promisify } from 'node:util'
 
 export class Paym {
-  _lightning: LightningService
-  _redis: RedisService
   _decoded?: {
     description: string
     destination: string
@@ -21,16 +18,15 @@ export class Paym {
   }
   _decodedLocally?: PaymentRequestObject & TagsObject
   _isPaid?: boolean
+  _lightning: LightningService
   _paymentRequest?: string
 
   /**
    *
    * @param {LightningService} lightning
-   * @param {RedisService} redis
    */
-  constructor(lightning?: LightningService, redis?: RedisService) {
+  constructor(lightning: LightningService) {
     this._lightning = lightning
-    this._redis = redis
   }
 
   // methods
