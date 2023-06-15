@@ -81,7 +81,7 @@ export const decodeRawHex = (rawTransaction: string) => {
   let transaction = Transaction.fromHex(rawTransaction)
   let format = decodeFormat(transaction)
   let result = {}
-  Object.keys(format).forEach(key => result[key] = format[key])
+  Object.keys(format).forEach(key => (result[key] = format[key]))
   let inputs: Input[] = decodeInput(transaction)
   let outputs: Output[] = decodeOutput(networks.bitcoin, transaction)
   return { inputs, outputs, ...result }
