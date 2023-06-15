@@ -14,7 +14,7 @@ type Input = {
 
 type Output = {
   satoshi: number
-  value: number
+  value: string
   n: number
   scriptPubKey: {
     asm: string
@@ -24,14 +24,11 @@ type Output = {
   }
 }
 
-let decodeFormat = (transaction: Transaction): {
-  locktime: number;
-  txid: string;
-  version: number } => ({
-    txid: transaction.getId(),
-    version: transaction.version,
-    locktime: transaction.locktime,
-  })
+let decodeFormat = (transaction: Transaction) => ({
+  txid: transaction.getId(),
+  version: transaction.version,
+  locktime: transaction.locktime,
+})
 
 let decodeInput = (transaction: Transaction): Array<Input> => {
   let result: Input[] = []
@@ -73,7 +70,7 @@ let decodeOutput = (network: Network, transaction: Transaction): Array<Output> =
     }
     return vout
   }
-  let result = []
+  let result: Output[] = []
   transaction.outs.forEach((out, n) => {
     result.push(format(out, n, network))
   })
