@@ -5,10 +5,10 @@ import { Graph } from '@/server/models/Graph'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
-import type { Redis as RedisService } from 'ioredis'
+import type { CacheService } from '@/server/services/cache'
 import type { Response } from 'express'
 
-export default (lightning: LightningService, redis: RedisService): LNDKrubRouteFunc =>
+export default (lightning: LightningService, cache: CacheService): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
@@ -17,7 +17,7 @@ export default (lightning: LightningService, redis: RedisService): LNDKrubRouteF
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/getchaninfo', [request.uuid])
-    let graph = new Graph(lightning, redis)
+    let graph = new Graph(lightning, cache)
     let { edges } = await graph.describe()
     if (!!edges) {
       for (let edge of edges) {

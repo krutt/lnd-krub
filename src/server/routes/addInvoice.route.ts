@@ -7,7 +7,7 @@ import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
 import { Invo, User } from '@/server/models'
 import { Invoice } from '@/types'
-import type { Redis as RedisService } from 'ioredis'
+import type { CacheService } from '@/server/services/cache'
 import type { Response } from 'express'
 import {
   errorBadAuth,
@@ -21,7 +21,7 @@ import { sunset } from '@/configs'
 export default (
     bitcoin: BitcoinService,
     lightning: LightningService,
-    redis: RedisService
+    cache: CacheService
   ): LNDKrubRouteFunc =>
   /**
    *
@@ -31,7 +31,7 @@ export default (
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/addinvoice', [request.uuid])
-    let user = new User(bitcoin, lightning, redis)
+    let user = new User(bitcoin, lightning, cache)
     if (!(await user.loadByAuthorization(request.headers.authorization))) {
       return errorBadAuth(response)
     }
@@ -41,7 +41,7 @@ export default (
       return errorBadArguments(response)
 
     if (sunset) return errorSunsetAddInvoice(response)
-    const invoice = new Invo(lightning, redis)
+    const invoice = new Invo(lightning, cache)
     const r_preimage = invoice.makePreimageHex()
     return await promisify(lightning.addInvoice)
       .bind(lightning)({

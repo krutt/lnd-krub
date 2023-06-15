@@ -6,7 +6,7 @@ import Frisbee from 'frisbee'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
-import type { Redis as RedisService } from 'ioredis'
+import type { CacheService } from '@/server/services/cache'
 import type { Response } from 'express'
 import { Invo, Lock, Node, Paym, User } from '@/server/models'
 import {
@@ -25,7 +25,7 @@ import { promisify } from 'node:util'
 const subscribeInvoicesCallCallback = async (
   bitcoin: BitcoinService,
   lightning: LightningService,
-  redis: RedisService,
+  cache: CacheService,
   response: any
 ) => {
   if (response.state === 'SETTLED') {
@@ -40,16 +40,16 @@ const subscribeInvoicesCallCallback = async (
     // obtaining a lock, to make sure we push to groundcontrol only once
     // since this web server can have several instances running, and each will get the same callback from LND
     // and dont release the lock - it will autoexpire in a while
-    let lock = new Lock('groundcontrol_hash_' + LightningInvoiceSettledNotification.hash, redis)
+    let lock = new Lock('groundcontrol_hash_' + LightningInvoiceSettledNotification.hash, cache)
     if (!(await lock.obtainLock())) {
       return
     }
-    let invoice = new Invo(lightning, redis)
+    let invoice = new Invo(lightning, cache)
     await invoice._setIsPaymentHashPaidInDatabase(
       LightningInvoiceSettledNotification.hash,
       LightningInvoiceSettledNotification.amt_paid_sat || 1
     )
-    const user = new User(bitcoin, lightning, redis)
+    const user = new User(bitcoin, lightning, cache)
     user._userid = await user.getUseridByPaymentHash(LightningInvoiceSettledNotification.hash)
     await user.clearBalanceCache()
     console.log(
@@ -88,7 +88,7 @@ const subscribeInvoicesCallCallback = async (
 export default (
     bitcoin: BitcoinService,
     lightning: LightningService,
-    redis: RedisService
+    cache: CacheService
   ): LNDKrubRouteFunc =>
   /**
    *
@@ -97,8 +97,8 @@ export default (
    * @returns {Express.Response}
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-    let user = new User(bitcoin, lightning, redis)
-    let node = new Node(lightning, redis)
+    let user = new User(bitcoin, lightning, cache)
+    let node = new Node(lightning, cache)
     let identityPubkey = await node.identityPubkey()
     if (!(await user.loadByAuthorization(request.headers.authorization))) {
       return errorBadAuth(response)
@@ -118,7 +118,7 @@ export default (
     }
 
     // obtaining a lock
-    let lock = new Lock('invoice_paying_for_' + user.getUserId(), redis)
+    let lock = new Lock('invoice_paying_for_' + user.getUserId(), cache)
     if (!(await lock.obtainLock())) {
       return errorGeneralServerError(response)
     }
@@ -171,7 +171,7 @@ export default (
           return errorLnd(response)
         }
 
-        let recipient = new User(bitcoin, lightning, redis)
+        let recipient = new User(bitcoin, lightning, cache)
         recipient._userid = recipient_id // hacky, fixme
         await recipient.clearBalanceCache()
 
@@ -186,14 +186,14 @@ export default (
           pay_req: request.body.invoice,
         })
 
-        let invoice = new Invo(lightning, redis)
+        let invoice = new Invo(lightning, cache)
         invoice.setPaymentRequest(request.body.invoice)
         await invoice.markAsPaidInDatabase()
 
         // now, faking LND callback about invoice paid:
         let preimage = await invoice.getPreimage()
         if (preimage) {
-          subscribeInvoicesCallCallback(bitcoin, lightning, redis, {
+          subscribeInvoicesCallCallback(bitcoin, lightning, cache, {
             state: 'SETTLED',
             memo: decoded.description,
             r_preimage: Buffer.from(preimage, 'hex'),

@@ -2,9 +2,9 @@
 
 // imports
 import { BitcoinService } from '@/server/services/bitcoin'
-import { LightningService } from '@/server/services/lightning'
+import { CacheService } from '@/server/services/cache'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
-import Redis from 'ioredis'
+import { LightningService } from '@/server/services/lightning'
 import bodyParser from 'body-parser'
 import cors from '@/server/middlewares/cors'
 import express, { Express, Response, Router } from 'express'
@@ -12,13 +12,13 @@ import helmet from 'helmet'
 import identifiable from '@/server/middlewares/identifiable'
 import morgan from 'morgan'
 import { promisify } from 'node:util'
-import { postRateLimit, rateLimit, redis as redisUrl } from '@/configs'
+import { postRateLimit, rateLimit } from '@/configs'
 import rateLimiter from 'express-rate-limit'
 
 // services
-let bitcoin = new BitcoinService()
-let lightning = new LightningService()
-let redis = new Redis(redisUrl)
+let bitcoin: BitcoinService = new BitcoinService()
+let cache: CacheService = new CacheService()
+let lightning: LightningService = new LightningService()
 
 // run-time constants
 const isProduction = process.env.NODE_ENV === 'production'
@@ -74,21 +74,21 @@ import payInvoice from '@/server/routes/payInvoice.route'
 // import queryRoutes from '@/server/routes/queryRoutes.route'
 import transactions from '@/server/routes/transactions.route'
 import userInvoices from '@/server/routes/userInvoices.route'
-router.post('/auth', postLimiter, authenticate(bitcoin, lightning, redis))
-router.post('/addinvoice', postLimiter, addInvoice(bitcoin, lightning, redis))
-router.get('/balance', postLimiter, balance(bitcoin, lightning, redis))
-router.get('/channels', channels(bitcoin, lightning, redis))
-router.get('/checkpayment/:payment_hash', checkPayment(bitcoin, lightning, redis))
-router.get('/checkrouteinvoice', checkRouteInvoice(bitcoin, lightning, redis))
-router.post('/create', postLimiter, createAccount(bitcoin, lightning, redis))
-router.get('/decodeinvoice', postLimiter, decodeInvoice(bitcoin, lightning, redis))
-router.get('/getbtc', bitcoinAddress(bitcoin, lightning, redis))
-router.get('/getchaninfo/:channelId', channelInfo(lightning, redis))
-router.get('/getinfo', postLimiter, info(bitcoin, lightning, redis))
-router.get('/getpending', postLimiter, pendingTransactions(bitcoin, lightning, redis))
-router.get('/gettxs', postLimiter, transactions(bitcoin, lightning, redis))
-router.get('/getuserinvoices', postLimiter, userInvoices(bitcoin, lightning, redis))
-router.post('/payinvoice', postLimiter, payInvoice(bitcoin, lightning, redis))
+router.post('/auth', postLimiter, authenticate(bitcoin, lightning, cache))
+router.post('/addinvoice', postLimiter, addInvoice(bitcoin, lightning, cache))
+router.get('/balance', postLimiter, balance(bitcoin, lightning, cache))
+router.get('/channels', channels(bitcoin, lightning, cache))
+router.get('/checkpayment/:payment_hash', checkPayment(bitcoin, lightning, cache))
+router.get('/checkrouteinvoice', checkRouteInvoice(bitcoin, lightning, cache))
+router.post('/create', postLimiter, createAccount(bitcoin, lightning, cache))
+router.get('/decodeinvoice', postLimiter, decodeInvoice(bitcoin, lightning, cache))
+router.get('/getbtc', bitcoinAddress(bitcoin, lightning, cache))
+router.get('/getchaninfo/:channelId', channelInfo(lightning, cache))
+router.get('/getinfo', postLimiter, info(bitcoin, lightning, cache))
+router.get('/getpending', postLimiter, pendingTransactions(bitcoin, lightning, cache))
+router.get('/gettxs', postLimiter, transactions(bitcoin, lightning, cache))
+router.get('/getuserinvoices', postLimiter, userInvoices(bitcoin, lightning, cache))
+router.post('/payinvoice', postLimiter, payInvoice(bitcoin, lightning, cache))
 // router.get('/queryroutes/:source/:dest/:amt', queryRoutes(lightning))
 
 /**
@@ -103,7 +103,7 @@ if (isProduction) {
   /**
    * development: unprotected dashboard endpoint and faucet endpoint
    */
-  router.post('/faucet', faucet(bitcoin, lightning, redis))
+  router.post('/faucet', faucet(bitcoin, lightning, cache))
 }
 router.put('/dashboard', dashboard(lightning))
 
@@ -143,13 +143,13 @@ app.on('event:startup', () => {
       console.dir(err)
       process.exit(3)
     })
-  redis.info(function (err, info) {
+  cache.info(function (err, info) {
     if (err || !info) {
-      console.error('redis failure')
+      console.error('cache failure')
       process.exit(5)
     }
   })
-  redis.monitor(function (err, monitor) {
+  cache.monitor(function (err, monitor) {
     if (!monitor) return
     monitor.on('monitor', function (time, args, source, database) {
       // console.log('REDIS', JSON.stringify(args))

@@ -5,7 +5,7 @@ import type { BitcoinService } from '@/server/services/bitcoin'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
-import type { Redis as RedisService } from 'ioredis'
+import type { CacheService } from '@/server/services/cache'
 import type { Response } from 'express'
 import { User } from '@/server/models'
 import { errorBadAuth, errorBadArguments } from '@/server/exceptions'
@@ -13,7 +13,7 @@ import { errorBadAuth, errorBadArguments } from '@/server/exceptions'
 export default (
     bitcoin: BitcoinService,
     lightning: LightningService,
-    redis: RedisService
+    cache: CacheService
   ): LNDKrubRouteFunc =>
   /**
    *
@@ -25,7 +25,7 @@ export default (
     console.log('/auth', [request.uuid])
     if (!((request.body.login && request.body.password) || request.body.refresh_token))
       return errorBadArguments(response)
-    let user = new User(bitcoin, lightning, redis)
+    let user = new User(bitcoin, lightning, cache)
     if (request.body.refresh_token) {
       // need to refresh token
       if (await user.loadByRefreshToken(request.body.refresh_token)) {
