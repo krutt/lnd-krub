@@ -61,8 +61,10 @@ describe('POST /auth x 2', () => {
         expect(refresh_token).toBeTruthy()
         expect(refresh_token.length).toBe(40)
         expect(access_token.length).not.toStrictEqual(testAccessToken)
+        testAccessToken = testAccessToken || ''
         expect(access_token.length).toBe(testAccessToken.length)
         expect(refresh_token).not.toStrictEqual(testRefreshToken)
+        testRefreshToken = testRefreshToken || ''
         expect(refresh_token.length).toBe(testRefreshToken.length)
       })
   })

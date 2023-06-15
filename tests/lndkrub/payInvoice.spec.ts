@@ -243,10 +243,12 @@ describe('POST /payinvoice with test external payment request', () => {
       .expect(200)
       .expect('Content-Type', /json/)
       .then((response: { body: Payment }) => {
-        let { description, num_satoshis } = response.body.decoded
+        let description = response.body.decoded?.description
+        let num_satoshis = response.body.decoded?.num_satoshis
         expect(description).toBeTypeOf('string')
         expect(description).toStrictEqual(memo)
         expect(num_satoshis).toBeTypeOf('string')
+        num_satoshis = num_satoshis || 0
         expect(+num_satoshis).toBe(amt)
       })
   })
