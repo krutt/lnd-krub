@@ -1,18 +1,21 @@
 // ~~/tests/lndkrub/pendingTransactions.spec.ts
 
 // imports
+import { BitcoinService } from '@/server/services/bitcoin'
 import { Transaction } from '@/types'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import bitcoin from 'τ/services/bitcoin'
+
 import lndkrub from '@/index'
 import supertest from 'supertest'
 
+let bitcoin: BitcoinService
 afterAll(() => {
   lndkrub.emit('event:shutdown')
 })
 
 beforeAll(async () => {
   lndkrub.emit('event:startup')
+  bitcoin = new BitcoinService()
 })
 
 describe('GET /getpending when creating a fresh account', () => {
@@ -72,9 +75,9 @@ describe('GET /getpending after sending new transaction to address', () => {
       .then((response: { body: [{ address: string }] }) => {
         address = response.body[0].address
       })
-    await bitcoin.request('sendtoaddress', [address, 10])
-    await bitcoin.request('getrawmempool', [])
-    await bitcoin.request('generateblock', [address, []])
+    await bitcoin.sendToAddress(address, 10)
+    await bitcoin.getRawMempool()
+    await bitcoin.generateBlock(address)
   })
   it('responds with a list of one pending transaction', async () => {
     await supertest(lndkrub)

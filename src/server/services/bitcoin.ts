@@ -26,11 +26,15 @@ export class BitcoinService {
 
   // methods
 
+  generateBlock = async (address: string) => await this._rpc.request('generateblock', [address, []])
+
   getAddressInfo = async (address: string) => await this._rpc.request('getaddressinfo', [address])
 
   getBlockchainInfo = async () => await this._rpc.request('getblockchaininfo', [])
 
   getNetworkInfo = async () => await this._rpc.request('getnetworkinfo', [])
+
+  getRawMempool = async () => await this._rpc.request('getrawmempool', [])
 
   importAddress = async (address: string, label: string, rescan: boolean = false) =>
     await this._rpc.request('importaddress', [address, label, rescan])
@@ -41,6 +45,9 @@ export class BitcoinService {
     skip: number = 0,
     includeWatchonly: boolean = true
   ) => await this._rpc.request('listtransactions', [label, count, skip, includeWatchonly])
+
+  sendToAddress = async (address: string, amount: number) =>
+    await this._rpc.request('sendtoaddress', [address, amount])
 }
 
 export default BitcoinService
