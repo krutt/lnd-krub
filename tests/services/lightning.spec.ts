@@ -1,9 +1,9 @@
 // ~~/tests/lnrpc.spec.ts
 
 // imports
-import { LightningService, LnRpc, createLNDCreds } from 'τ/services/lnrpc'
+import { LightningService } from '@/server/services/lightning'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { lnd, lndTarget } from 'τ/configs'
+import { lndTarget } from 'τ/configs'
 import { promisify } from 'node:util'
 import { randomBytes } from 'crypto'
 
@@ -18,13 +18,12 @@ type Invoice = {
 }
 
 beforeAll(() => {
-  lnsvc = new LnRpc.Lightning(
-    `${lnd.host}:${lnd.port}`,
-    createLNDCreds(lnd.macaroonPath, lnd.tlsCertPath)
-  )
-  lnext = new LnRpc.Lightning(
-    `${lndTarget.host}:${lndTarget.port}`,
-    createLNDCreds(lndTarget.macaroonPath, lndTarget.tlsCertPath)
+  lnsvc = new LightningService()
+  lnext = new LightningService(
+    lndTarget.host,
+    lndTarget.macaroonPath,
+    lndTarget.port,
+    lndTarget.tlsCertPath
   )
 })
 

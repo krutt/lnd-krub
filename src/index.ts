@@ -2,6 +2,7 @@
 
 // imports
 import { BitcoinService } from '@/server/services/bitcoin'
+import { LightningService } from '@/server/services/lightning'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import Redis from 'ioredis'
 import bodyParser from 'body-parser'
@@ -13,11 +14,10 @@ import morgan from 'morgan'
 import { promisify } from 'node:util'
 import { postRateLimit, rateLimit, redis as redisUrl } from '@/configs'
 import rateLimiter from 'express-rate-limit'
-import { v4 as uuid } from 'uuid'
 
 // services
 let bitcoin = new BitcoinService()
-import lightning from '@/server/services/lightning'
+let lightning = new LightningService()
 let redis = new Redis(redisUrl)
 
 // run-time constants

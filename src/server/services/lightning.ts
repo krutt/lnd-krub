@@ -2,25 +2,31 @@
 
 // imports
 import { lnd } from '@/configs'
-import * as grpc from '@grpc/grpc-js'
-import fs from 'fs'
-import * as protoLoader from '@grpc/proto-loader'
-
-// setup lnd rpc
+import {
+  CallCredentials,
+  ChannelCredentials,
+  GrpcObject,
+  Metadata,
+  credentials,
+  loadPackageDefinition,
+} from '@grpc/grpc-js'
+import { readFileSync } from 'fs'
+import { PackageDefinition, loadSync } from '@grpc/proto-loader'
 
 // consts
-let loaderOptions = {
+const loaderOptions = {
   keepCase: true,
   longs: String,
   enums: String,
   defaults: true,
   oneofs: true,
 }
+const packageDefinition: PackageDefinition = loadSync(lnd.protoPath, loaderOptions)
+const protoDescriptor: GrpcObject = loadPackageDefinition(packageDefinition)
 
-let packageDefinition = protoLoader.loadSync(lnd.protoPath, loaderOptions)
-let protoDescriptor = grpc.loadPackageDefinition(packageDefinition)
-
-export type LightningService = {
+interface LnSvc {
+  LnSvc: LnSvc
+  new(url: string, creds: ChannelCredentials): LnSvc
   addInvoice: Function
   decodePayReq: Function
   describeGraph: Function
@@ -35,21 +41,26 @@ export type LightningService = {
   sendPaymentSync: Function
   sendToRouteSync: Function
 }
-// @ts-ignore
-export const LnRpc = protoDescriptor.lnrpc as { Lightning: Constructable<LightningService> }
+const LnRpc = protoDescriptor.lnrpc as { Lightning?: LnSvc }
 
-// override process env var
-process.env.GRPC_SSL_CIPHER_SUITES = 'HIGH+ECDSA'
+export class LightningService extends LnRpc.Lightning {
+  constructor(
+    host: string = lnd.host,
+    macaroonPath: string = lnd.macaroonPath,
+    port: number = lnd.port,
+    tlsCertPath: string = lnd.tlsCertPath
+  ) {
+    let lndCert: Buffer = readFileSync(tlsCertPath)
+    let sslCreds: ChannelCredentials = credentials.createSsl(lndCert)
+    let macaroon: string = readFileSync(macaroonPath).toString('hex')
+    let macaroonCreds: CallCredentials = credentials.createFromMetadataGenerator((_, callback) => {
+      let metadata: Metadata = new Metadata()
+      metadata.add('macaroon', macaroon)
+      callback(null, metadata)
+    })
+    let creds: ChannelCredentials = credentials.combineChannelCredentials(sslCreds, macaroonCreds)
+    super(`${host}:${port}`, creds)
+  }
+}
 
-let lndCert = fs.readFileSync(lnd.tlsCertPath)
-let sslCreds = grpc.credentials.createSsl(lndCert)
-
-let macaroon = fs.readFileSync(lnd.macaroonPath).toString('hex')
-let macaroonCreds = grpc.credentials.createFromMetadataGenerator((_, callback) => {
-  let metadata = new grpc.Metadata()
-  metadata.add('macaroon', macaroon)
-  callback(null, metadata)
-})
-export const Creds = grpc.credentials.combineChannelCredentials(sslCreds, macaroonCreds)
-
-export default new LnRpc.Lightning(`${lnd.host}:${lnd.port}`, Creds)
+export default LightningService
