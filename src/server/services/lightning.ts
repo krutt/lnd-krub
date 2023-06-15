@@ -26,7 +26,7 @@ const protoDescriptor: GrpcObject = loadPackageDefinition(packageDefinition)
 
 interface LnSvc {
   LnSvc: LnSvc
-  new(url: string, creds: ChannelCredentials): LnSvc
+  new (url: string, creds: ChannelCredentials): LnSvc
   addInvoice: Function
   decodePayReq: Function
   describeGraph: Function

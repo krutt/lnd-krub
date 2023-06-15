@@ -2,7 +2,7 @@
 
 // imports
 import { Invoice } from '@/types'
-import { LightningService, LnRpc, createLNDCreds } from 'τ/services/lnrpc'
+import { LightningService } from '@/server/services/lightning'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { lndTarget } from 'τ/configs'
 import lndkrub from '@/index'
@@ -133,9 +133,11 @@ describe('GET /checkrouteinvoice with test payment request created externally', 
         authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
       })
     // external invoice
-    let lnext: LightningService = new LnRpc.Lightning(
-      `${lndTarget.host}:${lndTarget.port}`,
-      createLNDCreds(lndTarget.macaroonPath, lndTarget.tlsCertPath)
+    let lnext: LightningService = new LightningService(
+      lndTarget.host,
+      lndTarget.macaroonPath,
+      lndTarget.port,
+      lndTarget.tlsCertPath
     )
     let { payment_request } = await promisify(lnext.addInvoice).bind(lnext)({
       expiry: 20,
