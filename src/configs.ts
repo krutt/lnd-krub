@@ -6,7 +6,7 @@ if (!isProduction) {
   dotenv.config()
 }
 
-export const bitcoind = { rpc: process.env.BITCOIND_RPC_URL }
+export const bitcoind = { url: process.env.BITCOIND_RPC_URL }
 export const enableUpdateDescribeGraph = false
 export const forwardReserveFee = 0.01 // default 0.01
 export const intraHubFee = 0.003 // default to 0.003

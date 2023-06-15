@@ -1,12 +1,18 @@
 /* ~~/src/tests/services/bitcoin.spec.ts */
 
 // imports
-import { service as bitcoin } from './bitcoin'
-import { describe, expect, it } from 'vitest'
+import { BitcoinService } from '@/server/services/bitcoin'
+import { beforeAll, describe, expect, it } from 'vitest'
+
+let bitcoin: BitcoinService
+
+beforeAll(() => {
+  bitcoin = new BitcoinService()
+})
 
 describe('get network information', () => {
   it('responds with node information', async () => {
-    let { error, id, result } = await bitcoin.request('getnetworkinfo', [])
+    let { error, id, result } = await bitcoin.getNetworkInfo()
     expect(error).toBeFalsy()
     expect(id).toBeTruthy()
     expect(id).toBeTypeOf('string')
@@ -32,7 +38,7 @@ describe('get network information', () => {
 
 describe('list transactions for all', () => {
   it('responds with all available transactions', async () => {
-    let { error, id, result } = await bitcoin.request('listtransactions', ['*', 100500, 0, true])
+    let { error, id, result } = await bitcoin.listTransactions()
     expect(error).toBeFalsy()
     expect(id).toBeTruthy()
     expect(id).toBeTypeOf('string')

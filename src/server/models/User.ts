@@ -65,7 +65,7 @@ export class User {
     let result = []
     if (!!this._bitcoin) {
       result = await this._bitcoin
-        .request('listtransactions', ['*', 100500, 0, true])
+        .listTransactions()
         .then(data =>
           data.result.map(transaction => {
             let { address, amount, category, confirmations } = transaction
@@ -315,15 +315,13 @@ export class User {
       await this.addAddress(address)
       if (this._bitcoin) {
         let info: object | null = await this._bitcoin
-          .request('getaddressinfo', [address])
+          .getAddressInfo(address)
           .catch(err => {
             console.error(err)
             return null
           })
         if (!info) {
-          await this._bitcoin
-            .request('importaddress', [address, address, false])
-            .catch(err => console.error(err))
+          await this._bitcoin.importAddress(address, address).catch(err => console.error(err))
         }
       }
     }

@@ -1,6 +1,7 @@
 // ~~/src/index.ts
 
 // imports
+import { BitcoinService } from '@/server/services/bitcoin'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import Redis from 'ioredis'
 import bodyParser from 'body-parser'
@@ -15,9 +16,9 @@ import rateLimiter from 'express-rate-limit'
 import { v4 as uuid } from 'uuid'
 
 // services
-import bitcoin from '@/server/services/bitcoin'
+let bitcoin = new BitcoinService()
 import lightning from '@/server/services/lightning'
-let redis: Redis = new Redis(redisUrl)
+let redis = new Redis(redisUrl)
 
 // run-time constants
 const isProduction = process.env.NODE_ENV === 'production'
@@ -112,7 +113,7 @@ app.use('/', router)
 app.on('event:startup', () => {
   const MIN_BTC_BLOCK = 670000
   bitcoin
-    .request('getblockchaininfo', [], uuid())
+    .getBlockchainInfo()
     .then(info => {
       if (info && info.result && info.result.blocks) {
         if (info.result.chain === 'mainnet' && info.result.blocks < MIN_BTC_BLOCK) {
