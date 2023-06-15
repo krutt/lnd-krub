@@ -33,11 +33,12 @@ export default (
       // @ts-ignore
       let invoices = await user.getUserInvoices(request.query.limit)
       return response.send(invoices)
-    } catch (err) {
+    } catch (err: any) {
+      let { message }: { message?: string } = err
       console.log('', [
         request.uuid,
         'error getting user invoices:',
-        err.message,
+        message,
         'userid:',
         user.getUserId(),
       ])
