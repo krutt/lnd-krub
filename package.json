@@ -27,6 +27,7 @@
     "@types/ioredis": "^5.0.0",
     "@types/morgan": "^1.9.4",
     "@types/node": "^20.2.3",
+    "@types/supertest": "^2.0.12",
     "@types/uuid": "^9.0.1",
     "awesome-qr": "^2.1.5-rc.0",
     "dotenv": "^16.0.3",
