@@ -24,7 +24,7 @@ describe('get network information', () => {
     expect(networks).toBeTruthy()
     expect(networks).toBeTypeOf('object') // array
     let defaultNetworks: string[] = ['ipv4', 'ipv6', 'onion', 'i2p', 'cjdns']
-    expect(networks.map(network => network.name)).toStrictEqual(defaultNetworks)
+    expect(networks.map((network: { name: string }) => network.name)).toStrictEqual(defaultNetworks)
     expect(warnings).toBeTypeOf('string')
     expect(warnings).toBe('')
   })
