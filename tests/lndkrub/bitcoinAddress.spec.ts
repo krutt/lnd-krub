@@ -43,7 +43,7 @@ describe('GET /getbtc x 2', () => {
       .set(authHeaders)
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((response: { body: { address: string } }) => {
+      .then((response: { body: { address: string }[] }) => {
         let { address } = response.body[0]
         expect(address).toBeTruthy()
         expect(address.length).toBe(44)
@@ -59,7 +59,7 @@ describe('GET /getbtc x 2', () => {
       .set(authHeaders)
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((response: { body: { address: string } }) => {
+      .then((response: { body: { address: string }[] }) => {
         let { address } = response.body[0]
         expect(address).toBeTruthy()
         expect(address.length).toBe(44)
