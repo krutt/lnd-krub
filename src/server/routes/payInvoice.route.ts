@@ -50,7 +50,7 @@ const subscribeInvoicesCallCallback = async (
       LightningInvoiceSettledNotification.amt_paid_sat || 1
     )
     const user = new User(bitcoin, cache, lightning)
-    user._userid = await user.getUseridByPaymentHash(LightningInvoiceSettledNotification.hash)
+    user.userid = await user.getUseridByPaymentHash(LightningInvoiceSettledNotification.hash)
     await user.clearBalanceCache()
     console.log(
       'payment',
@@ -172,7 +172,7 @@ export default (
         }
 
         let recipient = new User(bitcoin, cache, lightning)
-        recipient._userid = recipient_id // hacky, fixme
+        recipient.userid = recipient_id // hacky, fixme
         await recipient.clearBalanceCache()
 
         // sender spent his balance:

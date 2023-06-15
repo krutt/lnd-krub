@@ -8,7 +8,7 @@ import { forwardReserveFee, intraHubFee } from '@/configs'
 import { promisify } from 'node:util'
 
 export class Paym {
-  _decoded?: {
+  decoded?: {
     description: string
     destination: string
     expiry: number
@@ -16,17 +16,17 @@ export class Paym {
     payment_hash: string
     timestamp: number
   }
-  _decodedLocally?: PaymentRequestObject & TagsObject
-  _isPaid?: boolean
-  _lightning: LightningService
-  _paymentRequest?: string
+  decodedLocally?: PaymentRequestObject & TagsObject
+  isPaid?: boolean
+  lightning: LightningService
+  paymentRequest?: string
 
   /**
    *
    * @param {LightningService} lightning
    */
   constructor(lightning: LightningService) {
-    this._lightning = lightning
+    this.lightning = lightning
   }
 
   // methods
@@ -45,8 +45,8 @@ export class Paym {
    * @param paymentRequest
    */
   decodePayReqLocally = (paymentRequest: string): PaymentRequestObject & TagsObject => {
-    this._decodedLocally = bolt11.decode(paymentRequest)
-    return this._decodedLocally
+    this.decodedLocally = bolt11.decode(paymentRequest)
+    return this.decodedLocally
   }
 
   /**
@@ -55,10 +55,10 @@ export class Paym {
    * @returns
    */
   decodePayReqViaRpc = async (paymentRequest: string): Promise<any | null> => {
-    this._decoded = await promisify(this._lightning.decodePayReq)
-      .bind(this._lightning)({ pay_req: paymentRequest })
+    this.decoded = await promisify(this.lightning.decodePayReq)
+      .bind(this.lightning)({ pay_req: paymentRequest })
       .catch(console.error)
-    return this._decoded
+    return this.decoded
   }
 
   /**
@@ -68,7 +68,7 @@ export class Paym {
    * @returns {boolean | null}
    */
   getIsPaid = (): boolean | null => {
-    return this._isPaid
+    return this.isPaid
   }
 
   /**
@@ -76,9 +76,9 @@ export class Paym {
    * @returns
    */
   getPaymentHash = async (): Promise<string> => {
-    if (!this._paymentRequest) throw new Error('BOLT11 payment request is not provided.')
-    if (!this._decoded) await this.decodePayReqViaRpc(this._paymentRequest)
-    return this._decoded['payment_hash']
+    if (!this.paymentRequest) throw new Error('BOLT11 payment request is not provided.')
+    if (!this.decoded) await this.decodePayReqViaRpc(this.paymentRequest)
+    return this.decoded['payment_hash']
   }
 
   /**
@@ -86,8 +86,8 @@ export class Paym {
    * @returns
    */
   isExpired = async (): Promise<boolean> => {
-    if (!this._paymentRequest) throw new Error('BOLT11 payment request is not provided.')
-    let decoded = await this.decodePayReqViaRpc(this._paymentRequest)
+    if (!this.paymentRequest) throw new Error('BOLT11 payment request is not provided.')
+    let decoded = await this.decodePayReqViaRpc(this.paymentRequest)
     return +decoded.timestamp + +decoded.expiry < +new Date() / 1000
   }
 
@@ -96,8 +96,8 @@ export class Paym {
    * @returns
    */
   listPayments = async (): Promise<Array<Payment>> => {
-    return await promisify(this._lightning.listPayments)
-      .bind(this._lightning)({})
+    return await promisify(this.lightning.listPayments)
+      .bind(this.lightning)({})
       .catch(err => {
         console.error(err)
         return []
@@ -113,38 +113,38 @@ export class Paym {
     if (payment.payment_error) {
       if (payment.payment_error.indexOf('already paid') !== -1) {
         // already paid
-        this._isPaid = true
-        if (this._decoded) {
-          payment.decoded = this._decoded
-          if (this._paymentRequest) payment.pay_req = this._paymentRequest
+        this.isPaid = true
+        if (this.decoded) {
+          payment.decoded = this.decoded
+          if (this.paymentRequest) payment.pay_req = this.paymentRequest
           // trying to guess the fee
           payment.payment_route = payment.payment_route || {}
           // we dont know the exact fee, so we use max (same as fee_limit)
           payment.payment_route.total_fees = Math.floor(
-            this._decoded.num_satoshis * forwardReserveFee
+            this.decoded.num_satoshis * forwardReserveFee
           )
-          payment.payment_route.total_amt = this._decoded.num_satoshis
+          payment.payment_route.total_amt = this.decoded.num_satoshis
         }
       } else if (payment.payment_error.indexOf('unable to') !== -1) {
         // failed to pay
-        this._isPaid = false
+        this.isPaid = false
       } else if (payment.payment_error.indexOf('FinalExpiryTooSoon') !== -1) {
-        this._isPaid = false
+        this.isPaid = false
       } else if (payment.payment_error.indexOf('UnknownPaymentHash') !== -1) {
-        this._isPaid = false
+        this.isPaid = false
       } else if (payment.payment_error.indexOf('IncorrectOrUnknownPaymentDetails') !== -1) {
-        this._isPaid = false
+        this.isPaid = false
       } else if (payment.payment_error.indexOf('payment is in transition') !== -1) {
-        this._isPaid = null // null is default, but lets set it anyway
+        this.isPaid = null // null is default, but lets set it anyway
       }
     } else if (payment && payment.payment_route && payment.payment_route.total_amt_msat) {
       // paid just now
-      this._isPaid = true
+      this.isPaid = true
       payment.payment_route.total_fees =
         +payment.payment_route.total_fees +
         Math.floor(+payment.payment_route.total_amt * intraHubFee)
-      if (this._paymentRequest) payment.pay_req = this._paymentRequest
-      if (this._decoded) payment.decoded = this._decoded
+      if (this.paymentRequest) payment.pay_req = this.paymentRequest
+      if (this.decoded) payment.decoded = this.decoded
     }
     return payment
   }
@@ -154,14 +154,14 @@ export class Paym {
    * @returns
    */
   queryRoutes = async (): Promise<any> => {
-    if (!this._paymentRequest) throw new Error('BOLT11 payment request is not provided.')
-    if (!this._decoded) await this.decodePayReqViaRpc(this._paymentRequest)
-    return await promisify(this._lightning.queryRoutes)
-      .bind(this._lightning)({
-        amt: this._decoded.num_satoshis,
-        fee_limit: { fixed: Math.floor(this._decoded.num_satoshis * forwardReserveFee) + 1 },
+    if (!this.paymentRequest) throw new Error('BOLT11 payment request is not provided.')
+    if (!this.decoded) await this.decodePayReqViaRpc(this.paymentRequest)
+    return await promisify(this.lightning.queryRoutes)
+      .bind(this.lightning)({
+        amt: this.decoded.num_satoshis,
+        fee_limit: { fixed: Math.floor(this.decoded.num_satoshis * forwardReserveFee) + 1 },
         final_cltv_delta: 144,
-        pub_key: this._decoded.destination,
+        pub_key: this.decoded.destination,
       })
       .catch(console.error)
   }
@@ -171,15 +171,15 @@ export class Paym {
    * @param routes
    */
   sendToRouteSync = async routes => {
-    if (!this._paymentRequest) throw new Error('BOLT11 payment request is not provided.')
-    if (!this._decoded) await this.decodePayReqViaRpc(this._paymentRequest)
+    if (!this.paymentRequest) throw new Error('BOLT11 payment request is not provided.')
+    if (!this.decoded) await this.decodePayReqViaRpc(this.paymentRequest)
     let request = {
-      payment_hash_string: this._decoded.payment_hash,
+      payment_hash_string: this.decoded.payment_hash,
       route: routes[0],
     }
     console.log('sendToRouteSync:', { request })
-    let route = await promisify(this._lightning.sendToRouteSync)
-      .bind(this._lightning)(request)
+    let route = await promisify(this.lightning.sendToRouteSync)
+      .bind(this.lightning)(request)
       .catch(console.error)
     if (route) this.processSendPaymentResponse(route)
   }
@@ -189,7 +189,7 @@ export class Paym {
    * @param {string} paymentRequest
    */
   setPaymentRequest = (paymentRequest: string) => {
-    this._paymentRequest = paymentRequest
+    this.paymentRequest = paymentRequest
   }
 }
 

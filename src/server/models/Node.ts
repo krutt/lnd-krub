@@ -6,8 +6,8 @@ import type { LightningService } from '@/server/services/lightning'
 import { promisify } from 'node:util'
 
 export class Node {
-  _cache: CacheService
-  _lightning: LightningService
+  cache: CacheService
+  lightning: LightningService
 
   /**
    *
@@ -15,26 +15,26 @@ export class Node {
    * @param {LightningService} lightning
    */
   constructor(cache: CacheService, lightning: LightningService) {
-    this._cache = cache
-    this._lightning = lightning
+    this.cache = cache
+    this.lightning = lightning
   }
 
   async identityPubkey(): Promise<string> {
-    let pubkey = await this._cache.get('lightning_identity_pubkey')
+    let pubkey = await this.cache.get('lightning_identity_pubkey')
     if (!pubkey) {
-      let info: { identity_pubkey: string } = await promisify(this._lightning.getInfo)
-        .bind(this._lightning)({})
+      let info: { identity_pubkey: string } = await promisify(this.lightning.getInfo)
+        .bind(this.lightning)({})
         .catch(console.error)
       if (info) {
         pubkey = info.identity_pubkey
-        await this._cache.setex('lightning_identity_pubkey', 120000, pubkey)
+        await this.cache.setex('lightning_identity_pubkey', 120000, pubkey)
       }
     }
     return pubkey
   }
 
   async release(): Promise<void> {
-    await this._cache.del('lightning_identity_pubkey')
+    await this.cache.del('lightning_identity_pubkey')
   }
 }
 

@@ -6,8 +6,8 @@ import type { LightningService } from '@/server/services/lightning'
 import { promisify } from 'node:util'
 
 export class Graph {
-  _cache: CacheService
-  _lightning: LightningService
+  cache: CacheService
+  lightning: LightningService
 
   /**
    *
@@ -15,23 +15,23 @@ export class Graph {
    * @param {LightningService} lightning
    */
   constructor(cache: CacheService, lightning: LightningService) {
-    this._cache = cache
-    this._lightning = lightning
+    this.cache = cache
+    this.lightning = lightning
   }
 
   async describe(): Promise<any> {
-    let graph = JSON.parse(await this._cache.get('lightning_describe_graph'))
+    let graph = JSON.parse(await this.cache.get('lightning_describe_graph'))
     if (!graph) {
-      let graph: { edges: any } = await promisify(this._lightning.describeGraph)
-        .bind(this._lightning)({ include_unannounced: true })
+      let graph: { edges: any } = await promisify(this.lightning.describeGraph)
+        .bind(this.lightning)({ include_unannounced: true })
         .catch(console.error)
-      if (graph) await this._cache.setex('lightning_describe_graph', 120000, JSON.stringify(graph))
+      if (graph) await this.cache.setex('lightning_describe_graph', 120000, JSON.stringify(graph))
     }
     return graph
   }
 
   async release(): Promise<void> {
-    await this._cache.del('lightning_describe_graph')
+    await this.cache.del('lightning_describe_graph')
   }
 }
 

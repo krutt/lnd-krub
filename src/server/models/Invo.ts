@@ -11,12 +11,11 @@ import { promisify } from 'node:util'
 
 export class Invo {
   // member vars
-  _cache: CacheService
-  _decoded?: Invoice
-  _isPaid?: boolean
-  _lightning: LightningService
-  _paymentRequest?: string
-  
+  cache: CacheService
+  decoded?: Invoice
+  isPaid?: boolean
+  lightning: LightningService
+  paymentRequest?: string
 
   /**
    *
@@ -24,29 +23,29 @@ export class Invo {
    * @param {LightningService} lightning
    */
   constructor(cache: CacheService, lightning: LightningService) {
-    this._cache = cache
-    this._lightning = lightning
+    this.cache = cache
+    this.lightning = lightning
   }
 
   // private methods
 
   _getIsPaymentHashMarkedPaidInDatabase = async (paymentHash: TagData) => {
-    return await this._cache.get('ispaid_' + paymentHash)
+    return await this.cache.get('ispaid_' + paymentHash)
   }
 
   _setIsPaymentHashPaidInDatabase = async (paymentHash: TagData, settleAmountSat?: number) => {
     if (settleAmountSat) {
-      return await this._cache.set('ispaid_' + paymentHash, settleAmountSat)
+      return await this.cache.set('ispaid_' + paymentHash, settleAmountSat)
     } else {
-      return await this._cache.del('ispaid_' + paymentHash)
+      return await this.cache.del('ispaid_' + paymentHash)
     }
   }
 
   // public methods
 
   getIsMarkedAsPaidInDatabase = async () => {
-    if (!this._paymentRequest) throw new Error('BOLT11 payment request is not provided.')
-    let decoded: PaymentRequestObject = bolt11.decode(this._paymentRequest)
+    if (!this.paymentRequest) throw new Error('BOLT11 payment request is not provided.')
+    let decoded: PaymentRequestObject = bolt11.decode(this.paymentRequest)
     let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
     let paymentHash: TagData = paymentTag?.data
     if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
@@ -54,12 +53,12 @@ export class Invo {
   }
 
   getPreimage = async (): Promise<any> => {
-    if (!this._paymentRequest) throw new Error('BOLT11 payment request is not provided.')
-    let decoded: PaymentRequestObject = bolt11.decode(this._paymentRequest)
+    if (!this.paymentRequest) throw new Error('BOLT11 payment request is not provided.')
+    let decoded: PaymentRequestObject = bolt11.decode(this.paymentRequest)
     let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
     let paymentHash: TagData = paymentTag?.data
     if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
-    return await this._cache.get('preimage_for_' + paymentHash)
+    return await this.cache.get('preimage_for_' + paymentHash)
   }
 
   /**
@@ -68,8 +67,8 @@ export class Invo {
    * @return {Promise<array>}
    */
   listInvoices = async (): Promise<Array<Invoice>> => {
-    return await promisify(this._lightning.listInvoices)
-      .bind(this._lightning)({
+    return await promisify(this.lightning.listInvoices)
+      .bind(this.lightning)({
         num_max_invoices: 99000111,
         reversed: true,
       })
@@ -85,8 +84,8 @@ export class Invo {
   }
 
   markAsPaidInDatabase = async () => {
-    if (!this._paymentRequest) throw new Error('BOLT11 payment request is not provided.')
-    let decoded: PaymentRequestObject = bolt11.decode(this._paymentRequest)
+    if (!this.paymentRequest) throw new Error('BOLT11 payment request is not provided.')
+    let decoded: PaymentRequestObject = bolt11.decode(this.paymentRequest)
     let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
     let paymentHash: TagData = paymentTag?.data
     if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
@@ -94,8 +93,8 @@ export class Invo {
   }
 
   markAsUnpaidInDatabase = async () => {
-    if (!this._paymentRequest) throw new Error('BOLT11 payment request is not provided.')
-    let decoded: PaymentRequestObject = bolt11.decode(this._paymentRequest)
+    if (!this.paymentRequest) throw new Error('BOLT11 payment request is not provided.')
+    let decoded: PaymentRequestObject = bolt11.decode(this.paymentRequest)
     let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
     let paymentHash: TagData = paymentTag?.data
     if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
@@ -108,12 +107,12 @@ export class Invo {
       .update(Buffer.from(preimageHex, 'hex'))
       .digest('hex')
     let key = 'preimage_for_' + paymentHashHex
-    await this._cache.set(key, preimageHex)
-    await this._cache.expire(key, 3600 * 24 * 30) // 1 month
+    await this.cache.set(key, preimageHex)
+    await this.cache.expire(key, 3600 * 24 * 30) // 1 month
   }
 
   setPaymentRequest = (paymentRequest: string) => {
-    this._paymentRequest = paymentRequest
+    this.paymentRequest = paymentRequest
   }
 }
 
