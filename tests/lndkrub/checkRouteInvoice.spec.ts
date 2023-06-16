@@ -4,11 +4,13 @@
 import { Invoice } from '@/types'
 import { LightningService } from '@/server/services/lightning'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { lndTarget } from 'τ/configs'
+import { externalLND } from 'τ/configs'
 import lndkrub from '@/index'
 import { promisify } from 'node:util'
 import { randomBytes } from 'crypto'
 import supertest from 'supertest'
+
+let lnext: LightningService
 
 afterAll(() => {
   lndkrub.emit('event:shutdown')
@@ -16,6 +18,12 @@ afterAll(() => {
 
 beforeAll(async () => {
   lndkrub.emit('event:startup')
+  lnext = new LightningService(
+    externalLND.host,
+    externalLND.macaroonPath,
+    externalLND.port,
+    externalLND.tlsCertPath
+  )
 })
 
 describe('GET /checkrouteinvoice with no query', () => {
@@ -133,12 +141,6 @@ describe('GET /checkrouteinvoice with test payment request created externally', 
         authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
       })
     // external invoice
-    let lnext: LightningService = new LightningService(
-      lndTarget.host,
-      lndTarget.macaroonPath,
-      lndTarget.port,
-      lndTarget.tlsCertPath
-    )
     let { payment_request } = await promisify(lnext.addInvoice).bind(lnext)({
       expiry: 20,
       memo,

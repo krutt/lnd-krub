@@ -3,7 +3,7 @@
 // imports
 import { LightningService } from '@/server/services/lightning'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { lndTarget } from 'τ/configs'
+import { externalLND } from 'τ/configs'
 import { promisify } from 'node:util'
 import { randomBytes } from 'crypto'
 
@@ -20,10 +20,10 @@ type Invoice = {
 beforeAll(() => {
   lnsvc = new LightningService()
   lnext = new LightningService(
-    lndTarget.host,
-    lndTarget.macaroonPath,
-    lndTarget.port,
-    lndTarget.tlsCertPath
+    externalLND.host,
+    externalLND.macaroonPath,
+    externalLND.port,
+    externalLND.tlsCertPath
   )
 })
 
