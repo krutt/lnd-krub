@@ -13,8 +13,6 @@ some creative differences, as followed:
 - Vite for front-end construction.
 - Vitest for API testing and BlueWallet compatibility maintenance.
 - Paired with crontab for script-running.
-- Pending integration with Chaumian e-cash, [cashu-ts](https://github.com/cashubtc/cashu-ts)
-- Pending integration with Notes and Other Stuff Transmitted by Relays, [nostr-tools](https://github.com/nbd-wtf/nostr-tools)
 
 **INSTALLATION**
 
