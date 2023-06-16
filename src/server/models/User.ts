@@ -582,10 +582,11 @@ export class User {
   }
 
   watchAddress = async (address: string) => {
-    // if (!address) return
-    // if (!!this.bitcoin) {
-    //   return await this.bitcoin.request('importaddress', [address, address, false])
-    // }
+    if (!address) return
+    if (this.bitcoin)
+      await this.bitcoin.importAddress(address, address).catch(() => {
+        /* Regtest throws "Only legacy wallets are supported for this command" */
+      })
   }
 }
 
