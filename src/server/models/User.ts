@@ -443,8 +443,7 @@ export class User {
           } catch (_) {
             payment.description += tag.data
           }
-        }
-        if (tag.tagName === 'payment_hash') {
+        } else if (tag.tagName === 'payment_hash') {
           // @ts-ignore
           payment.payment_hash = tag.data
         }
