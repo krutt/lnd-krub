@@ -8,7 +8,11 @@ import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
-import { Invo, Lock, Node, Paym, User } from '@/server/models'
+import { Invo } from '@/server/models/Invo'
+import { Lock } from '@/server/models/Lock'
+import { Node } from '@/server/models/Node'
+import { Paym } from '@/server/models/Paym'
+import { User } from '@/server/models/User'
 import {
   errorBadAuth,
   errorBadArguments,

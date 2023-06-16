@@ -7,7 +7,7 @@ import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
-import { User } from '@/server/models'
+import { User } from '@/server/models/User'
 import { errorBadAuth, errorGeneralServerError, errorNotAValidInvoice } from '@/server/exceptions'
 import { promisify } from 'node:util'
 

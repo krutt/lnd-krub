@@ -7,7 +7,7 @@ import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
-import { User } from '@/server/models'
+import { User } from '@/server/models/User'
 import { errorBadArguments, errorSunset } from '@/server/exceptions'
 import { sunset } from '@/configs'
 
