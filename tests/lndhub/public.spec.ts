@@ -27,10 +27,12 @@ describe('GET /getinfo', () => {
       .then(
         (response: { body: { uris: string[]; chains: { chain: string; network: string }[] } }) => {
           let { chains, uris } = response.body
-          expect(uris).toBeTruthy() // not empty
-          expect(chains).toBeTruthy() // not empty
+          expect(chains).toBeTruthy()
+          expect(chains.length).toBe(1)
           expect(chains[0].chain).toBe('bitcoin')
           expect(chains[0].network).toBe('regtest')
+          expect(uris).toBeTruthy()
+          expect(uris.length).toBe(1)
         }
       )
   })
