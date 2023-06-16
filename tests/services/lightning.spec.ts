@@ -18,13 +18,13 @@ type Invoice = {
 }
 
 beforeAll(() => {
-  lnsvc = new LightningService()
   lnext = new LightningService(
     externalLND.host,
     externalLND.macaroonPath,
     externalLND.port,
     externalLND.tlsCertPath
   )
+  lnsvc = new LightningService()
 })
 
 describe('call "addInvoice" via grpc to ⚡️ service and external ⚡️ service', () => {
