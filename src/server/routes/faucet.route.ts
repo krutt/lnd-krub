@@ -7,8 +7,10 @@ import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
-import { User } from '@/server/models'
-import { errorBadAuth } from '@/server/exceptions'
+import { Invo, User } from '@/server/models'
+import { errorBadAuth, errorGeneralServerError } from '@/server/exceptions'
+import { promisify } from 'node:util'
+import { randomBytes } from 'crypto'
 
 export default (
     bitcoin: BitcoinService,
@@ -28,7 +30,34 @@ export default (
       return errorBadAuth(response)
     }
     let amt = parseInt(request.body.amt || 0)
-    let balance = await user.getBalance()
-    await user.saveBalance(balance + amt)
-    return response.send({ balance: balance + amt })
+    if (!amt) return response.send({ balance: 0 })
+    let r_preimage = randomBytes(32).toString('base64')
+    let faucet: User = new User(bitcoin, cache, lightning)
+    let invoice = await promisify(lightning.addInvoice)
+      .bind(lightning)({
+        memo: 'faucet',
+        value: amt,
+        expiry: 3600 * 24,
+        r_preimage,
+      })
+      .catch(() => {})
+    if (!invoice) return errorGeneralServerError(response)
+    await user.saveUserInvoice(invoice)
+    let invoiceModel = new Invo(cache, lightning)
+    await invoiceModel.savePreimage(r_preimage)
+    await user.clearBalanceCache()
+    faucet.userid = 'faucet'
+    await faucet.savePaidLndInvoice({
+      timestamp: Math.floor(+new Date() / 1000),
+      type: 'faucet',
+      value: amt,
+      fee: 0,
+      memo: 'faucet',
+      pay_req: invoice.payment_request,
+    })
+    invoiceModel.setPaymentRequest(invoice.payment_request)
+    await invoiceModel.markAsPaidInDatabase()
+
+    let balance = await user.getCalculatedBalance()
+    return response.send({ balance })
   }
