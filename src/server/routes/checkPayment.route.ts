@@ -5,7 +5,7 @@ import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { Response } from 'express'
 import { errorBadAuth } from '@/server/exceptions'
-import { getPaymentHashPaid, loadUserByAuthorization, syncInvoicePaid } from '@/server/models/user'
+import { getPaymentHashPaid, loadUserByAuthorization, syncInvoicePaid } from '@/server/models/_user'
 
 export default (): LNDKrubRouteFunc =>
   /**

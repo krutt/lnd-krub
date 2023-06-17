@@ -10,7 +10,7 @@ import {
   getPendingTransactions,
   getUserAddress,
   loadUserByAuthorization,
-} from '@/server/models/user'
+} from '@/server/models/_user'
 
 export default (): LNDKrubRouteFunc =>
   /**

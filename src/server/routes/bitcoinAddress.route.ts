@@ -11,7 +11,7 @@ import {
   generateUserAddress,
   getUserAddress,
   watchAddress,
-} from '@/server/models/user'
+} from '@/server/models/_user'
 
 export default (): LNDKrubRouteFunc =>
   /**

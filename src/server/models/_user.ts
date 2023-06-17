@@ -7,7 +7,7 @@ import bolt11, { TagData } from 'bolt11'
 import { bitcoin, cache, lightning } from '@/server/models'
 import { createHash, randomBytes } from 'crypto'
 import { decodeRawHex } from '@/cypher'
-import { obtainLock, releaseLock } from '@/server/models/lock'
+import { obtainLock, releaseLock } from '@/server/models/_lock'
 import { promisify } from 'node:util'
 
 // static cache:

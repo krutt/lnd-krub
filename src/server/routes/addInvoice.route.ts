@@ -12,8 +12,8 @@ import {
   errorLnd,
   errorSunsetAddInvoice,
 } from '@/server/exceptions'
-import { loadUserByAuthorization, saveUserInvoice } from '@/server/models/user'
-import { makePreimageHex, savePreimage } from '@/server/models/invoice'
+import { loadUserByAuthorization, saveUserInvoice } from '@/server/models/_user'
+import { makePreimageHex, savePreimage } from '@/server/models/_invoice'
 import { promisify } from 'node:util'
 import { sunset } from '@/configs'
 

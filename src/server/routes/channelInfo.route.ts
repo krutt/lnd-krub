@@ -4,7 +4,7 @@
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { Response } from 'express'
-import { describeLightningGraph } from '@/server/models/graph'
+import { describeLightningGraph } from '@/server/models/_graph'
 
 export default (): LNDKrubRouteFunc =>
   /**

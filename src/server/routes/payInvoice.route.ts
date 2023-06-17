@@ -15,7 +15,7 @@ import {
   getUserIdByPaymentHash,
   savePaidLndInvoice,
   unlockFunds,
-} from '@/server/models/user'
+} from '@/server/models/_user'
 import {
   errorBadAuth,
   errorBadArguments,
@@ -27,14 +27,14 @@ import {
   errorTryAgainLater,
 } from '@/server/exceptions'
 import { forwardReserveFee, intraHubFee } from '@/configs'
-import { getIdentityPubkey } from '@/server/models/daemon'
+import { getIdentityPubkey } from '@/server/models/_daemon'
 import {
   getPreimage,
   markAsPaidInDatabase,
   setIsPaymentHashPaidInDatabase,
-} from '@/server/models/invoice'
-import { obtainLock, releaseLock } from '@/server/models/lock'
-import { processSendPaymentResponse } from '@/server/models/payment'
+} from '@/server/models/_invoice'
+import { obtainLock, releaseLock } from '@/server/models/_lock'
+import { processSendPaymentResponse } from '@/server/models/_payment'
 import { promisify } from 'node:util'
 
 const subscribeInvoicesCallCallback = async (response: any) => {

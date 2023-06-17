@@ -64,6 +64,9 @@ describe('GET /getuserinvoices', () => {
       .expect(200)
       .expect('Content-Type', /json/)
       .then((response: { body: InvoiceJSON[] }) => {
+        console.log('*--*--*')
+        console.log(response.body)
+        console.log('*--*--*')
         let invoices: InvoiceJSON[] = response.body
         expect(invoices).toBeTruthy()
         expect(invoices.length).toBeGreaterThan(0)

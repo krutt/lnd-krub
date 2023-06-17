@@ -6,7 +6,7 @@ import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
 import { errorBadAuth, errorLnd } from '@/server/exceptions'
-import { loadUserByAuthorization } from '@/server/models/user'
+import { loadUserByAuthorization } from '@/server/models/_user'
 import { promisify } from 'node:util'
 
 export default (lightning: LightningService): LNDKrubRouteFunc =>

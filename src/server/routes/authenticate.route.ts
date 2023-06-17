@@ -9,7 +9,7 @@ import {
   fetchAccessTokens,
   loadUserByLoginAndPassword,
   loadUserByRefreshToken,
-} from '@/server/models/user'
+} from '@/server/models/_user'
 
 export default (): LNDKrubRouteFunc =>
   /**
