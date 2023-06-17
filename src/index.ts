@@ -77,7 +77,7 @@ import userInvoices from '@/server/routes/userInvoices.route'
 router.post('/auth', postLimiter, authenticate())
 router.post('/addinvoice', postLimiter, addInvoice())
 router.get('/balance', postLimiter, balance())
-router.get('/channels', channels(lightning))
+router.get('/channels', channels())
 router.get('/checkpayment/:payment_hash', checkPayment())
 router.get('/checkrouteinvoice', checkRouteInvoice(lightning))
 router.post('/create', postLimiter, createAccount())

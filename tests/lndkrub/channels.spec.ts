@@ -1,6 +1,7 @@
 // ~~/tests/lndkrub/channels.spec.ts
 
 // imports
+import type { Channel } from '@/types'
 import lndkrub from '@/index'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import supertest from 'supertest'
@@ -42,10 +43,11 @@ describe('GET /channels', () => {
       .set(authHeaders)
       .expect(200)
       .expect('Content-Type', /json/)
-      // TODO: Improve typing
-      .then((response: { body: { channels: any[] } }) => {
+      .then((response: { body: { channels: Channel[] } }) => {
         let { channels } = response.body
         expect(channels).toBeTruthy()
+        expect(channels).toBeTypeOf('object') // array
+        expect(channels.length).toBeGreaterThan(0)
         // TODO: Other validations
       })
   })
