@@ -41,7 +41,7 @@ const getIsPaymentHashMarkedPaidInDatabase = async (paymentHash: TagData) => {
   return await cache.get('ispaid_' + paymentHash)
 }
 
-export const getPreimage = async (paymentRequest: string): Promise<any> => {
+export const getPreimage = async (paymentRequest: string): Promise<string> => {
   if (!paymentRequest) throw new Error('BOLT11 payment request is not provided.')
   let decoded: PaymentRequestObject = bolt11.decode(paymentRequest)
   let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
