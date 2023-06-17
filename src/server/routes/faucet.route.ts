@@ -34,23 +34,22 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
           expiry: 3600 * 24,
           r_preimage,
         })
-        .catch(err => {
-          console.log('*-*-*-*-*')
-          console.error(err)
-          console.log('*-*-*-*-*')
-        })
+        .catch(() => {})
       if (!invoice) return errorGeneralServerError(response)
       await saveUserInvoice(invoice, userId)
       await savePreimage(r_preimage)
       await clearBalanceCache(userId)
-      await savePaidLndInvoice({
-        timestamp: Math.floor(+new Date() / 1000),
-        type: 'faucet',
-        value: amount,
-        fee: 0,
-        memo: 'faucet',
-        pay_req: invoice.payment_request,
-      }, 'faucet')
+      await savePaidLndInvoice(
+        {
+          timestamp: Math.floor(+new Date() / 1000),
+          type: 'faucet',
+          value: amount,
+          fee: 0,
+          memo: 'faucet',
+          pay_req: invoice.payment_request,
+        },
+        'faucet'
+      )
       await markAsPaidInDatabase(invoice.payment_request)
     }
     let balance = await calculateBalance(userId)
