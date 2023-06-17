@@ -475,7 +475,7 @@ export const saveUserInvoice = async (doc: any, userId: string) => {
     }
   }
 
-  await cache.set('payment_hash' + paymentHash, userId)
+  await cache.set('payment_hash_' + paymentHash, userId)
   return await cache.rpush('userinvoices_for_' + userId, JSON.stringify(doc))
 }
 
