@@ -3,7 +3,7 @@
 // imports
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import lndkrub from '@/index'
-import { randomBytes } from 'crypto'
+import { randomBytes } from 'node:crypto'
 import supertest from 'supertest'
 
 afterAll(() => {

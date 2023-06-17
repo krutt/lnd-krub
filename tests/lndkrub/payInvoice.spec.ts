@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { externalLND } from 'τ/configs'
 import lndkrub from '@/index'
 import { promisify } from 'node:util'
-import { randomBytes } from 'crypto'
+import { randomBytes } from 'node:crypto'
 import supertest from 'supertest'
 
 let lnext: LightningService

@@ -5,7 +5,7 @@ import type { Invoice } from '@/types'
 import type { Tag } from '@/types'
 import bolt11, { PaymentRequestObject, TagData } from 'bolt11'
 import { cache, lightning } from '@/server/models'
-import crypto from 'crypto'
+import { createHash, randomBytes } from 'node:crypto'
 import { promisify } from 'node:util'
 
 export const getIsMarkedAsPaidInDatabase = async (paymentRequest: string) => {
@@ -47,10 +47,7 @@ export const listInvoices = async (): Promise<Array<Invoice>> => {
     })
 }
 
-export const makePreimageHex = (): string => {
-  let buffer = crypto.randomBytes(32)
-  return buffer.toString('hex')
-}
+export const makePreimageHex = (): string => randomBytes(32).toString('hex')
 
 export const markAsPaidInDatabase = async (paymentRequest: string) => {
   let decoded: PaymentRequestObject = bolt11.decode(paymentRequest)
@@ -69,10 +66,7 @@ export const markAsUnpaidInDatabase = async (paymentRequest: string) => {
 }
 
 export const savePreimage = async (preimageHex): Promise<void> => {
-  let paymentHashHex = require('crypto')
-    .createHash('sha256')
-    .update(Buffer.from(preimageHex, 'hex'))
-    .digest('hex')
+  let paymentHashHex = createHash('sha256').update(Buffer.from(preimageHex, 'hex')).digest('hex')
   let key = 'preimage_for_' + paymentHashHex
   await cache.setex(key, 3600 * 24 * 30, preimageHex) // 1 month
 }

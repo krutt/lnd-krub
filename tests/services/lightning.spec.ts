@@ -5,7 +5,7 @@ import { LightningService } from '@/server/services/lightning'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { externalLND } from 'τ/configs'
 import { promisify } from 'node:util'
-import { randomBytes } from 'crypto'
+import { randomBytes } from 'node:crypto'
 
 let lnsvc: LightningService
 let lnext: LightningService
