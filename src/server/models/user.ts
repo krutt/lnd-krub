@@ -466,7 +466,6 @@ export const savePaidLndInvoice = async (doc: any, userId: string): Promise<numb
   await cache.rpush('txs_for_' + userId, JSON.stringify(doc))
 
 export const saveUserInvoice = async (doc: any, userId: string) => {
-
   let decoded = bolt11.decode(doc.payment_request)
   let paymentHash: TagData | null = null
   for (let tag of decoded.tags) {
