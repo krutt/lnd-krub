@@ -20,7 +20,7 @@ export const fetchIdentityPubkey = async (): Promise<string> => {
       .catch(console.error)
     if (info) {
       pubkey = info.identity_pubkey
-      /*await */cache.setex(KEY, TTL, pubkey)
+      /*await */ cache.setex(KEY, TTL, pubkey)
     }
   }
   return pubkey
