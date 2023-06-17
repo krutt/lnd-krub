@@ -29,6 +29,7 @@ import {
 import { forwardReserveFee, intraHubFee } from '@/configs'
 import { fetchIdentityPubkey } from '@/server/models/pubkey'
 import {
+  decodePaymentRequest,
   getPreimage,
   markAsPaidInDatabase,
   setIsPaymentHashPaidInDatabase,
@@ -129,15 +130,13 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
       return errorTryAgainLater(response)
     }
 
-    let decoded = await promisify(lightning.decodePayReq)
-      .bind(lightning)({ pay_req: paymentRequest })
-      .catch(console.error)
+    let decoded = await decodePaymentRequest(paymentRequest)
     if (!decoded) {
       await releaseLock(lockKey)
       return errorNotAValidInvoice(response)
     } else if (+decoded.num_satoshis === 0) {
       // 'tip' invoices
-      decoded.num_satoshis = freeAmount
+      decoded.num_satoshis = freeAmount.toFixed(0)
     }
 
     console.log('/payinvoice', [
@@ -148,7 +147,7 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
 
     if (
       balance >=
-      +decoded.num_satoshis + Math.floor(decoded.num_satoshis * forwardReserveFee) + 1
+      +decoded.num_satoshis + Math.floor(+decoded.num_satoshis * forwardReserveFee) + 1
     ) {
       // got enough balance, including 1% of payment amount - reserve for fees
       if (identityPubkey === decoded.destination) {
@@ -174,8 +173,8 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
           {
             timestamp: Math.floor(+new Date() / 1000),
             type: 'paid_invoice',
-            value: +decoded.num_satoshis + Math.floor(decoded.num_satoshis * intraHubFee),
-            fee: Math.floor(decoded.num_satoshis * intraHubFee),
+            value: +decoded.num_satoshis + Math.floor(+decoded.num_satoshis * intraHubFee),
+            fee: Math.floor(+decoded.num_satoshis * intraHubFee),
             memo: decodeURIComponent(decoded.description),
             pay_req: paymentRequest,
           },
@@ -211,7 +210,7 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
         // allow_self_payment: true,
         payment_request: paymentRequest,
         amt: decoded.num_satoshis, // amt is used only for 'tip' invoices
-        fee_limit: { fixed: Math.floor(decoded.num_satoshis * forwardReserveFee) + 1 },
+        fee_limit: { fixed: Math.floor(+decoded.num_satoshis * forwardReserveFee) + 1 },
         // timeout_seconds: 60
       })
       if (!payment || !!payment.payment_error) {

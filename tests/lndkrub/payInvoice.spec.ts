@@ -252,7 +252,6 @@ describe('POST /payinvoice with test external payment request', () => {
         expect(description).toBeTypeOf('string')
         expect(description).toStrictEqual(memo)
         expect(num_satoshis).toBeTypeOf('string')
-        num_satoshis = num_satoshis || 0
         expect(+num_satoshis).toBe(amt)
       })
   })

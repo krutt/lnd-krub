@@ -1,16 +1,12 @@
 // ~~/src/types/Payment.ts
 
+// imports
+import { Invoice } from './Invoice'
+
 // define type
 export type Payment = {
   amt: number
-  decoded?: {
-    description: string
-    destination: string
-    expiry: number
-    num_satoshis: number
-    payment_hash: string
-    timestamp: number
-  }
+  decoded?: Invoice
   description: string
   expire_time: number
   fee: number
