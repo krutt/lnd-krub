@@ -12,7 +12,7 @@ export type Invoice = {
   ispaid?: boolean
   pay_req?: string // bluewallet: client backwards compatibility
   timestamp?: number // unix timestamp in seconds
-  type?: 'user_invoice'
+  type?: 'faucet' | 'user_invoice'
   userid?: string
 }
 

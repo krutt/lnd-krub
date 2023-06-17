@@ -1,20 +1,17 @@
 // ~~/src/server/routes/authenticate.route.ts
 
 // imports
-import type { BitcoinService } from '@/server/services/bitcoin'
-import type { CacheService } from '@/server/services/cache'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
-import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
-import { User } from '@/server/models/User'
 import { errorBadAuth, errorBadArguments } from '@/server/exceptions'
+import {
+  fetchAccessTokens,
+  loadUserByLoginAndPassword,
+  loadUserByRefreshToken,
+} from '@/server/models/user'
 
-export default (
-    bitcoin: BitcoinService,
-    cache: CacheService,
-    lightning: LightningService
-  ): LNDKrubRouteFunc =>
+export default (): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
@@ -25,25 +22,21 @@ export default (
     console.log('/auth', [request.uuid])
     if (!((request.body.login && request.body.password) || request.body.refresh_token))
       return errorBadArguments(response)
-    let user = new User(bitcoin, cache, lightning)
     if (request.body.refresh_token) {
       // need to refresh token
-      if (await user.loadByRefreshToken(request.body.refresh_token)) {
-        return response.send({
-          refresh_token: user.getRefreshToken(),
-          access_token: user.getAccessToken(),
-        })
+      let userId = await loadUserByRefreshToken(request.body.refresh_token)
+      if (userId) {
+        let { access_token, refresh_token } = await fetchAccessTokens(userId)
+        return response.send({ access_token, refresh_token })
       } else {
         return errorBadAuth(response)
       }
     } else {
       // need to authorize user
-      let result = await user.loadByLoginAndPassword(request.body.login, request.body.password)
-      if (result) {
-        return response.send({
-          refresh_token: user.getRefreshToken(),
-          access_token: user.getAccessToken(),
-        })
+      let userId = await loadUserByLoginAndPassword(request.body.login, request.body.password)
+      if (userId) {
+        let { access_token, refresh_token } = await fetchAccessTokens(userId)
+        return response.send({ access_token, refresh_token })
       } else return errorBadAuth(response)
     }
   }

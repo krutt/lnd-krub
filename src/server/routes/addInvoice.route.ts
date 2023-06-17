@@ -1,13 +1,9 @@
 // ~~/src/server/routes/addInvoice.route.ts
 
 // imports
-import type { BitcoinService } from '@/server/services/bitcoin'
-import type { CacheService } from '@/server/services/cache'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
-import { Invo } from '@/server/models/Invo'
-import { User } from '@/server/models/User'
 import { Invoice } from '@/types'
 import type { Response } from 'express'
 import {
@@ -16,14 +12,12 @@ import {
   errorLnd,
   errorSunsetAddInvoice,
 } from '@/server/exceptions'
+import { loadUserByAuthorization, saveUserInvoice } from '@/server/models/user'
+import { makePreimageHex, savePreimage } from '@/server/models/invoice'
 import { promisify } from 'node:util'
 import { sunset } from '@/configs'
 
-export default (
-    bitcoin: BitcoinService,
-    cache: CacheService,
-    lightning: LightningService
-  ): LNDKrubRouteFunc =>
+export default (lightning: LightningService): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
@@ -32,18 +26,17 @@ export default (
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/addinvoice', [request.uuid])
-    let user = new User(bitcoin, cache, lightning)
-    if (!(await user.loadByAuthorization(request.headers.authorization))) {
+    let userId = await loadUserByAuthorization(request.headers.authorization)
+    if (!userId) {
       return errorBadAuth(response)
     }
-    console.log('/addinvoice', [request.uuid, 'userid: ' + user.getUserId()])
+    console.log('/addinvoice', [request.uuid, 'userid: ' + userId])
 
     if (!request.body.amt || /*stupid NaN*/ !(request.body.amt > 0))
       return errorBadArguments(response)
 
     if (sunset) return errorSunsetAddInvoice(response)
-    const invoice = new Invo(cache, lightning)
-    const r_preimage = invoice.makePreimageHex()
+    let r_preimage = makePreimageHex()
     return await promisify(lightning.addInvoice)
       .bind(lightning)({
         memo: request.body.memo,
@@ -53,8 +46,8 @@ export default (
       })
       .then(async (info: Invoice) => {
         info.pay_req = info.payment_request // bluewallet: client backwards compatibility
-        await user.saveUserInvoice(info)
-        await invoice.savePreimage(r_preimage)
+        await saveUserInvoice(info, userId)
+        await savePreimage(r_preimage)
         return response.send(info)
       })
       .catch(err => {

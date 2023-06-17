@@ -1,20 +1,18 @@
 // ~~/src/server/routes/balance.route.ts
 
 // imports
-import type { BitcoinService } from '@/server/services/bitcoin'
-import type { CacheService } from '@/server/services/cache'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
-import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
-import { User } from '@/server/models/User'
 import { errorBadAuth, errorGeneralServerError } from '@/server/exceptions'
+import {
+  calculateBalance,
+  generateUserAddress,
+  getUserAddress,
+  loadUserByAuthorization,
+} from '@/server/models/user'
 
-export default (
-    bitcoin: BitcoinService,
-    cache: CacheService,
-    lightning: LightningService
-  ): LNDKrubRouteFunc =>
+export default (): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
@@ -22,19 +20,17 @@ export default (
    * @returns {Express.Response}
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-    let user = new User(bitcoin, cache, lightning)
+    console.log('/balance', [request.uuid])
+    let userId = await loadUserByAuthorization(request.headers.authorization)
+    if (!userId) return errorBadAuth(response)
+    console.log('/balance', [request.uuid, 'userid: ' + userId])
+    if (!(await getUserAddress(userId))) await generateUserAddress(userId) // onchain address needed further
     try {
-      console.log('/balance', [request.uuid])
-      if (!(await user.loadByAuthorization(request.headers.authorization))) {
-        return errorBadAuth(response)
-      }
-      console.log('/balance', [request.uuid, 'userid: ' + user.getUserId()])
-      if (!(await user.getAddress())) await user.generateAddress() // onchain address needed further
-      let balance = await user.getBalance()
+      let balance = await calculateBalance(userId)
       if (balance < 0) balance = 0
       return response.send({ BTC: { AvailableBalance: balance } })
     } catch (err) {
-      console.error('', [request.uuid, 'error getting balance:', err, 'userid:', user.getUserId()])
+      console.error('', [request.uuid, 'error getting balance:', err, 'userid:', userId])
       return errorGeneralServerError(response)
     }
   }

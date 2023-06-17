@@ -1,21 +1,14 @@
 // ~~/src/server/routes/createAccount.route.ts
 
 // imports
-import type { BitcoinService } from '@/server/services/bitcoin'
-import type { CacheService } from '@/server/services/cache'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
-import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
-import { User } from '@/server/models/User'
 import { errorBadArguments, errorSunset } from '@/server/exceptions'
 import { sunset } from '@/configs'
+import { createUser, saveMetadata } from '@/server/models/user'
 
-export default (
-    bitcoin: BitcoinService,
-    cache: CacheService,
-    lightning: LightningService
-  ): LNDKrubRouteFunc =>
+export default (): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
@@ -37,12 +30,14 @@ export default (
     )
       return errorBadArguments(response)
     if (sunset) return errorSunset(response)
-    let user = new User(bitcoin, cache, lightning)
-    await user.create()
-    await user.saveMetadata({
-      partnerid: request.body.partnerid,
-      accounttype: request.body.accounttype,
-      created_at: new Date().toISOString(),
-    })
-    return response.send({ login: user.getLogin(), password: user.getPassword() })
+    let { login, password, userId } = await createUser()
+    await saveMetadata(
+      {
+        partnerid: request.body.partnerid,
+        accounttype: request.body.accounttype,
+        created_at: new Date().toISOString(),
+      },
+      userId
+    )
+    return response.send({ login, password })
   }

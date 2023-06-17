@@ -1,20 +1,13 @@
 // ~~/src/server/routes/userInvoices.route.ts
 
 // imports
-import type { BitcoinService } from '@/server/services/bitcoin'
-import type { CacheService } from '@/server/services/cache'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
-import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
-import { User } from '@/server/models/User'
 import { errorBadAuth } from '@/server/exceptions'
+import { loadUserByAuthorization } from '@/server/models/user'
 
-export default (
-    bitcoin: BitcoinService,
-    cache: CacheService,
-    lightning: LightningService
-  ): LNDKrubRouteFunc =>
+export default (): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
@@ -23,11 +16,9 @@ export default (
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/getuserinvoices', [request.uuid])
-    let user = new User(bitcoin, cache, lightning)
-    if (!(await user.loadByAuthorization(request.headers.authorization))) {
-      return errorBadAuth(response)
-    }
-    console.log('/getuserinvoices', [request.uuid, 'userid: ' + user.getUserId()])
+    let userId = await loadUserByAuthorization(request.headers.authorization)
+    if (!userId) return errorBadAuth(response)
+    console.log('/getuserinvoices', [request.uuid, 'userid: ' + userId])
 
     try {
       // @ts-ignore
@@ -35,13 +26,7 @@ export default (
       return response.send(invoices)
     } catch (err: any) {
       let { message }: { message?: string } = err
-      console.log('', [
-        request.uuid,
-        'error getting user invoices:',
-        message,
-        'userid:',
-        user.getUserId(),
-      ])
+      console.log('', [request.uuid, 'error getting user invoices:', message, 'userid:', userId])
       return response.send([])
     }
   }

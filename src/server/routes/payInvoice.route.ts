@@ -1,18 +1,21 @@
 // ~~/src/server/routes/payInvoice.route.ts
 
 // imports
-import type { BitcoinService } from '@/server/services/bitcoin'
-import type { CacheService } from '@/server/services/cache'
 import Frisbee from 'frisbee'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
-import { Invo } from '@/server/models/Invo'
-import { Lock } from '@/server/models/Lock'
-import { Node } from '@/server/models/Node'
-import { Paym } from '@/server/models/Paym'
-import { User } from '@/server/models/User'
+import {
+  calculateBalance,
+  clearBalanceCache,
+  loadUserByAuthorization,
+  lockFunds,
+  getPaymentHashPaid,
+  getUserIdByPaymentHash,
+  savePaidLndInvoice,
+  unlockFunds,
+} from '@/server/models/user'
 import {
   errorBadAuth,
   errorBadArguments,
@@ -24,14 +27,17 @@ import {
   errorTryAgainLater,
 } from '@/server/exceptions'
 import { forwardReserveFee, intraHubFee } from '@/configs'
+import { getIdentityPubkey } from '@/server/models/daemon'
+import {
+  getPreimage,
+  markAsPaidInDatabase,
+  setIsPaymentHashPaidInDatabase,
+} from '@/server/models/invoice'
+import { obtainLock, releaseLock } from '@/server/models/lock'
+import { processSendPaymentResponse } from '@/server/models/payment'
 import { promisify } from 'node:util'
 
-const subscribeInvoicesCallCallback = async (
-  bitcoin: BitcoinService,
-  lightning: LightningService,
-  cache: CacheService,
-  response: any
-) => {
+const subscribeInvoicesCallCallback = async (response: any) => {
   if (response.state === 'SETTLED') {
     const LightningInvoiceSettledNotification = {
       memo: response.memo,
@@ -44,18 +50,16 @@ const subscribeInvoicesCallCallback = async (
     // obtaining a lock, to make sure we push to groundcontrol only once
     // since this web server can have several instances running, and each will get the same callback from LND
     // and dont release the lock - it will autoexpire in a while
-    let lock = new Lock(cache, 'groundcontrol_hash_' + LightningInvoiceSettledNotification.hash)
-    if (!(await lock.obtainLock())) {
+    if (!(await obtainLock('groundcontrol_hash_' + LightningInvoiceSettledNotification.hash))) {
       return
     }
-    let invoice = new Invo(cache, lightning)
-    await invoice._setIsPaymentHashPaidInDatabase(
+    await setIsPaymentHashPaidInDatabase(
       LightningInvoiceSettledNotification.hash,
       LightningInvoiceSettledNotification.amt_paid_sat || 1
     )
-    const user = new User(bitcoin, cache, lightning)
-    user.userid = await user.getUseridByPaymentHash(LightningInvoiceSettledNotification.hash)
-    await user.clearBalanceCache()
+    // const user = new User(bitcoin, cache, lightning)
+    let userId = await getUserIdByPaymentHash(LightningInvoiceSettledNotification.hash)
+    await clearBalanceCache(userId)
     console.log(
       'payment',
       LightningInvoiceSettledNotification.hash,
@@ -89,11 +93,7 @@ const subscribeInvoicesCallCallback = async (
 //   // The server has closed the stream.
 // })
 
-export default (
-    bitcoin: BitcoinService,
-    cache: CacheService,
-    lightning: LightningService
-  ): LNDKrubRouteFunc =>
+export default (lightning: LightningService): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
@@ -101,20 +101,13 @@ export default (
    * @returns {Express.Response}
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-    let user = new User(bitcoin, cache, lightning)
-    let node = new Node(cache, lightning)
-    let identityPubkey = await node.identityPubkey()
-    if (!(await user.loadByAuthorization(request.headers.authorization))) {
-      return errorBadAuth(response)
-    }
+    let userId: null | string = await loadUserByAuthorization(request.headers.authorization)
+    if (!userId) return errorBadAuth(response)
+    let identityPubkey: string = await getIdentityPubkey()
+    let paymentRequest: string = request.body.invoice || request.body.payment_request
+    console.log('/payinvoice', [request.uuid, 'userid: ' + userId, 'invoice: ' + paymentRequest])
 
-    console.log('/payinvoice', [
-      request.uuid,
-      'userid: ' + user.getUserId(),
-      'invoice: ' + request.body.invoice,
-    ])
-
-    if (!request.body.invoice) return errorBadArguments(response)
+    if (!paymentRequest) return errorBadArguments(response)
     let freeAmount = 0
     if (request.body.amount) {
       freeAmount = parseInt(request.body.amount)
@@ -122,26 +115,25 @@ export default (
     }
 
     // obtaining a lock
-    let lock = new Lock(cache, 'invoice_paying_for_' + user.getUserId())
-    if (!(await lock.obtainLock())) {
+    let lockKey: string = 'invoice_paying_for_' + userId
+    if (!(await obtainLock(lockKey))) {
       return errorGeneralServerError(response)
     }
 
-    let balance: number = await user.getCalculatedBalance().catch(err => {
-      console.log('', [request.uuid, 'error running getCalculatedBalance():', err.message])
+    let balance: number = await calculateBalance(userId).catch(err => {
+      console.log('', [request.uuid, 'error running calculateBalance():', err.message])
       return -1
     })
     if (balance < 0) {
-      lock.releaseLock()
+      await releaseLock(lockKey)
       return errorTryAgainLater(response)
     }
 
-    let pay_req: string = request.body.invoice
     let decoded = await promisify(lightning.decodePayReq)
-      .bind(lightning)({ pay_req })
+      .bind(lightning)({ pay_req: paymentRequest })
       .catch(console.error)
     if (!decoded) {
-      await lock.releaseLock()
+      await releaseLock(lockKey)
       return errorNotAValidInvoice(response)
     } else if (+decoded.num_satoshis === 0) {
       // 'tip' invoices
@@ -162,42 +154,40 @@ export default (
       if (identityPubkey === decoded.destination) {
         // this is internal invoice
         // now, receiver add balance
-        let recipient_id = await user.getUseridByPaymentHash(decoded.payment_hash)
-        console.log('Recipient:', recipient_id)
-        if (!recipient_id) {
-          await lock.releaseLock()
+        let recipientId = await getUserIdByPaymentHash(decoded.payment_hash)
+        console.log('Recipient:', recipientId)
+        if (!recipientId) {
+          await releaseLock(lockKey)
           return errorGeneralServerError(response)
         }
 
-        if (await user.getPaymentHashPaid(decoded.payment_hash)) {
+        if (await getPaymentHashPaid(decoded.payment_hash)) {
           // this internal invoice was paid, no sense paying it again
-          await lock.releaseLock()
+          await releaseLock(lockKey)
           return errorLnd(response)
         }
-
-        let recipient = new User(bitcoin, cache, lightning)
-        recipient.userid = recipient_id // hacky, fixme
-        await recipient.clearBalanceCache()
+        await clearBalanceCache(recipientId)
 
         // sender spent his balance:
-        await user.clearBalanceCache()
-        await user.savePaidLndInvoice({
-          timestamp: Math.floor(+new Date() / 1000),
-          type: 'paid_invoice',
-          value: +decoded.num_satoshis + Math.floor(decoded.num_satoshis * intraHubFee),
-          fee: Math.floor(decoded.num_satoshis * intraHubFee),
-          memo: decodeURIComponent(decoded.description),
-          pay_req: request.body.invoice,
-        })
+        await clearBalanceCache(userId)
+        await savePaidLndInvoice(
+          {
+            timestamp: Math.floor(+new Date() / 1000),
+            type: 'paid_invoice',
+            value: +decoded.num_satoshis + Math.floor(decoded.num_satoshis * intraHubFee),
+            fee: Math.floor(decoded.num_satoshis * intraHubFee),
+            memo: decodeURIComponent(decoded.description),
+            pay_req: paymentRequest,
+          },
+          userId
+        )
 
-        let invoice = new Invo(cache, lightning)
-        invoice.setPaymentRequest(request.body.invoice)
-        await invoice.markAsPaidInDatabase()
+        await markAsPaidInDatabase(request.body.invoice)
 
         // now, faking LND callback about invoice paid:
-        let preimage = await invoice.getPreimage()
+        let preimage = await getPreimage(request.body.invoice)
         if (preimage) {
-          subscribeInvoicesCallCallback(bitcoin, lightning, cache, {
+          subscribeInvoicesCallCallback({
             state: 'SETTLED',
             memo: decoded.description,
             r_preimage: Buffer.from(preimage, 'hex'),
@@ -205,7 +195,7 @@ export default (
             amt_paid_sat: +decoded.num_satoshis,
           })
         }
-        await lock.releaseLock()
+        await releaseLock(lockKey)
         return response.send(decoded)
       }
 
@@ -213,37 +203,38 @@ export default (
 
       if (!decoded.num_satoshis) {
         // tip invoice, but someone forgot to specify amount
-        await lock.releaseLock()
+        await releaseLock(lockKey)
         return errorBadArguments(response)
       }
-      await user.lockFunds(request.body.invoice, decoded)
+      await lockFunds(paymentRequest, decoded, userId)
       let payment = await promisify(lightning.sendPaymentSync).bind(lightning)({
         // allow_self_payment: true,
-        payment_request: request.body.invoice,
+        payment_request: paymentRequest,
         amt: decoded.num_satoshis, // amt is used only for 'tip' invoices
         fee_limit: { fixed: Math.floor(decoded.num_satoshis * forwardReserveFee) + 1 },
         // timeout_seconds: 60
       })
       if (!payment || !!payment.payment_error) {
         // payment failed
-        await lock.releaseLock()
+        await releaseLock(lockKey)
         return errorPaymentFailed(response)
       }
       // payment callback
-      await user.unlockFunds(request.body.invoice)
+      await unlockFunds(paymentRequest, userId)
       if (payment.payment_route && payment.payment_route.total_amt_msat) {
-        let PaymentShallow = new Paym(null)
-        payment = PaymentShallow.processSendPaymentResponse(payment)
-        payment.pay_req = request.body.invoice
-        payment.decoded = decoded
-        await user.savePaidLndInvoice(payment)
-        await user.clearBalanceCache()
-        await lock.releaseLock()
+        payment = processSendPaymentResponse(payment, paymentRequest)
+        payment.pay_req = paymentRequest
+        payment.decoded =
+          // payment.payment_route.total_fees = Math.floor(decoded.num_satoshis * forwardReserveFee)
+          // payment.payment_route.total_amt = decoded.num_satoshis
+          await savePaidLndInvoice(payment, userId)
+        await clearBalanceCache(userId)
+        await releaseLock(lockKey)
         return response.send(payment)
       }
       return null
     } else {
-      await lock.releaseLock()
+      await releaseLock(lockKey)
       return errorNotEnoughBalance(response)
     }
   }

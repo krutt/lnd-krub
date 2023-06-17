@@ -1,38 +1,21 @@
-// ~~/src/server/models/Graph.ts
+// ~~/src/server/models/graph.ts
 
 // imports
-import type { CacheService } from '@/server/services/cache'
-import type { LightningService } from '@/server/services/lightning'
+import type { Graph } from '@/types'
+import { cache, lightning } from '@/server/models'
 import { promisify } from 'node:util'
 
-export class Graph {
-  cache: CacheService
-  lightning: LightningService
-
-  /**
-   *
-   * @param {CacheService} cache
-   * @param {LightningService} lightning
-   */
-  constructor(cache: CacheService, lightning: LightningService) {
-    this.cache = cache
-    this.lightning = lightning
+export const describeLightningGraph = async (): Promise<Graph> => {
+  let graph = JSON.parse(await cache.get('lightning_describe_graph'))
+  if (!graph) {
+    let graph: { edges: any } = await promisify(lightning.describeGraph)
+      .bind(lightning)({ include_unannounced: true })
+      .catch(console.error)
+    if (graph) await cache.setex('lightning_describe_graph', 120000, JSON.stringify(graph))
   }
-
-  async describe(): Promise<any> {
-    let graph = JSON.parse(await this.cache.get('lightning_describe_graph'))
-    if (!graph) {
-      let graph: { edges: any } = await promisify(this.lightning.describeGraph)
-        .bind(this.lightning)({ include_unannounced: true })
-        .catch(console.error)
-      if (graph) await this.cache.setex('lightning_describe_graph', 120000, JSON.stringify(graph))
-    }
-    return graph
-  }
-
-  async release(): Promise<void> {
-    await this.cache.del('lightning_describe_graph')
-  }
+  return graph
 }
 
-export default Graph
+export const releaseLightningGraph = async (): Promise<void> => {
+  await cache.del('lightning_describe_graph')
+}

@@ -1,9 +1,11 @@
 // ~~/src/server/models/index.ts
 
 // imports
-export { Graph } from './Graph'
-export { Invo } from './Invo'
-export { Lock } from './Lock'
-export { Node } from './Node'
-export { Paym } from './Paym'
-export { User } from './User'
+import { BitcoinService } from '@/server/services/bitcoin'
+import { CacheService } from '@/server/services/cache'
+import { LightningService } from '@/server/services/lightning'
+
+// exports
+export const bitcoin = new BitcoinService()
+export const cache = new CacheService()
+export const lightning = new LightningService()

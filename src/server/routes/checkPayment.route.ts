@@ -1,20 +1,13 @@
 // ~~/src/server/routes/checkPayment.route.ts
 
 // imports
-import type { BitcoinService } from '@/server/services/bitcoin'
-import type { CacheService } from '@/server/services/cache'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
-import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
-import { User } from '@/server/models/User'
 import { errorBadAuth } from '@/server/exceptions'
+import { getPaymentHashPaid, loadUserByAuthorization, syncInvoicePaid } from '@/server/models/user'
 
-export default (
-    bitcoin: BitcoinService,
-    cache: CacheService,
-    lightning: LightningService
-  ): LNDKrubRouteFunc =>
+export default (): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
@@ -23,14 +16,13 @@ export default (
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/checkpayment', [request.uuid])
-    let user = new User(bitcoin, cache, lightning)
-    await user.loadByAuthorization(request.headers.authorization)
-    if (!user.getUserId()) return errorBadAuth(response)
-
-    let paid = true
-    if (!(await user.getPaymentHashPaid(request.params.payment_hash))) {
+    let userId = await loadUserByAuthorization(request.headers.authorization)
+    if (!userId) return errorBadAuth(response)
+    let paid: boolean = true
+    let paymentHash: string = request.params.payment_hash
+    if (!(await getPaymentHashPaid(paymentHash))) {
       // Not found on cache
-      paid = await user.syncInvoicePaid(request.params.payment_hash)
+      paid = await syncInvoicePaid(paymentHash, userId)
     }
     return response.send({ paid })
   }

@@ -1,20 +1,18 @@
 // ~~/src/server/routes/pendingTransactions.route.ts
 
 // imports
-import type { BitcoinService } from '@/server/services/bitcoin'
-import type { CacheService } from '@/server/services/cache'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
-import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
-import { User } from '@/server/models/User'
 import { errorBadAuth } from '@/server/exceptions'
+import {
+  generateUserAddress,
+  getPendingTransactions,
+  getUserAddress,
+  loadUserByAuthorization,
+} from '@/server/models/user'
 
-export default (
-    bitcoin: BitcoinService,
-    cache: CacheService,
-    lightning: LightningService
-  ): LNDKrubRouteFunc =>
+export default (): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
@@ -23,14 +21,14 @@ export default (
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/getpending', [request.uuid])
-    let user = new User(bitcoin, cache, lightning)
-    if (!(await user.loadByAuthorization(request.headers.authorization))) {
+    let userId = await loadUserByAuthorization(request.headers.authorization)
+    if (!userId) {
       return errorBadAuth(response)
     }
-    console.log('/getpending', [request.uuid, 'userid: ' + user.getUserId()])
+    console.log('/getpending', [request.uuid, 'userid: ' + userId])
 
-    if (!(await user.getAddress())) await user.generateAddress() // onchain address needed further
+    if (!(await getUserAddress(userId))) await generateUserAddress(userId) // onchain address needed further
 
-    let transactions = await user.getPendingTransactions()
+    let transactions = await getPendingTransactions(userId)
     return response.send(transactions)
   }

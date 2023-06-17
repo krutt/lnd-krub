@@ -1,21 +1,20 @@
 // ~~/src/server/routes/transactions.route.ts
 
 // imports
-import type { BitcoinService } from '@/server/services/bitcoin'
-import type { CacheService } from '@/server/services/cache'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
-import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
-import { User } from '@/server/models/User'
 import { errorBadAuth } from '@/server/exceptions'
 import { forwardReserveFee } from '@/configs'
+import {
+  generateUserAddress,
+  getLockedPayments,
+  getTransactions,
+  getUserAddress,
+  loadUserByAuthorization,
+} from '@/server/models/user'
 
-export default (
-    bitcoin: BitcoinService,
-    cache: CacheService,
-    lightning: LightningService
-  ): LNDKrubRouteFunc =>
+export default (): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
@@ -24,18 +23,16 @@ export default (
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/gettxs', [request.uuid])
-    let user = new User(bitcoin, cache, lightning)
-    if (!(await user.loadByAuthorization(request.headers.authorization))) {
-      return errorBadAuth(response)
-    }
-    console.log('/gettxs', [request.uuid, 'userid: ' + user.getUserId()])
+    let userId = await loadUserByAuthorization(request.headers.authorization)
+    if (!userId) return errorBadAuth(response)
+    console.log('/gettxs', [request.uuid, 'userid: ' + userId])
 
-    if (!(await user.getAddress())) await user.generateAddress() // onchain addr needed further
+    if (!(await getUserAddress(userId))) await generateUserAddress(userId) // onchain addr needed further
     try {
-      let txs = await user.getTxs()
-      let lockedPayments = await user.getLockedPayments()
+      let transactions = await getTransactions(userId)
+      let lockedPayments = await getLockedPayments(userId)
       for (let locked of lockedPayments) {
-        txs.push({
+        transactions.push({
           type: 'paid_invoice',
           fee: Math.floor(locked.amount * forwardReserveFee) /* feelimit */,
           value: locked.amount + Math.floor(locked.amount * forwardReserveFee) /* feelimit */,
@@ -43,9 +40,9 @@ export default (
           memo: 'Payment in transition',
         })
       }
-      return response.send(txs)
+      return response.send(transactions)
     } catch (err) {
-      console.log('', [request.uuid, 'error gettxs:', err.message, 'userid:', user.getUserId()])
+      console.log('', [request.uuid, 'error gettxs:', err.message, 'userid:', userId])
       return response.send([])
     }
   }
