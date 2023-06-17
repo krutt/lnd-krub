@@ -63,7 +63,7 @@ export const getUserAddress = async (userId: string) => {
 
 /**
  * LNDKrub no longer relies on redis balance as source of truth, this is
- * more a cache now. See `getCalculatedBalance()` to get correct balance.
+ * more a cache now. See `calculateBalance()` to get correct balance.
  *
  * @returns {Promise<number>} Balance available to spend
  */
