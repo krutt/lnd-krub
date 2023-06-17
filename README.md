@@ -1,4 +1,4 @@
-> **Warning**
+> 🚧 **Warning**
 > This project is in early development, it does however work with real sats! Always use amounts you don't mind losing.
 
 # LNDKrub
@@ -14,10 +14,11 @@ some creative differences, as followed:
 - Dependency injection pattern for loose coupling.
 - Vite for front-end construction.
 - Vitest for API testing and BlueWallet compatibility maintenance.
-- Paired with crontab for script-running.
+- Killed Object-Oriented Programming with fire when it came to ORM-like operations. 🔥
 
-Pending tasks on the roadmap
+> 👷‍♂️ **Pending tasks on the roadmap**
 
+- Pair with crontab for script-running.
 - [BlueWallet Acceptance Tests](github.com/BlueWallet/LndHub#tests).
 - CI/CD: Reject commits which fail BlueWallet Acceptance Tests on `origin/master`.
 - Cache solution change: Change [Redis](github.com/redis/redis) solid-state drive caching to [Memcached](memcached.org).
