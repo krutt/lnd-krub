@@ -23,6 +23,11 @@ export const createInvoice = async (
     .catch(console.error)
 }
 
+export const decodePaymentRequest = async (paymentRequest: string): Promise<Invoice | void> =>
+  await promisify(lightning.decodePayReq)
+    .bind(lightning)({ pay_req: paymentRequest })
+    .catch(console.error)
+
 export const getIsMarkedAsPaidInDatabase = async (paymentRequest: string) => {
   if (!paymentRequest) throw new Error('BOLT11 payment request is not provided.')
   let decoded: PaymentRequestObject = bolt11.decode(paymentRequest)
