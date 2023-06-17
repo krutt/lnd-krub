@@ -27,7 +27,7 @@ import {
   errorTryAgainLater,
 } from '@/server/exceptions'
 import { forwardReserveFee, intraHubFee } from '@/configs'
-import { getIdentityPubkey } from '@/server/models/daemon'
+import { fetchIdentityPubkey } from '@/server/models/pubkey'
 import {
   getPreimage,
   markAsPaidInDatabase,
@@ -103,7 +103,7 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     let userId: null | string = await loadUserByAuthorization(request.headers.authorization)
     if (!userId) return errorBadAuth(response)
-    let identityPubkey: string = await getIdentityPubkey()
+    let identityPubkey: string = await fetchIdentityPubkey()
     let paymentRequest: string = request.body.invoice || request.body.payment_request
     console.log('/payinvoice', [request.uuid, 'userid: ' + userId, 'invoice: ' + paymentRequest])
 
