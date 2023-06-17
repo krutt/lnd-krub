@@ -19,7 +19,7 @@ export const listChannels = async (): Promise<Channel[]> => {
     let info = await promisify(lightning.listChannels).bind(lightning)({}).catch(console.error)
     if (info) {
       channels = info.channels
-      /*await */cache.setex(KEY, TTL, JSON.stringify(channels))
+      /*await */ cache.setex(KEY, TTL, JSON.stringify(channels))
     }
   }
   return channels
