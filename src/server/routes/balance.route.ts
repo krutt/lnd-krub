@@ -10,7 +10,7 @@ import {
   generateUserAddress,
   getUserAddress,
   loadUserByAuthorization,
-} from '@/server/models/_user'
+} from '@/server/models/user'
 
 export default (): LNDKrubRouteFunc =>
   /**

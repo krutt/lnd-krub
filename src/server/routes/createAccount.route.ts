@@ -6,7 +6,7 @@ import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { Response } from 'express'
 import { errorBadArguments, errorSunset } from '@/server/exceptions'
 import { sunset } from '@/configs'
-import { createUser, saveMetadata } from '@/server/models/_user'
+import { createUser, saveMetadata } from '@/server/models/user'
 
 export default (): LNDKrubRouteFunc =>
   /**
