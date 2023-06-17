@@ -97,6 +97,21 @@ export const queryRoutes = async (paymentRequest: string): Promise<any> => {
     .catch(console.error)
 }
 
+export const sendPayment = async (
+  amount: number,
+  fee: number,
+  paymentRequest: string
+): Promise<Payment | void> =>
+  await promisify(lightning.sendPaymentSync)
+    .bind(lightning)({
+      // allow_self_payment: true,
+      payment_request: paymentRequest,
+      amt: amount, // amt is used only for 'tip' invoices
+      fee_limit: { fixed: fee },
+      // timeout_seconds: 60
+    })
+    .catch(console.error)
+
 /**
  *
  * @param routes

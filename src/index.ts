@@ -88,7 +88,7 @@ router.get('/getinfo', postLimiter, info(lightning))
 router.get('/getpending', postLimiter, pendingTransactions())
 router.get('/gettxs', postLimiter, transactions())
 router.get('/getuserinvoices', postLimiter, userInvoices())
-router.post('/payinvoice', postLimiter, payInvoice(lightning))
+router.post('/payinvoice', postLimiter, payInvoice())
 // router.get('/queryroutes/:source/:dest/:amt', queryRoutes(lightning))
 
 /**

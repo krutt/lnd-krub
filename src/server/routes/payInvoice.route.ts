@@ -4,7 +4,6 @@
 import Frisbee from 'frisbee'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
-import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
 import {
   calculateBalance,
@@ -35,8 +34,7 @@ import {
   setIsPaymentHashPaidInDatabase,
 } from '@/server/models/invoice'
 import { obtainLock, releaseLock } from '@/server/models/lock'
-import { processSendPaymentResponse } from '@/server/models/payment'
-import { promisify } from 'node:util'
+import { processSendPaymentResponse, sendPayment } from '@/server/models/payment'
 
 const subscribeInvoicesCallCallback = async (response: any) => {
   if (response.state === 'SETTLED') {
@@ -94,7 +92,7 @@ const subscribeInvoicesCallCallback = async (response: any) => {
 //   // The server has closed the stream.
 // })
 
-export default (lightning: LightningService): LNDKrubRouteFunc =>
+export default (): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
@@ -206,16 +204,12 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
         return errorBadArguments(response)
       }
       await lockFunds(paymentRequest, decoded, userId)
-      let payment = await promisify(lightning.sendPaymentSync).bind(lightning)({
-        // allow_self_payment: true,
-        payment_request: paymentRequest,
-        amt: decoded.num_satoshis, // amt is used only for 'tip' invoices
-        fee_limit: { fixed: Math.floor(+decoded.num_satoshis * forwardReserveFee) + 1 },
-        // timeout_seconds: 60
-      })
+      let amount = +decoded.num_satoshis
+      let fee = Math.floor(amount * forwardReserveFee) + 1
+      let payment = await sendPayment(amount, fee, paymentRequest)
       if (!payment || !!payment.payment_error) {
         // payment failed
-        await releaseLock(lockKey)
+        /*await */ releaseLock(lockKey)
         return errorPaymentFailed(response)
       }
       // payment callback
