@@ -5,8 +5,23 @@ import type { Invoice } from '@/types'
 import type { Tag } from '@/types'
 import bolt11, { PaymentRequestObject, TagData } from 'bolt11'
 import { cache, lightning } from '@/server/models'
-import { createHash, randomBytes } from 'node:crypto'
+import { createHash } from 'node:crypto'
 import { promisify } from 'node:util'
+
+export const createInvoice = async (
+  amount: number,
+  memo: string,
+  r_preimage: string
+): Promise<Invoice | void> => {
+  return await promisify(lightning.addInvoice)
+    .bind(lightning)({
+      memo,
+      expiry: 3600 * 24,
+      r_preimage,
+      value: amount,
+    })
+    .catch(console.error)
+}
 
 export const getIsMarkedAsPaidInDatabase = async (paymentRequest: string) => {
   if (!paymentRequest) throw new Error('BOLT11 payment request is not provided.')
@@ -46,8 +61,6 @@ export const listInvoices = async (): Promise<Array<Invoice>> => {
       return []
     })
 }
-
-export const makePreimageHex = (): string => randomBytes(32).toString('hex')
 
 export const markAsPaidInDatabase = async (paymentRequest: string) => {
   let decoded: PaymentRequestObject = bolt11.decode(paymentRequest)
