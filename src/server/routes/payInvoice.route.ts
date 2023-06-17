@@ -224,10 +224,10 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
       if (payment.payment_route && payment.payment_route.total_amt_msat) {
         payment = processSendPaymentResponse(payment, paymentRequest)
         payment.pay_req = paymentRequest
-        payment.decoded =
-          // payment.payment_route.total_fees = Math.floor(decoded.num_satoshis * forwardReserveFee)
-          // payment.payment_route.total_amt = decoded.num_satoshis
-          await savePaidLndInvoice(payment, userId)
+        payment.decoded = decoded
+        // payment.payment_route.total_fees = Math.floor(decoded.num_satoshis * forwardReserveFee)
+        // payment.payment_route.total_amt = decoded.num_satoshis
+        await savePaidLndInvoice(payment, userId)
         await clearBalanceCache(userId)
         await releaseLock(lockKey)
         return response.send(payment)
