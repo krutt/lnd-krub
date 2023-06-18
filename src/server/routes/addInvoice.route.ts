@@ -34,6 +34,7 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
   let invoice = await createInvoice(request.body.amt, request.body.memo, r_preimage)
   if (!invoice) return errorLnd(response)
   invoice.pay_req = invoice.payment_request // bluewallet: client backwards compatibility
+  // TODO: parallelize
   await saveUserInvoice(invoice, userId)
   await savePreimage(r_preimage)
   return response.send(invoice)
