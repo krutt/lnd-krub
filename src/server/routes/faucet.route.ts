@@ -3,16 +3,15 @@
 // imports
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
-import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
 import { calculateBalance, clearBalanceCache } from '@/server/models/user'
+import { createInvoice } from '@/server/models/invoice'
 import { errorBadAuth, errorGeneralServerError } from '@/server/exceptions'
 import { loadUserByAuthorization, savePaidLndInvoice, saveUserInvoice } from '@/server/models/user'
 import { markAsPaidInDatabase, savePreimage } from '@/server/models/invoice'
-import { promisify } from 'node:util'
 import { randomBytes } from 'node:crypto'
 
-export default (lightning: LightningService): LNDKrubRouteFunc =>
+export default (): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
@@ -27,14 +26,7 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
     let amount = parseInt(request.body.amt || request.body.amount || 0)
     if (amount) {
       let r_preimage = randomBytes(32).toString('base64')
-      let invoice = await promisify(lightning.addInvoice)
-        .bind(lightning)({
-          memo: 'faucet',
-          value: amount,
-          expiry: 3600 * 24,
-          r_preimage,
-        })
-        .catch(() => {})
+      let invoice = await createInvoice(amount, 'faucet', r_preimage)
       if (!invoice) return errorGeneralServerError(response)
       await saveUserInvoice(invoice, userId)
       await savePreimage(r_preimage)
