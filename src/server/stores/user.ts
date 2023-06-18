@@ -2,7 +2,7 @@
 
 // imports
 import BigNumber from 'bignumber.js'
-import type { Payment, User } from '@/types'
+import type { Invoice, Payment, User } from '@/types'
 import bolt11, { TagData } from 'bolt11'
 import { bitcoin, cache, lightning } from '@/server/stores'
 import { createHash, randomBytes } from 'node:crypto'
@@ -305,12 +305,9 @@ export const getTransactions = async (userId: string) => {
   return result
 }
 
-export const getUserInvoices = async (userId: string, limit: number = 0) => {
-  if (!userId) throw new Error('UserId missing.')
+export const getUserInvoices = async (userId: string, limit: number = 0): Promise<Invoice[]> => {
   let range = await cache.lrange('userinvoices_for_' + userId, 0, -1)
-  if (limit) {
-    range = range.slice(-limit)
-  }
+  if (limit) range = range.slice(-limit)
   let result = []
   for (let item of range) {
     let payment = JSON.parse(item) as Payment
