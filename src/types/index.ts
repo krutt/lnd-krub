@@ -1,6 +1,7 @@
-// ~~/src/types/index.ts
+/* ~~/src/types/index.ts */
 
 export type { Channel } from './Channel'
+export type { Dashblob } from './Dashblob'
 export type { Graph } from './Graph'
 export type { Invoice, InvoiceJSON } from './Invoice'
 export type { LNDKrubRequest } from './LNDKrubRequest'

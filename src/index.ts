@@ -10,8 +10,8 @@ import cors from '@/server/middlewares/cors'
 import express, { Express, Response, Router } from 'express'
 import helmet from 'helmet'
 import identifiable from '@/server/middlewares/identifiable'
+import { loadNodeInformation } from '@/server/models/dashblob'
 import morgan from 'morgan'
-import { promisify } from 'node:util'
 import { postRateLimit, rateLimit } from '@/configs'
 import rateLimiter from 'express-rate-limit'
 
@@ -84,7 +84,7 @@ router.post('/create', postLimiter, createAccount())
 router.get('/decodeinvoice', postLimiter, decodeInvoice())
 router.get('/getbtc', bitcoinAddress())
 router.get('/getchaninfo/:channelId', channelInfo())
-router.get('/getinfo', postLimiter, info(lightning))
+router.get('/getinfo', postLimiter, info())
 router.get('/getpending', postLimiter, pendingTransactions())
 router.get('/gettxs', postLimiter, transactions())
 router.get('/getuserinvoices', postLimiter, userInvoices())
@@ -127,16 +127,13 @@ app.on('event:startup', () => {
       console.error('bitcoind failure:', err)
       process.exit(2)
     })
-  promisify(lightning.getInfo)
-    .bind(lightning)({})
+  loadNodeInformation()
     .then(info => {
-      // let identity_pubkey = false
-      // console.info('lnd getinfo:', info)
-      if (!info.synced_to_chain) {
+      if (info && !info.synced_to_chain) {
         console.error('lnd not synced')
+        // TODO: uncomment
         // process.exit(4);
       }
-      // identity_pubkey = info.identity_pubkey
     })
     .catch(err => {
       // console.error('lnd failure')
