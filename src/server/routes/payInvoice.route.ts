@@ -2,8 +2,7 @@
 
 // imports
 import Frisbee from 'frisbee'
-import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
-import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
+import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
 import {
   calculateBalance,
@@ -92,142 +91,143 @@ const subscribeInvoicesCallCallback = async (response: any) => {
 //   // The server has closed the stream.
 // })
 
-export default (): LNDKrubRouteFunc =>
-  /**
-   *
-   * @param {LNDKrubRequest} request
-   * @param {Express.Response} response
-   * @returns {Express.Response}
-   */
-  async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-    let userId: null | string = await loadUserByAuthorization(request.headers.authorization)
-    if (!userId) return errorBadAuth(response)
-    let identityPubkey: string = await fetchIdentityPubkey()
-    let paymentRequest: string = request.body.invoice || request.body.payment_request
-    console.log('/payinvoice', [request.uuid, 'userid: ' + userId, 'invoice: ' + paymentRequest])
+/**
+ *
+ * @param {LNDKrubRequest} request
+ * @param {Express.Response} response
+ * @returns {Express.Response}
+ */
+export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
+  let userId: null | string = await loadUserByAuthorization(request.headers.authorization)
+  if (!userId) return errorBadAuth(response)
+  let identityPubkey: string = await fetchIdentityPubkey()
+  let paymentRequest: string = request.body.invoice || request.body.payment_request
+  console.log('/payinvoice', [request.uuid, 'userid: ' + userId, 'invoice: ' + paymentRequest])
 
-    if (!paymentRequest) return errorBadArguments(response)
-    let freeAmount = 0
-    if (request.body.amount) {
-      freeAmount = parseInt(request.body.amount)
-      if (freeAmount <= 0) return errorBadArguments(response)
-    }
-
-    // obtaining a lock
-    let lockKey: string = 'invoice_paying_for_' + userId
-    if (!(await obtainLock(lockKey))) {
-      return errorGeneralServerError(response)
-    }
-
-    let balance: number = await calculateBalance(userId).catch(err => {
-      console.log('', [request.uuid, 'error running calculateBalance():', err.message])
-      return -1
-    })
-    if (balance < 0) {
-      await releaseLock(lockKey)
-      return errorTryAgainLater(response)
-    }
-
-    let decoded = await decodePaymentRequest(paymentRequest)
-    if (!decoded) {
-      await releaseLock(lockKey)
-      return errorNotAValidInvoice(response)
-    } else if (+decoded.num_satoshis === 0) {
-      // 'tip' invoices
-      decoded.num_satoshis = freeAmount.toFixed(0)
-    }
-
-    console.log('/payinvoice', [
-      request.uuid,
-      'balance: ' + balance,
-      'num_satoshis: ' + decoded.num_satoshis,
-    ])
-
-    if (
-      balance >=
-      +decoded.num_satoshis + Math.floor(+decoded.num_satoshis * forwardReserveFee) + 1
-    ) {
-      // got enough balance, including 1% of payment amount - reserve for fees
-      if (identityPubkey === decoded.destination) {
-        // this is internal invoice
-        // now, receiver add balance
-        let recipientId = await getUserIdByPaymentHash(decoded.payment_hash)
-        console.log('Recipient:', recipientId)
-        if (!recipientId) {
-          await releaseLock(lockKey)
-          return errorGeneralServerError(response)
-        }
-
-        if (await getPaymentHashPaid(decoded.payment_hash)) {
-          // this internal invoice was paid, no sense paying it again
-          await releaseLock(lockKey)
-          return errorLnd(response)
-        }
-        await clearBalanceCache(recipientId)
-
-        // sender spent his balance:
-        await clearBalanceCache(userId)
-        await savePaidLndInvoice(
-          {
-            timestamp: Math.floor(+new Date() / 1000),
-            type: 'paid_invoice',
-            value: +decoded.num_satoshis + Math.floor(+decoded.num_satoshis * intraHubFee),
-            fee: Math.floor(+decoded.num_satoshis * intraHubFee),
-            memo: decodeURIComponent(decoded.description),
-            pay_req: paymentRequest,
-          },
-          userId
-        )
-
-        await markAsPaidInDatabase(request.body.invoice)
-
-        // now, faking LND callback about invoice paid:
-        let preimage = await getPreimage(request.body.invoice)
-        if (preimage) {
-          subscribeInvoicesCallCallback({
-            state: 'SETTLED',
-            memo: decoded.description,
-            r_preimage: Buffer.from(preimage, 'hex'),
-            r_hash: Buffer.from(decoded.payment_hash, 'hex'),
-            amt_paid_sat: +decoded.num_satoshis,
-          })
-        }
-        await releaseLock(lockKey)
-        return response.send(decoded)
-      }
-
-      // else - regular lightning network payment:
-
-      if (!decoded.num_satoshis) {
-        // tip invoice, but someone forgot to specify amount
-        await releaseLock(lockKey)
-        return errorBadArguments(response)
-      }
-      await lockFunds(paymentRequest, decoded, userId)
-      let amount = +decoded.num_satoshis
-      let fee = Math.floor(amount * forwardReserveFee) + 1
-      let payment = await sendPayment(amount, fee, paymentRequest)
-      if (!payment || !!payment.payment_error) {
-        // payment failed
-        /*await */ releaseLock(lockKey)
-        return errorPaymentFailed(response)
-      }
-      // payment callback
-      await unlockFunds(paymentRequest, userId)
-      if (payment.payment_route && payment.payment_route.total_amt_msat) {
-        payment = processSendPaymentResponse(payment, paymentRequest)
-        payment.pay_req = paymentRequest
-        payment.decoded = decoded
-        // payment.payment_route.total_fees = Math.floor(decoded.num_satoshis * forwardReserveFee)
-        // payment.payment_route.total_amt = decoded.num_satoshis
-        await savePaidLndInvoice(payment, userId)
-        await clearBalanceCache(userId)
-        await releaseLock(lockKey)
-        return response.send(payment)
-      }
-      return null
-    } else {
-      await releaseLock(lockKey)
-      return errorNotEnoughBalance(response)
-    }
+  if (!paymentRequest) return errorBadArguments(response)
+  let freeAmount = 0
+  if (request.body.amount) {
+    freeAmount = parseInt(request.body.amount)
+    if (freeAmount <= 0) return errorBadArguments(response)
   }
+
+  // obtaining a lock
+  let lockKey: string = 'invoice_paying_for_' + userId
+  if (!(await obtainLock(lockKey))) {
+    return errorGeneralServerError(response)
+  }
+
+  let balance: number = await calculateBalance(userId).catch(err => {
+    console.log('', [request.uuid, 'error running calculateBalance():', err.message])
+    return -1
+  })
+  if (balance < 0) {
+    await releaseLock(lockKey)
+    return errorTryAgainLater(response)
+  }
+
+  let decoded = await decodePaymentRequest(paymentRequest)
+  if (!decoded) {
+    await releaseLock(lockKey)
+    return errorNotAValidInvoice(response)
+  } else if (+decoded.num_satoshis === 0) {
+    // 'tip' invoices
+    decoded.num_satoshis = freeAmount.toFixed(0)
+  }
+
+  console.log('/payinvoice', [
+    request.uuid,
+    'balance: ' + balance,
+    'num_satoshis: ' + decoded.num_satoshis,
+  ])
+
+  if (
+    balance >=
+    +decoded.num_satoshis + Math.floor(+decoded.num_satoshis * forwardReserveFee) + 1
+  ) {
+    // got enough balance, including 1% of payment amount - reserve for fees
+    if (identityPubkey === decoded.destination) {
+      // this is internal invoice
+      // now, receiver add balance
+      let recipientId = await getUserIdByPaymentHash(decoded.payment_hash)
+      console.log('Recipient:', recipientId)
+      if (!recipientId) {
+        await releaseLock(lockKey)
+        return errorGeneralServerError(response)
+      }
+
+      if (await getPaymentHashPaid(decoded.payment_hash)) {
+        // this internal invoice was paid, no sense paying it again
+        await releaseLock(lockKey)
+        return errorLnd(response)
+      }
+      await clearBalanceCache(recipientId)
+
+      // sender spent his balance:
+      await clearBalanceCache(userId)
+      await savePaidLndInvoice(
+        {
+          timestamp: Math.floor(+new Date() / 1000),
+          type: 'paid_invoice',
+          value: +decoded.num_satoshis + Math.floor(+decoded.num_satoshis * intraHubFee),
+          fee: Math.floor(+decoded.num_satoshis * intraHubFee),
+          memo: decodeURIComponent(decoded.description),
+          pay_req: paymentRequest,
+        },
+        userId
+      )
+
+      await markAsPaidInDatabase(request.body.invoice)
+
+      // now, faking LND callback about invoice paid:
+      let preimage = await getPreimage(request.body.invoice)
+      if (preimage) {
+        subscribeInvoicesCallCallback({
+          state: 'SETTLED',
+          memo: decoded.description,
+          r_preimage: Buffer.from(preimage, 'hex'),
+          r_hash: Buffer.from(decoded.payment_hash, 'hex'),
+          amt_paid_sat: +decoded.num_satoshis,
+        })
+      }
+      await releaseLock(lockKey)
+      return response.send(decoded)
+    }
+
+    // else - regular lightning network payment:
+
+    if (!decoded.num_satoshis) {
+      // tip invoice, but someone forgot to specify amount
+      await releaseLock(lockKey)
+      return errorBadArguments(response)
+    }
+    await lockFunds(paymentRequest, decoded, userId)
+    let amount = +decoded.num_satoshis
+    let fee = Math.floor(amount * forwardReserveFee) + 1
+    let payment = await sendPayment(amount, fee, paymentRequest)
+    if (!payment || !!payment.payment_error) {
+      // payment failed
+      /*await */ releaseLock(lockKey)
+      return errorPaymentFailed(response)
+    }
+    // payment callback
+    await unlockFunds(paymentRequest, userId)
+    if (payment.payment_route && payment.payment_route.total_amt_msat) {
+      payment = processSendPaymentResponse(payment, paymentRequest)
+      payment.pay_req = paymentRequest
+      payment.decoded = decoded
+      // payment.payment_route.total_fees = Math.floor(decoded.num_satoshis * forwardReserveFee)
+      // payment.payment_route.total_amt = decoded.num_satoshis
+      await savePaidLndInvoice(payment, userId)
+      await clearBalanceCache(userId)
+      await releaseLock(lockKey)
+      return response.send(payment)
+    }
+    return null
+  } else {
+    await releaseLock(lockKey)
+    return errorNotEnoughBalance(response)
+  }
+}
+
+export default route

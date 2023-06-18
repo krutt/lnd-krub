@@ -2,12 +2,11 @@
 
 // imports
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
-import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
 import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
 import { promisify } from 'node:util'
 
-export default (lightning: LightningService): LNDKrubRouteFunc =>
+export default (lightning: LightningService) =>
   /**
    *
    * @param {LNDKrubRequest} request

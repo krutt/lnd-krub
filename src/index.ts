@@ -72,21 +72,21 @@ import payInvoice from '@/server/routes/payInvoice.route'
 // import queryRoutes from '@/server/routes/queryRoutes.route'
 import transactions from '@/server/routes/transactions.route'
 import userInvoices from '@/server/routes/userInvoices.route'
-router.post('/auth', postLimiter, authenticate())
-router.post('/addinvoice', postLimiter, addInvoice())
-router.get('/balance', postLimiter, balance())
-router.get('/channels', channels())
-router.get('/checkpayment/:payment_hash', checkPayment())
-router.get('/checkrouteinvoice', checkRouteInvoice())
-router.post('/create', postLimiter, createAccount())
-router.get('/decodeinvoice', postLimiter, decodeInvoice())
-router.get('/getbtc', bitcoinAddress())
-router.get('/getchaninfo/:channelId', channelInfo())
-router.get('/getinfo', postLimiter, info())
-router.get('/getpending', postLimiter, pendingTransactions())
-router.get('/gettxs', postLimiter, transactions())
-router.get('/getuserinvoices', postLimiter, userInvoices())
-router.post('/payinvoice', postLimiter, payInvoice())
+router.post('/auth', postLimiter, authenticate)
+router.post('/addinvoice', postLimiter, addInvoice)
+router.get('/balance', postLimiter, balance)
+router.get('/channels', channels)
+router.get('/checkpayment/:payment_hash', checkPayment)
+router.get('/checkrouteinvoice', checkRouteInvoice)
+router.post('/create', postLimiter, createAccount)
+router.get('/decodeinvoice', postLimiter, decodeInvoice)
+router.get('/getbtc', bitcoinAddress)
+router.get('/getchaninfo/:channelId', channelInfo)
+router.get('/getinfo', postLimiter, info)
+router.get('/getpending', postLimiter, pendingTransactions)
+router.get('/gettxs', postLimiter, transactions)
+router.get('/getuserinvoices', postLimiter, userInvoices)
+router.post('/payinvoice', postLimiter, payInvoice)
 // router.get('/queryroutes/:source/:dest/:amt', queryRoutes(lightning))
 
 /**
@@ -101,9 +101,9 @@ if (isProduction) {
   /**
    * development: unprotected dashboard endpoint and faucet endpoint
    */
-  router.post('/faucet', faucet())
+  router.post('/faucet', faucet)
 }
-router.put('/dashboard', dashboard())
+router.put('/dashboard', dashboard)
 
 app.use('/', router)
 
