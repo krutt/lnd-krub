@@ -3,9 +3,9 @@
 // imports
 import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
-import { decodePaymentRequest } from '@/server/models/invoice'
+import { decodePaymentRequest } from '@/server/stores/invoice'
 import { errorBadAuth, errorGeneralServerError, errorNotAValidInvoice } from '@/server/exceptions'
-import { loadUserByAuthorization } from '@/server/models/user'
+import { loadUserByAuthorization } from '@/server/stores/user'
 
 /**
  *

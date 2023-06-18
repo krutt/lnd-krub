@@ -11,7 +11,7 @@ import {
   getTransactions,
   getUserAddress,
   loadUserByAuthorization,
-} from '@/server/models/user'
+} from '@/server/stores/user'
 
 /**
  *

@@ -1,10 +1,10 @@
-// ~~/src/server/models/invoice.ts
+// ~~/src/server/stores/invoice.ts
 
 // imports
 import type { Invoice } from '@/types'
 import type { Tag } from '@/types'
 import bolt11, { PaymentRequestObject, TagData } from 'bolt11'
-import { cache, lightning } from '@/server/models'
+import { cache, lightning } from '@/server/stores'
 import { createHash } from 'node:crypto'
 import { promisify } from 'node:util'
 

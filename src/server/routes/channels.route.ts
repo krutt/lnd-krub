@@ -4,8 +4,8 @@
 import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
 import { errorBadAuth, errorLnd } from '@/server/exceptions'
-import { loadUserByAuthorization } from '@/server/models/user'
-import { listChannels } from '@/server/models/channel'
+import { loadUserByAuthorization } from '@/server/stores/user'
+import { listChannels } from '@/server/stores/channel'
 
 /**
  *

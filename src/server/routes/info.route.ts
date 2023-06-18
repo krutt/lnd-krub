@@ -4,8 +4,8 @@
 import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
 import { errorBadAuth, errorLnd } from '@/server/exceptions'
-import { loadNodeInformation } from '@/server/models/dashblob'
-import { loadUserByAuthorization } from '@/server/models/user'
+import { loadNodeInformation } from '@/server/stores/dashblob'
+import { loadUserByAuthorization } from '@/server/stores/user'
 
 /**
  *

@@ -1,10 +1,10 @@
-// ~~/src/server/models/payment.ts
+// ~~/src/server/stores/payment.ts
 
 // imports
 import type { Payment } from '@/types'
 import bolt11, { PaymentRequestObject, TagsObject } from 'bolt11'
 import { forwardReserveFee, intraHubFee } from '@/configs'
-import { lightning } from '@/server/models'
+import { lightning } from '@/server/stores'
 import { promisify } from 'node:util'
 
 /**

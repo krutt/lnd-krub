@@ -1,7 +1,7 @@
-// ~~/src/server/models/lock.ts
+// ~~/src/server/stores/lock.ts
 
 // imports
-import { cache } from '@/server/models'
+import { cache } from '@/server/stores'
 
 /**
  * Tries to obtain lock in single-threaded Redis.

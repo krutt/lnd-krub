@@ -1,8 +1,8 @@
-/* ~~/src/server/models/channel.ts */
+/* ~~/src/server/stores/channel.ts */
 
 // imports
 import { Channel } from '@/types'
-import { cache, lightning } from '@/server/models'
+import { cache, lightning } from '@/server/stores'
 import { promisify } from 'node:util'
 
 // constants

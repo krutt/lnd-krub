@@ -1,8 +1,8 @@
-/* ~~/src/server/models/dashblob.ts */
+/* ~~/src/server/stores/dashblob.ts */
 
 // imports
 import { Dashblob } from '@/types'
-import { lightning } from '@/server/models'
+import { lightning } from '@/server/stores'
 import { promisify } from 'node:util'
 
 export const loadNodeInformation = async (): Promise<Dashblob | void> =>

@@ -9,8 +9,8 @@ import {
   errorLnd,
   errorSunsetAddInvoice,
 } from '@/server/exceptions'
-import { loadUserByAuthorization, saveUserInvoice } from '@/server/models/user'
-import { createInvoice, savePreimage } from '@/server/models/invoice'
+import { loadUserByAuthorization, saveUserInvoice } from '@/server/stores/user'
+import { createInvoice, savePreimage } from '@/server/stores/invoice'
 import { randomBytes } from 'node:crypto'
 import { sunset } from '@/configs'
 

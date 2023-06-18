@@ -8,7 +8,7 @@ import {
   fetchAccessTokens,
   loadUserByLoginAndPassword,
   loadUserByRefreshToken,
-} from '@/server/models/user'
+} from '@/server/stores/user'
 
 /**
  *

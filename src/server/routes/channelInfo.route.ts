@@ -3,7 +3,7 @@
 // imports
 import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
-import { describeLightningGraph } from '@/server/models/graph'
+import { describeLightningGraph } from '@/server/stores/graph'
 
 /**
  *

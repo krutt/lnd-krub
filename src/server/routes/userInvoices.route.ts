@@ -4,7 +4,7 @@
 import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
 import { errorBadAuth } from '@/server/exceptions'
-import { loadUserByAuthorization } from '@/server/models/user'
+import { loadUserByAuthorization } from '@/server/stores/user'
 
 /**
  *

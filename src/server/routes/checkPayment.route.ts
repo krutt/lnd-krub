@@ -4,7 +4,7 @@
 import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
 import { errorBadAuth } from '@/server/exceptions'
-import { getPaymentHashPaid, loadUserByAuthorization, syncInvoicePaid } from '@/server/models/user'
+import { getPaymentHashPaid, loadUserByAuthorization, syncInvoicePaid } from '@/server/stores/user'
 
 /**
  *

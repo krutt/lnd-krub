@@ -9,7 +9,7 @@ import {
   generateUserAddress,
   getUserAddress,
   loadUserByAuthorization,
-} from '@/server/models/user'
+} from '@/server/stores/user'
 
 /**
  *

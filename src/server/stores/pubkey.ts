@@ -1,7 +1,7 @@
-/* ~~/src/server/models/pubkey.ts */
+/* ~~/src/server/stores/pubkey.ts */
 
 // imports
-import { cache, lightning } from '@/server/models'
+import { cache, lightning } from '@/server/stores'
 import { promisify } from 'node:util'
 
 // constants

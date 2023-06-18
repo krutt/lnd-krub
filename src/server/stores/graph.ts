@@ -1,8 +1,8 @@
-// ~~/src/server/models/graph.ts
+// ~~/src/server/stores/graph.ts
 
 // imports
 import type { Graph } from '@/types'
-import { cache, lightning } from '@/server/models'
+import { cache, lightning } from '@/server/stores'
 import { promisify } from 'node:util'
 
 export const describeLightningGraph = async (): Promise<Graph> => {

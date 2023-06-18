@@ -13,7 +13,7 @@ import {
   getUserIdByPaymentHash,
   savePaidLndInvoice,
   unlockFunds,
-} from '@/server/models/user'
+} from '@/server/stores/user'
 import {
   errorBadAuth,
   errorBadArguments,
@@ -25,15 +25,15 @@ import {
   errorTryAgainLater,
 } from '@/server/exceptions'
 import { forwardReserveFee, intraHubFee } from '@/configs'
-import { fetchIdentityPubkey } from '@/server/models/pubkey'
+import { fetchIdentityPubkey } from '@/server/stores/pubkey'
 import {
   decodePaymentRequest,
   getPreimage,
   markAsPaidInDatabase,
   setIsPaymentHashPaidInDatabase,
-} from '@/server/models/invoice'
-import { obtainLock, releaseLock } from '@/server/models/lock'
-import { processSendPaymentResponse, sendPayment } from '@/server/models/payment'
+} from '@/server/stores/invoice'
+import { obtainLock, releaseLock } from '@/server/stores/lock'
+import { processSendPaymentResponse, sendPayment } from '@/server/stores/payment'
 
 const subscribeInvoicesCallCallback = async (response: any) => {
   if (response.state === 'SETTLED') {

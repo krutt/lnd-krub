@@ -3,11 +3,11 @@
 // imports
 import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
-import { calculateBalance, clearBalanceCache } from '@/server/models/user'
-import { createInvoice } from '@/server/models/invoice'
+import { calculateBalance, clearBalanceCache } from '@/server/stores/user'
+import { createInvoice } from '@/server/stores/invoice'
 import { errorBadAuth, errorGeneralServerError } from '@/server/exceptions'
-import { loadUserByAuthorization, savePaidLndInvoice, saveUserInvoice } from '@/server/models/user'
-import { markAsPaidInDatabase, savePreimage } from '@/server/models/invoice'
+import { loadUserByAuthorization, savePaidLndInvoice, saveUserInvoice } from '@/server/stores/user'
+import { markAsPaidInDatabase, savePreimage } from '@/server/stores/invoice'
 import { randomBytes } from 'node:crypto'
 
 /**

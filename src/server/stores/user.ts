@@ -1,13 +1,13 @@
-// ~~/src/server/models/user.ts
+// ~~/src/server/stores/user.ts
 
 // imports
 import BigNumber from 'bignumber.js'
 import type { Payment, User } from '@/types'
 import bolt11, { TagData } from 'bolt11'
-import { bitcoin, cache, lightning } from '@/server/models'
+import { bitcoin, cache, lightning } from '@/server/stores'
 import { createHash, randomBytes } from 'node:crypto'
 import { decodeRawHex } from '@/cypher'
-import { obtainLock, releaseLock } from '@/server/models/lock'
+import { obtainLock, releaseLock } from '@/server/stores/lock'
 import { promisify } from 'node:util'
 
 // static cache:

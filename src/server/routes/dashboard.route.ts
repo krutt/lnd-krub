@@ -4,8 +4,8 @@
 import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
 import { errorLnd } from '@/server/exceptions'
-import { listChannels } from '@/server/models/channel'
-import { loadNodeInformation } from '@/server/models/dashblob'
+import { listChannels } from '@/server/stores/channel'
+import { loadNodeInformation } from '@/server/stores/dashblob'
 
 /**
  *

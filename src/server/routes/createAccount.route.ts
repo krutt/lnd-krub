@@ -5,7 +5,7 @@ import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
 import { errorBadArguments, errorSunset } from '@/server/exceptions'
 import { sunset } from '@/configs'
-import { createUser, saveMetadata } from '@/server/models/user'
+import { createUser, saveMetadata } from '@/server/stores/user'
 
 /**
  *

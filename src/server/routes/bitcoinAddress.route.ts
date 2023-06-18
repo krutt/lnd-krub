@@ -10,7 +10,7 @@ import {
   generateUserAddress,
   getUserAddress,
   watchAddress,
-} from '@/server/models/user'
+} from '@/server/stores/user'
 
 /**
  *
