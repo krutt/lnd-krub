@@ -17,10 +17,8 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
   console.log('/decodeinvoice', [request.uuid])
   let userId = await loadUserByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
-
   let paymentRequest = request.query.invoice || request.query.payment_request
   if (!paymentRequest) return errorGeneralServerError(response)
-
   let info = await decodePaymentRequest(paymentRequest.toString())
   if (!info) return errorNotAValidInvoice(response)
   return response.send(info)
