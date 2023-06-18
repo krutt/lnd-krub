@@ -3,10 +3,11 @@
 // imports
 import '../assets/styles.css'
 import { AwesomeQR } from 'awesome-qr'
+import { Channel, Dashblob } from '../types'
 import Mustache from 'mustache'
 import wellKnown from '../assets/pubkeys.json'
 
-let render = (info, channels, qrBuffer) => {
+let render = (dashblob: Dashblob, channels: Channel[], qrBuffer: string | undefined) => {
   document.querySelector<HTMLDivElement>('#app')!.innerHTML = Mustache.render(
     `
     <div class="holder">
@@ -125,7 +126,7 @@ let render = (info, channels, qrBuffer) => {
       </footer>
     </div>
   `,
-    { ...info, ...channels, qrBuffer }
+    { ...dashblob, channels, qrBuffer }
   )
 }
 
@@ -143,17 +144,17 @@ let fetchInfo = async () => {
       }, {})
     body['_csrf'] = cookies['xsrf-token']
   }
-  let dashboard = await (
+  let info = await (
     await fetch('/dashboard', { body: JSON.stringify(body), method, headers })
   ).json()
-  let info = dashboard[0]
-  let lightningListChannels = dashboard[1]
-  let channels = []
+  let dashblob: Dashblob = info[0]
+  let channels: Channel[] = info[1]
+  let displayChannels: Channel[] = []
   let max_chan_capacity = -1
-  for (const channel of lightningListChannels.channels) {
+  for (const channel of channels) {
     max_chan_capacity = Math.max(max_chan_capacity, channel.capacity)
   }
-  for (let channel of lightningListChannels.channels) {
+  for (let channel of channels) {
     let magic = max_chan_capacity / 100
     channel.local = channel.local_balance * 1
     channel.total = channel.capacity * 1
@@ -161,17 +162,16 @@ let fetchInfo = async () => {
     channel.capacity_btc = channel.capacity / 100000000
     channel.name = wellKnown[channel.remote_pubkey]
     if (channel.name) {
-      channels.unshift(channel)
+      displayChannels.unshift(channel)
     } else {
-      channels.push(channel)
+      displayChannels.push(channel)
     }
   }
-  lightningListChannels.channels = channels
   // @ts-ignore
   let baseUrl = 'http://' + import.meta.env.BASE_URL
   let qrCode: string = 'bluewallet:setlndhuburl?url=' + encodeURIComponent(baseUrl)
   let qrBuffer = await new AwesomeQR({ text: qrCode, size: 500 }).draw()
-  render(info, lightningListChannels, qrBuffer)
+  render(dashblob, displayChannels, qrBuffer?.toString())
 }
 
 window.onload = () => {

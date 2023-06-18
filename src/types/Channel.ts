@@ -1,7 +1,14 @@
 /* ~~/src/types */
 
 export type Channel = {
-  /* TODO: Probably should define some attributes here. */
+  capacity: number
+  capacity_btc: number
+  local: number
+  local_balance: number
+  name?: string // well known
+  remote_pubkey: string
+  size: number
+  total: number
 }
 
 export default Channel
