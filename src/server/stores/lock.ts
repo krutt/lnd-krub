@@ -9,7 +9,7 @@ import { cache } from '@/server/stores'
  *
  * @returns {Promise<boolean>}
  */
-export const obtainLock = async (lockKey: string) => {
+export const obtainLock = async (lockKey: string): Promise<boolean> => {
   const timestamp = +new Date()
   let setResult = await cache.setnx(lockKey, timestamp)
   if (!setResult) {
@@ -26,6 +26,4 @@ export const obtainLock = async (lockKey: string) => {
 /**
  * Releases the lock set on redis
  */
-export const releaseLock = async (lockKey: string) => {
-  await cache.del(lockKey)
-}
+export const releaseLock = async (lockKey: string): Promise<number> => await cache.del(lockKey)
