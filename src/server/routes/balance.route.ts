@@ -23,14 +23,12 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
   if (!userId) return errorBadAuth(response)
   console.log('/balance', [request.uuid, 'userid: ' + userId])
   if (!(await getUserAddress(userId))) await generateUserAddress(userId) // onchain address needed further
-  try {
-    let balance = await calculateBalance(userId)
-    if (balance < 0) balance = 0
-    return response.send({ BTC: { AvailableBalance: balance } })
-  } catch (err) {
-    console.error('', [request.uuid, 'error getting balance:', err, 'userid:', userId])
-    return errorGeneralServerError(response)
-  }
+  return await calculateBalance(userId)
+    .then(balance => response.send({ BTC: { AvailableBalance: Math.max(balance, 0) } }))
+    .catch(err => {
+      console.error('', [request.uuid, 'error getting balance:', err, 'userid:', userId])
+      return errorGeneralServerError(response)
+    })
 }
 
 export default route
