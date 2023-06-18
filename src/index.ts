@@ -103,7 +103,7 @@ if (isProduction) {
   /**
    * development: unprotected dashboard endpoint and faucet endpoint
    */
-  router.post('/faucet', faucet(lightning))
+  router.post('/faucet', faucet())
 }
 router.put('/dashboard', dashboard(lightning))
 
