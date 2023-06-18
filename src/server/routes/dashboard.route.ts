@@ -3,12 +3,12 @@
 // imports
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
 import type { LNDKrubRouteFunc } from '@/types/LNDKrubRouteFunc'
-import type { LightningService } from '@/server/services/lightning'
 import type { Response } from 'express'
 import { errorLnd } from '@/server/exceptions'
-import { promisify } from 'node:util'
+import { listChannels } from '@/server/models/channel'
+import { loadNodeInformation } from '@/server/models/dashblob'
 
-export default (lightning: LightningService): LNDKrubRouteFunc =>
+export default (): LNDKrubRouteFunc =>
   /**
    *
    * @param {LNDKrubRequest} request
@@ -17,9 +17,8 @@ export default (lightning: LightningService): LNDKrubRouteFunc =>
    */
   async (request: LNDKrubRequest, response: Response): Promise<Response> => {
     console.log('/dashboard', [request.uuid])
-    let result = await Promise.all([
-      promisify(lightning.getInfo).bind(lightning)({}),
-      promisify(lightning.listChannels).bind(lightning)({}),
-    ]).catch(() => errorLnd(response))
+    let result = await Promise.all([loadNodeInformation(), listChannels()]).catch(() =>
+      errorLnd(response)
+    )
     return response.send(result)
   }

@@ -4,7 +4,6 @@
 import { BitcoinService } from '@/server/services/bitcoin'
 import { CacheService } from '@/server/services/cache'
 import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
-import { LightningService } from '@/server/services/lightning'
 import bodyParser from 'body-parser'
 import cors from '@/server/middlewares/cors'
 import express, { Express, Response, Router } from 'express'
@@ -18,7 +17,6 @@ import rateLimiter from 'express-rate-limit'
 // services
 let bitcoin: BitcoinService = new BitcoinService()
 let cache: CacheService = new CacheService()
-let lightning: LightningService = new LightningService()
 
 // run-time constants
 const isProduction = process.env.NODE_ENV === 'production'
@@ -105,7 +103,7 @@ if (isProduction) {
    */
   router.post('/faucet', faucet())
 }
-router.put('/dashboard', dashboard(lightning))
+router.put('/dashboard', dashboard())
 
 app.use('/', router)
 
