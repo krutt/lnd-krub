@@ -87,7 +87,7 @@ router.get('/getpending', postLimiter, pendingTransactions)
 router.get('/gettxs', postLimiter, transactions)
 router.get('/getuserinvoices', postLimiter, userInvoices)
 router.post('/payinvoice', postLimiter, payInvoice)
-// router.get('/queryroutes/:source/:dest/:amt', queryRoutes(lightning))
+// router.get('/queryroutes/:source/:dest/:amt', queryRoutes)
 
 /**
  * production: limit dashboard endpoint with cross-site request forgery protection

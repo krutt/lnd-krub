@@ -1,27 +1,26 @@
-// ~~/src/server/routes/queryRoutes.route.ts
+/* ~~/src/server/routes/queryRoutes.route.ts */
 
 // imports
-import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
-import type { LightningService } from '@/server/services/lightning'
+import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
-import { promisify } from 'node:util'
+import { errorBadArguments, errorLnd } from '@/server/exceptions'
+import { queryRoutes } from '@/server/stores/route'
 
-export default (lightning: LightningService) =>
-  /**
-   *
-   * @param {LNDKrubRequest} request
-   * @param {Express.Response} response
-   * @returns {Express.Response}
-   */
-  async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-    console.log('/queryroutes', [request.uuid])
-    let query = promisify(lightning.queryRoutes)
-      .bind(lightning)({
-        pub_key: request.params.dest,
-        use_mission_control: true,
-        amt: request.params.amt,
-        source_pub_key: request.params.source,
-      })
-      .catch(console.error)
-    return response.send(query)
-  }
+/**
+ *
+ * @param {LNDKrubRequest} request
+ * @param {Express.Response} response
+ * @returns {Express.Response}
+ */
+export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
+  console.log('/queryroutes', [request.uuid])
+  let amount: number = parseInt(request.params.amt || request.params.amount || '0')
+  let destination: string = request.params.dest || request.params.destination
+  let source: string = request.params.source || request.params.src
+  if (!amount || !destination || !source) return errorBadArguments(response)
+  let routes = await queryRoutes(amount, destination, source)
+  if (!routes) return errorLnd(response)
+  return response.send(routes)
+}
+
+export default route
