@@ -10,9 +10,6 @@ import { decodeRawHex } from '@/cypher'
 import { obtainLock, releaseLock } from '@/server/stores/lock'
 import { promisify } from 'node:util'
 
-// static cache:
-let _invoice_ispaid_cache = {}
-
 export const addAddress = async (address: string, userId: string) => {
   await cache.set('bitcoin_address_for_' + userId, address)
 }
@@ -326,34 +323,20 @@ export const getUserInvoices = async (userId: string, limit: number = 0): Promis
         payment.payment_hash = tag.data
       }
     }
-
     let paymentHashPaidAmountSat = 0
     let { payment_hash } = payment as Payment
-    if (_invoice_ispaid_cache[payment_hash]) {
-      // static cache hit
-      payment.ispaid = true
-      paymentHashPaidAmountSat = _invoice_ispaid_cache[payment_hash]
-    } else {
-      // static cache miss, asking redis cache
-      paymentHashPaidAmountSat = await getPaymentHashPaid(payment_hash)
-      if (paymentHashPaidAmountSat) payment.ispaid = true
-    }
-
+    paymentHashPaidAmountSat = await getPaymentHashPaid(payment_hash)
+    if (paymentHashPaidAmountSat) payment.ispaid = true
     if (!payment.ispaid) {
       if (decoded && decoded.timestamp > +new Date() / 1000 - 3600 * 24 * 5) {
         // if invoice is not too old we query lnd to find out if its paid
         payment.ispaid = await syncInvoicePaid(payment_hash, userId)
         paymentHashPaidAmountSat = await getPaymentHashPaid(payment_hash) // since we have just saved it
       }
-    } else {
-      _invoice_ispaid_cache[payment_hash] = paymentHashPaidAmountSat
     }
-
     payment.amt =
-      // @ts-ignore
-      paymentHashPaidAmountSat && parseInt(paymentHashPaidAmountSat) > decoded.satoshis
-        ? // @ts-ignore
-          parseInt(paymentHashPaidAmountSat)
+      paymentHashPaidAmountSat && paymentHashPaidAmountSat > decoded.satoshis
+        ? paymentHashPaidAmountSat
         : decoded.satoshis
     payment.expire_time = 3600 * 24
     // ^^^default; will keep for now. if we want to un-hardcode it - it should be among tags (`expire_time`)
@@ -361,7 +344,6 @@ export const getUserInvoices = async (userId: string, limit: number = 0): Promis
     payment.type = 'user_invoice'
     result.push(payment)
   }
-
   return result
 }
 
