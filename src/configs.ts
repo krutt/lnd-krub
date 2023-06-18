@@ -1,4 +1,4 @@
-// ~~/src/configs.ts
+/* ~~/src/configs.ts */
 
 const isProduction: boolean = process.env.NODE_ENV === 'production'
 if (!isProduction) {
