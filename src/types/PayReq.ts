@@ -11,9 +11,9 @@ export type PayReq = {
   cltv_expiry: string
   description: string
   description_hash: string
-  fallback_addr: string
   destination: string
   expiry: string
+  fallback_addr: string
   features: { [key:string]: Feature }
   num_msat: string
   num_satoshis: string
