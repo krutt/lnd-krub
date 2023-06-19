@@ -1,4 +1,4 @@
-/* ~~/src/server/stores/Dashblob.ts */
+/* ~~/src/types/Dashblob.ts */
 
 type Chain = {
   chain: 'bitcoin'
