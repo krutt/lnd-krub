@@ -30,4 +30,4 @@ export type PayReqJSON = PayReq & {
   }
 }
 
-export default PaymentRequest
+export default PayReq
