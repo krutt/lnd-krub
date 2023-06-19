@@ -30,20 +30,20 @@ let decodeFormat = (transaction: Transaction) => ({
   locktime: transaction.locktime,
 })
 
-let decodeInput = (transaction: Transaction): Array<Input> => {
-  let result: Input[] = []
-  transaction.ins.forEach((input, n) => {
-    result.push({
+let decodeInput = (transaction: Transaction): Input[] => {
+  let inputs: Input[] = []
+  transaction.ins.forEach(input => {
+    inputs.push({
       txid: input.hash.reverse().toString('hex'),
       n: input.index,
       script: script.toASM(input.script),
       sequence: input.sequence,
     })
   })
-  return result
+  return inputs
 }
 
-let decodeOutput = (network: Network, transaction: Transaction): Array<Output> => {
+let decodeOutput = (network: Network, transaction: Transaction): Output[] => {
   let format = (out, n, network) => {
     let vout = {
       satoshi: out.value,

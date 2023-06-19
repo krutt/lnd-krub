@@ -144,8 +144,10 @@ app.on('event:startup', () => {
       process.exit(5)
     }
   })
+  // @ts-ignore
   cache.monitor(function (err, monitor) {
     if (!monitor) return
+    // @ts-ignore
     monitor.on('monitor', function (time, args, source, database) {
       // console.log('REDIS', JSON.stringify(args))
     })

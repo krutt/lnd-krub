@@ -7,7 +7,7 @@
     "moduleResolution": "Node",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": false,
+    "noUnusedParameters": true,
     "lib": ["ESNext", "DOM"],
     "paths": {
       "@/*": ["./src/*"],
