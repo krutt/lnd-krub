@@ -1,7 +1,7 @@
 // ~~/src/server/stores/invoice.ts
 
 // imports
-import type { AddInvoiceResponse, Invoice, PayReq, Tag } from '@/types'
+import type { AddInvoiceResponse, Invoice, PayReq } from '@/types'
 import { PaymentRequestObject, TagData, decode as decodeBOLT11 } from 'bolt11'
 import { cache, lightning } from '@/server/stores'
 import { createHash } from 'node:crypto'
@@ -42,8 +42,8 @@ export const decodePaymentRequest = async (
 export const getIsMarkedAsPaidInDatabase = async (bolt11: string) => {
   if (!bolt11) throw new Error('BOLT11 payment request is not provided.')
   let decoded: PaymentRequestObject = decodeBOLT11(bolt11)
-  let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
-  let paymentHash: TagData = paymentTag?.data
+  let tag = decoded.tags.find(tag => tag.tagName === 'payment_hash')
+  let paymentHash = tag?.data
   if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
   return await getIsPaymentHashMarkedPaidInDatabase(paymentHash)
 }
@@ -55,8 +55,8 @@ const getIsPaymentHashMarkedPaidInDatabase = async (paymentHash: TagData) => {
 export const getPreimage = async (bolt11: string): Promise<string> => {
   if (!bolt11) throw new Error('BOLT11 payment request is not provided.')
   let decoded: PaymentRequestObject = decodeBOLT11(bolt11)
-  let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
-  let paymentHash: TagData = paymentTag?.data
+  let tag = decoded.tags.find(tag => tag.tagName === 'payment_hash')
+  let paymentHash = tag?.data
   if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
   return await cache.get('preimage_for_' + paymentHash)
 }
@@ -86,16 +86,16 @@ export const lookupInvoice = async (paymentHash: string): Promise<Invoice | null
 
 export const markAsPaidInDatabase = async (bolt11: string) => {
   let decoded: PaymentRequestObject = decodeBOLT11(bolt11)
-  let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
-  let paymentHash: TagData = paymentTag?.data
+  let tag = decoded.tags.find(tag => tag.tagName === 'payment_hash')
+  let paymentHash = tag?.data
   if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
   return await setIsPaymentHashPaidInDatabase(paymentHash, decoded.satoshis)
 }
 
 export const markAsUnpaidInDatabase = async (bolt11: string) => {
   let decoded: PaymentRequestObject = decodeBOLT11(bolt11)
-  let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
-  let paymentHash: TagData = paymentTag?.data
+  let tag = decoded.tags.find(tag => tag.tagName === 'payment_hash')
+  let paymentHash = tag?.data
   if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
   return await setIsPaymentHashPaidInDatabase(paymentHash)
 }
