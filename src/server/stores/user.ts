@@ -23,15 +23,9 @@ export const createUser = async (): Promise<{
   password: string
   userId: string
 }> => {
-  let buffer = randomBytes(10)
-  let login = buffer.toString('hex')
-
-  buffer = randomBytes(10)
-  let password = buffer.toString('hex')
-
-  buffer = randomBytes(24)
-  let userId = buffer.toString('hex')
-
+  let login = randomBytes(10).toString('hex')
+  let password = randomBytes(10).toString('hex')
+  let userId = randomBytes(24).toString('hex')
   await saveUserToDatabase(login, password, userId)
   return { login, password, userId }
 }
@@ -324,10 +318,7 @@ export const getUserInvoices = async (userId: string, limit: number = 0): Promis
         amountPaid = await fetchPaymentAmountPaid(payment_hash) // since we have just saved it
       }
     }
-    payment.amt =
-      amountPaid && amountPaid > decoded.satoshis
-        ? amountPaid
-        : decoded.satoshis
+    payment.amt = amountPaid && amountPaid > decoded.satoshis ? amountPaid : decoded.satoshis
     payment.expire_time = 3600 * 24
     // ^^^default; will keep for now. if we want to un-hardcode it - it should be among tags (`expire_time`)
     payment.timestamp = decoded.timestamp
