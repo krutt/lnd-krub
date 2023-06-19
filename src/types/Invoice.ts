@@ -21,8 +21,8 @@ export type Invoice = {
 
 export type InvoiceJSON = Invoice & {
   r_hash: {
+    data: number[]
     type: 'Buffer'
-    data: Array<number>
   }
 }
 

@@ -5,5 +5,5 @@ import { Dashblob } from '@/types'
 import { lightning } from '@/server/stores'
 import { promisify } from 'node:util'
 
-export const loadNodeInformation = async (): Promise<Dashblob | void> =>
+export const loadNodeInformation = async (): Promise<Dashblob | null> =>
   await promisify(lightning.getInfo).bind(lightning)({}).catch(console.error)

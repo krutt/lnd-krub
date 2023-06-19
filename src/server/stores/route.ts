@@ -9,7 +9,7 @@ export const queryRoutes = async (
   amount: number,
   destination: string,
   source: string
-): Promise<Route[] | void> =>
+): Promise<Route[] | null> =>
   await promisify(lightning.queryRoutes)
     .bind(lightning)({
       pub_key: destination,

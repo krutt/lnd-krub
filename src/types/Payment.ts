@@ -1,12 +1,12 @@
 // ~~/src/types/Payment.ts
 
 // imports
-import { Invoice } from './Invoice'
+import { PayReq } from './PayReq'
 
 // define type
 export type Payment = {
   amt: number
-  decoded?: Invoice
+  decoded?: PayReq
   description: string
   expire_time: number
   fee: number

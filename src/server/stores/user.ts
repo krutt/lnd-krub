@@ -122,13 +122,13 @@ export const getLockedPayments = async (userId: string) => {
  * Used to calculate balance till the lock is lifted (payment is in
  * determined state - succeded or failed).
  *
- * @param {String} paymentRequest
+ * @param {String} bolt11
  * @param {Object} decodedInvoice
  * @returns {Promise<void>}
  */
-export const lockFunds = async (paymentRequest: string, decodedInvoice: any, userId: string) => {
+export const lockFunds = async (bolt11: string, decodedInvoice: any, userId: string) => {
   let doc = {
-    pay_req: paymentRequest,
+    pay_req: bolt11,
     amount: +decodedInvoice.num_satoshis,
     timestamp: Math.floor(+new Date() / 1000),
   }
@@ -270,7 +270,7 @@ export const getTransactions = async (userId: string) => {
       payment.fee = 0
     }
     if (payment.decoded) {
-      payment.timestamp = payment.decoded.timestamp
+      payment.timestamp = +payment.decoded.timestamp
       payment.memo = payment.decoded.description
     }
     if (payment.payment_preimage) {
@@ -452,14 +452,14 @@ export const syncInvoicePaid = async (paymentHash: string, userId: string) => {
 
 /**
  * Strips specific payreq from the list of locked payments
- * @param paymentRequest
+ * @param {String} bolt11 encoded payment request
  * @returns {Promise<void>}
  */
-export const unlockFunds = async (paymentRequest: string, userId: string) => {
+export const unlockFunds = async (bolt11: string, userId: string) => {
   let payments = await getLockedPayments(userId)
   let saveBack = []
   for (let paym of payments) {
-    if (paym.pay_req !== paymentRequest) {
+    if (paym.pay_req !== bolt11) {
       saveBack.push(paym)
     }
   }

@@ -3,7 +3,8 @@
 // imports
 import type { Invoice } from '@/types'
 import type { Tag } from '@/types'
-import bolt11, { PaymentRequestObject, TagData } from 'bolt11'
+import type { PayReq } from '@/types'
+import { PaymentRequestObject, TagData, decode as decodeBOLT11 } from 'bolt11'
 import { cache, lightning } from '@/server/stores'
 import { createHash } from 'node:crypto'
 import { promisify } from 'node:util'
@@ -12,8 +13,8 @@ export const createInvoice = async (
   amount: number,
   memo: string,
   r_preimage: string
-): Promise<Invoice | void> => {
-  return await promisify(lightning.addInvoice)
+): Promise<Invoice | null> =>
+  await promisify(lightning.addInvoice)
     .bind(lightning)({
       memo,
       expiry: 3600 * 24,
@@ -21,16 +22,28 @@ export const createInvoice = async (
       value: amount,
     })
     .catch(console.error)
+
+/**
+ * Decode given payment request string using service denoded by rpc-endpoint, or by `bolt11` library
+ * if `viaRpc` parameter is set to `false`.
+ * @param {String} bolt11
+ * @param {Boolean} viaRpc, defaults to `true`
+ * @returns
+ */
+export const decodePaymentRequest = async (
+  bolt11: string,
+  viaRpc: boolean = true
+): Promise<PayReq | null> => {
+  return viaRpc
+    ? await promisify(lightning.decodePayReq)
+        .bind(lightning)({ pay_req: bolt11 })
+        .catch(console.error)
+    : decodeBOLT11(bolt11) // TODO: make compatible with PayReq type
 }
 
-export const decodePaymentRequest = async (paymentRequest: string): Promise<Invoice | void> =>
-  await promisify(lightning.decodePayReq)
-    .bind(lightning)({ pay_req: paymentRequest })
-    .catch(console.error)
-
-export const getIsMarkedAsPaidInDatabase = async (paymentRequest: string) => {
-  if (!paymentRequest) throw new Error('BOLT11 payment request is not provided.')
-  let decoded: PaymentRequestObject = bolt11.decode(paymentRequest)
+export const getIsMarkedAsPaidInDatabase = async (bolt11: string) => {
+  if (!bolt11) throw new Error('BOLT11 payment request is not provided.')
+  let decoded: PaymentRequestObject = decodeBOLT11(bolt11)
   let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
   let paymentHash: TagData = paymentTag?.data
   if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
@@ -41,9 +54,9 @@ const getIsPaymentHashMarkedPaidInDatabase = async (paymentHash: TagData) => {
   return await cache.get('ispaid_' + paymentHash)
 }
 
-export const getPreimage = async (paymentRequest: string): Promise<string> => {
-  if (!paymentRequest) throw new Error('BOLT11 payment request is not provided.')
-  let decoded: PaymentRequestObject = bolt11.decode(paymentRequest)
+export const getPreimage = async (bolt11: string): Promise<string> => {
+  if (!bolt11) throw new Error('BOLT11 payment request is not provided.')
+  let decoded: PaymentRequestObject = decodeBOLT11(bolt11)
   let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
   let paymentHash: TagData = paymentTag?.data
   if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
@@ -67,29 +80,29 @@ export const listInvoices = async (): Promise<Array<Invoice>> => {
     })
 }
 
-export const lookupInvoice = async (paymentHash: string): Promise<Invoice | void> => {
+export const lookupInvoice = async (paymentHash: string): Promise<Invoice | null> => {
   return await promisify(lightning.lookupInvoice)
     .bind(lightning)({ r_hash_str: paymentHash })
     .catch(console.error)
 }
 
-export const markAsPaidInDatabase = async (paymentRequest: string) => {
-  let decoded: PaymentRequestObject = bolt11.decode(paymentRequest)
+export const markAsPaidInDatabase = async (bolt11: string) => {
+  let decoded: PaymentRequestObject = decodeBOLT11(bolt11)
   let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
   let paymentHash: TagData = paymentTag?.data
   if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
   return await setIsPaymentHashPaidInDatabase(paymentHash, decoded.satoshis)
 }
 
-export const markAsUnpaidInDatabase = async (paymentRequest: string) => {
-  let decoded: PaymentRequestObject = bolt11.decode(paymentRequest)
+export const markAsUnpaidInDatabase = async (bolt11: string) => {
+  let decoded: PaymentRequestObject = decodeBOLT11(bolt11)
   let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')
   let paymentHash: TagData = paymentTag?.data
   if (!paymentHash) throw new Error('Could not find payment hash in invoice tags')
   return await setIsPaymentHashPaidInDatabase(paymentHash)
 }
 
-export const savePreimage = async (preimageHex): Promise<void> => {
+export const savePreimage = async (preimageHex: string): Promise<void> => {
   let paymentHashHex = createHash('sha256').update(Buffer.from(preimageHex, 'hex')).digest('hex')
   let key = 'preimage_for_' + paymentHashHex
   await cache.setex(key, 3600 * 24 * 30, preimageHex) // 1 month

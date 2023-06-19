@@ -104,10 +104,10 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
   let userId: null | string = await loadUserByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
   let identityPubkey: string = await fetchIdentityPubkey()
-  let paymentRequest: string = request.body.invoice || request.body.payment_request
-  console.log('/payinvoice', [request.uuid, 'userid: ' + userId, 'invoice: ' + paymentRequest])
+  let bolt11: string = request.body.invoice
+  console.log('/payinvoice', [request.uuid, 'userid: ' + userId, 'invoice: ' + bolt11])
 
-  if (!paymentRequest) return errorBadArguments(response)
+  if (!bolt11) return errorBadArguments(response)
   let freeAmount = 0
   if (request.body.amount) {
     freeAmount = parseInt(request.body.amount)
@@ -129,7 +129,7 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
     return errorTryAgainLater(response)
   }
 
-  let decoded = await decodePaymentRequest(paymentRequest)
+  let decoded = await decodePaymentRequest(bolt11)
   if (!decoded) {
     await releaseLock(lockKey)
     return errorNotAValidInvoice(response)
@@ -175,7 +175,7 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
           value: +decoded.num_satoshis + Math.floor(+decoded.num_satoshis * intraHubFee),
           fee: Math.floor(+decoded.num_satoshis * intraHubFee),
           memo: decodeURIComponent(decoded.description),
-          pay_req: paymentRequest,
+          pay_req: bolt11,
         },
         userId
       )
@@ -204,20 +204,20 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
       await releaseLock(lockKey)
       return errorBadArguments(response)
     }
-    await lockFunds(paymentRequest, decoded, userId)
+    await lockFunds(bolt11, decoded, userId)
     let amount = +decoded.num_satoshis
     let fee = Math.floor(amount * forwardReserveFee) + 1
-    let payment = await sendPayment(amount, fee, paymentRequest)
+    let payment = await sendPayment(amount, fee, bolt11)
     if (!payment || !!payment.payment_error) {
       // payment failed
       /*await */ releaseLock(lockKey)
       return errorPaymentFailed(response)
     }
     // payment callback
-    await unlockFunds(paymentRequest, userId)
+    await unlockFunds(bolt11, userId)
     if (payment.payment_route && payment.payment_route.total_amt_msat) {
-      payment = processSendPaymentResponse(payment, paymentRequest)
-      payment.pay_req = paymentRequest
+      payment = processSendPaymentResponse(payment, bolt11)
+      payment.pay_req = bolt11
       payment.decoded = decoded
       // payment.payment_route.total_fees = Math.floor(decoded.num_satoshis * forwardReserveFee)
       // payment.payment_route.total_amt = decoded.num_satoshis
