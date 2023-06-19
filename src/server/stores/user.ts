@@ -12,13 +12,11 @@ import { obtainLock, releaseLock } from '@/server/stores/lock'
 import { promisify } from 'node:util'
 import { fetchPaymentAmountPaid, setPaymentAmountPaid } from './payment'
 
-export const addAddress = async (address: string, userId: string) => {
+export const addAddress = async (address: string, userId: string): Promise<'OK'> =>
   await cache.set('bitcoin_address_for_' + userId, address)
-}
 
-export const clearBalanceCache = async (userId: string) => {
-  return cache.del('balance_for_' + userId)
-}
+export const clearBalanceCache = async (userId: string): Promise<number> =>
+  await cache.del('balance_for_' + userId)
 
 export const createUser = async (): Promise<{
   login: string
