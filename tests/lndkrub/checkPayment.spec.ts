@@ -61,7 +61,10 @@ describe('GET /checkpayment/ with randomly generated payment hash', () => {
       .set(authHeaders)
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((response: { body: { paid?: boolean } }) => expect(response.body).toStrictEqual({}))
+      .then((response: { body: { paid: boolean } }) => {
+        let { paid } = response.body
+        expect(paid).toBe(false)
+      })
   })
 })
 
@@ -120,7 +123,7 @@ describe('GET /checkpayment/ payment hash from paying invoice', () => {
       .set(authHeaders)
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((response: { body: { paid?: boolean } }) => {
+      .then((response: { body: { paid: boolean } }) => {
         let { paid } = response.body
         expect(paid).toBe(true)
       })

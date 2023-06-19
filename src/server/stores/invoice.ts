@@ -67,6 +67,12 @@ export const listInvoices = async (): Promise<Array<Invoice>> => {
     })
 }
 
+export const lookupInvoice = async (paymentHash: string): Promise<Invoice | void> => {
+  return await promisify(lightning.lookupInvoice)
+    .bind(lightning)({ r_hash_str: paymentHash })
+    .catch(console.error)
+}
+
 export const markAsPaidInDatabase = async (paymentRequest: string) => {
   let decoded: PaymentRequestObject = bolt11.decode(paymentRequest)
   let paymentTag: Tag = decoded.tags.find((tag: Tag) => tag.tagName === 'payment_hash')

@@ -7,6 +7,7 @@ import bolt11, { TagData } from 'bolt11'
 import { bitcoin, cache, lightning } from '@/server/stores'
 import { createHash, randomBytes } from 'node:crypto'
 import { decodeRawHex } from '@/cypher'
+import { lookupInvoice } from '@/server/stores/invoice'
 import { obtainLock, releaseLock } from '@/server/stores/lock'
 import { promisify } from 'node:util'
 
@@ -415,17 +416,6 @@ const listTransactions = async () => {
   return { result }
 }
 
-export const lookupInvoice = async (paymentHash: string) => {
-  return await promisify(lightning.lookupInvoice)
-    .bind(lightning)({
-      r_hash_str: paymentHash,
-    })
-    .catch(err => {
-      console.error(err)
-      return {}
-    })
-}
-
 /**
  * LNDKrub no longer relies on redis balance as source of truth, this is
  * more a cache now. See `getCalculatedBalance()` to get correct balance.
@@ -472,14 +462,14 @@ export const setPaymentHashPaid = async (paymentHash: string, settleAmountSat) =
 }
 
 export const syncInvoicePaid = async (paymentHash: string, userId: string) => {
-  const invoice = await lookupInvoice(paymentHash)
+  let invoice = await lookupInvoice(paymentHash)
   // @ts-ignore
+  if (!invoice || !invoice.settled) return false
   const ispaid = invoice.settled // TODO: start using `state` instead as its future proof, and this one might get deprecated
   if (ispaid) {
     // so invoice was paid after all
     await setPaymentHashPaid(
       paymentHash,
-      // @ts-ignore
       invoice.amt_paid_msat ? Math.floor(invoice.amt_paid_msat / 1000) : invoice.amt_paid_sat
     )
     await clearBalanceCache(userId)
