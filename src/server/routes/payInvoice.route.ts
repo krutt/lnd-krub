@@ -9,7 +9,6 @@ import {
   clearBalanceCache,
   loadUserByAuthorization,
   lockFunds,
-  getPaymentHashPaid,
   getUserIdByPaymentHash,
   savePaidLndInvoice,
   unlockFunds,
@@ -33,7 +32,11 @@ import {
   setIsPaymentHashPaidInDatabase,
 } from '@/server/stores/invoice'
 import { obtainLock, releaseLock } from '@/server/stores/lock'
-import { processSendPaymentResponse, sendPayment } from '@/server/stores/payment'
+import {
+  fetchPaymentAmountPaid,
+  processSendPaymentResponse,
+  sendPayment,
+} from '@/server/stores/payment'
 
 const subscribeInvoicesCallCallback = async (response: any) => {
   if (response.state === 'SETTLED') {
@@ -156,7 +159,7 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
         return errorGeneralServerError(response)
       }
 
-      if (await getPaymentHashPaid(decoded.payment_hash)) {
+      if (await fetchPaymentAmountPaid(decoded.payment_hash)) {
         // this internal invoice was paid, no sense paying it again
         await releaseLock(lockKey)
         return errorLnd(response)

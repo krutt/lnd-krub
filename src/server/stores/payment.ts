@@ -4,7 +4,7 @@
 import type { Payment } from '@/types'
 import bolt11, { PaymentRequestObject, TagsObject } from 'bolt11'
 import { forwardReserveFee, intraHubFee } from '@/configs'
-import { lightning } from '@/server/stores'
+import { cache, lightning } from '@/server/stores'
 import { promisify } from 'node:util'
 
 /**
@@ -33,6 +33,14 @@ export const decodePayReqViaRpc = async (paymentRequest: string): Promise<any | 
   return await promisify(lightning.decodePayReq)
     .bind(lightning)({ pay_req: paymentRequest })
     .catch(console.error)
+}
+
+/**
+ * Retrieves amount paid per payment from paymentHash specified from solid-state cache
+ * @returns {Number}
+ */
+export const fetchPaymentAmountPaid = async (paymentHash: string): Promise<number> => {
+  return parseInt(await cache.get('ispaid_' + paymentHash))
 }
 
 /**
@@ -128,3 +136,12 @@ export const sendToRouteSync = async (paymentRequest: string, routes) => {
     .catch(console.error)
   if (route) processSendPaymentResponse(route, paymentRequest)
 }
+
+/**
+ * Sets settled amount per payment by specified paymentHash on solid-state cache
+ * @returns {String}
+ */
+export const setPaymentAmountPaid = async (
+  paymentHash: string,
+  settleAmount: number
+): Promise<'OK'> => await cache.set('ispaid_' + paymentHash, settleAmount)

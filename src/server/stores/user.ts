@@ -10,6 +10,7 @@ import { decodeRawHex } from '@/cypher'
 import { lookupInvoice } from '@/server/stores/invoice'
 import { obtainLock, releaseLock } from '@/server/stores/lock'
 import { promisify } from 'node:util'
+import { fetchPaymentAmountPaid, setPaymentAmountPaid } from './payment'
 
 export const addAddress = async (address: string, userId: string) => {
   await cache.set('bitcoin_address_for_' + userId, address)
@@ -230,15 +231,6 @@ export const getOrGenerateAddress = async (userId: string) => {
 }
 
 /**
- * Doent belong here, FIXME
- * @see Invo._getIsPaymentHashMarkedPaidInDatabase
- * @see Invo.getIsMarkedAsPaidInDatabase
- */
-export const getPaymentHashPaid = async (paymentHash: string): Promise<number> => {
-  return parseInt(await cache.get('ispaid_' + paymentHash))
-}
-
-/**
  * User's onchain txs that are >= 3 confs
  * Queries bitcoind RPC.
  *
@@ -324,20 +316,19 @@ export const getUserInvoices = async (userId: string, limit: number = 0): Promis
         payment.payment_hash = tag.data
       }
     }
-    let paymentHashPaidAmountSat = 0
     let { payment_hash } = payment as Payment
-    paymentHashPaidAmountSat = await getPaymentHashPaid(payment_hash)
-    if (paymentHashPaidAmountSat) payment.ispaid = true
+    let amountPaid = await fetchPaymentAmountPaid(payment_hash)
+    if (amountPaid) payment.ispaid = true
     if (!payment.ispaid) {
       if (decoded && decoded.timestamp > +new Date() / 1000 - 3600 * 24 * 5) {
         // if invoice is not too old we query lnd to find out if its paid
         payment.ispaid = await syncInvoicePaid(payment_hash, userId)
-        paymentHashPaidAmountSat = await getPaymentHashPaid(payment_hash) // since we have just saved it
+        amountPaid = await fetchPaymentAmountPaid(payment_hash) // since we have just saved it
       }
     }
     payment.amt =
-      paymentHashPaidAmountSat && paymentHashPaidAmountSat > decoded.satoshis
-        ? paymentHashPaidAmountSat
+      amountPaid && amountPaid > decoded.satoshis
+        ? amountPaid
         : decoded.satoshis
     payment.expire_time = 3600 * 24
     // ^^^default; will keep for now. if we want to un-hardcode it - it should be among tags (`expire_time`)
@@ -452,24 +443,17 @@ const saveUserToDatabase = async (login: string, password: string, userId: strin
   await cache.set(key, userId)
 }
 
-/**
- * Doent belong here, FIXME
- * @see Invo._setIsPaymentHashPaidInDatabase
- * @see Invo.markAsPaidInDatabase
- */
-export const setPaymentHashPaid = async (paymentHash: string, settleAmountSat) => {
-  return await cache.set('ispaid_' + paymentHash, settleAmountSat)
-}
-
 export const syncInvoicePaid = async (paymentHash: string, userId: string) => {
   let invoice = await lookupInvoice(paymentHash)
   // @ts-ignore
   if (!invoice || !invoice.settled) return false
+  // @ts-ignore
   const ispaid = invoice.settled // TODO: start using `state` instead as its future proof, and this one might get deprecated
   if (ispaid) {
     // so invoice was paid after all
-    await setPaymentHashPaid(
+    await setPaymentAmountPaid(
       paymentHash,
+      // @ts-ignore
       invoice.amt_paid_msat ? Math.floor(invoice.amt_paid_msat / 1000) : invoice.amt_paid_sat
     )
     await clearBalanceCache(userId)

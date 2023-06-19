@@ -4,7 +4,8 @@
 import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
 import { errorBadAuth } from '@/server/exceptions'
-import { getPaymentHashPaid, loadUserByAuthorization, syncInvoicePaid } from '@/server/stores/user'
+import { fetchPaymentAmountPaid } from '@/server/stores/payment'
+import { loadUserByAuthorization, syncInvoicePaid } from '@/server/stores/user'
 
 /**
  *
@@ -18,7 +19,7 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
   if (!userId) return errorBadAuth(response)
   let paid: boolean = true
   let paymentHash: string = request.params.payment_hash
-  if (!(await getPaymentHashPaid(paymentHash))) {
+  if (!(await fetchPaymentAmountPaid(paymentHash))) {
     // Not found on cache
     paid = await syncInvoicePaid(paymentHash, userId)
   }
