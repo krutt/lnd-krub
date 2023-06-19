@@ -1,9 +1,10 @@
 // ~~/src/server/stores/user.ts
 
 // imports
+import type { AddInvoiceResponse } from '@/types'
 import BigNumber from 'bignumber.js'
 import type { Invoice, Payment, User, UserMetadata } from '@/types'
-import bolt11, { TagData } from 'bolt11'
+import { TagData, decode as decodeBOLT11 } from 'bolt11'
 import { bitcoin, cache, lightning } from '@/server/stores'
 import { createHash, randomBytes } from 'node:crypto'
 import { decodeRawHex } from '@/cypher'
@@ -127,12 +128,12 @@ export const getLockedPayments = async (userId: string) => {
  * @returns {Promise<void>}
  */
 export const lockFunds = async (bolt11: string, decodedInvoice: any, userId: string) => {
-  let doc = {
+  let locked = {
     pay_req: bolt11,
     amount: +decodedInvoice.num_satoshis,
     timestamp: Math.floor(+new Date() / 1000),
   }
-  return cache.rpush('locked_payments_for_' + userId, JSON.stringify(doc))
+  return cache.rpush('locked_payments_for_' + userId, JSON.stringify(locked))
 }
 
 /**
@@ -293,7 +294,7 @@ export const getUserInvoices = async (userId: string, limit: number = 0): Promis
   let result = []
   for (let item of range) {
     let payment = JSON.parse(item) as Payment
-    let decoded = bolt11.decode(payment.payment_request)
+    let decoded = decodeBOLT11(payment.payment_request)
     payment.description = ''
     for (let tag of decoded.tags) {
       if (tag.tagName === 'description') {
@@ -411,11 +412,8 @@ export const saveBalance = async (balance: number, userId: string) => {
 export const saveUserMetadata = async (metadata: UserMetadata, userId: string): Promise<'OK'> =>
   await cache.set('metadata_for_' + userId, JSON.stringify(metadata))
 
-export const savePaidLndInvoice = async (doc: any, userId: string): Promise<number> =>
-  await cache.rpush('txs_for_' + userId, JSON.stringify(doc))
-
-export const saveUserInvoice = async (doc: any, userId: string) => {
-  let decoded = bolt11.decode(doc.payment_request)
+export const saveUserInvoice = async (response: AddInvoiceResponse, userId: string) => {
+  let decoded = decodeBOLT11(response.payment_request)
   let paymentHash: TagData | null = null
   for (let tag of decoded.tags) {
     if (tag.tagName === 'payment_hash') {
@@ -424,7 +422,7 @@ export const saveUserInvoice = async (doc: any, userId: string) => {
   }
 
   await cache.set('payment_hash_' + paymentHash, userId)
-  return await cache.rpush('userinvoices_for_' + userId, JSON.stringify(doc))
+  return await cache.rpush('userinvoices_for_' + userId, JSON.stringify(response))
 }
 
 const saveUserToDatabase = async (login: string, password: string, userId: string) => {
@@ -464,8 +462,8 @@ export const unlockFunds = async (bolt11: string, userId: string) => {
     }
   }
   await cache.del('locked_payments_for_' + userId)
-  for (let doc of saveBack) {
-    await cache.rpush('locked_payments_for_' + userId, JSON.stringify(doc))
+  for (let payment of saveBack) {
+    await cache.rpush('locked_payments_for_' + userId, JSON.stringify(payment))
   }
 }
 

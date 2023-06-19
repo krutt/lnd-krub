@@ -1,7 +1,7 @@
 // ~~/src/server/stores/payment.ts
 
 // imports
-import type { Payment } from '@/types'
+import type { MockPayment, Payment } from '@/types'
 import { forwardReserveFee, intraHubFee } from '@/configs'
 import { cache, lightning } from '@/server/stores'
 import { decodePaymentRequest } from '@/server/stores/invoice'
@@ -85,6 +85,11 @@ export const queryRoutes = async (bolt11: string): Promise<any> => {
     })
     .catch(console.error)
 }
+
+export const savePayment = async (
+  payment: MockPayment | Payment,
+  userId: string
+): Promise<number> => await cache.rpush('txs_for_' + userId, JSON.stringify(payment))
 
 export const sendPayment = async (
   amount: number,

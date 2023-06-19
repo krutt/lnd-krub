@@ -6,8 +6,9 @@ import type { Response } from 'express'
 import { calculateBalance, clearBalanceCache } from '@/server/stores/user'
 import { createInvoice } from '@/server/stores/invoice'
 import { errorBadAuth, errorGeneralServerError } from '@/server/exceptions'
-import { loadUserByAuthorization, savePaidLndInvoice, saveUserInvoice } from '@/server/stores/user'
+import { loadUserByAuthorization, saveUserInvoice } from '@/server/stores/user'
 import { markAsPaidInDatabase, savePreimage } from '@/server/stores/invoice'
+import { savePayment } from '@/server/stores/payment'
 import { randomBytes } from 'node:crypto'
 
 /**
@@ -26,17 +27,18 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
     let r_preimage = randomBytes(32).toString('base64')
     let invoice = await createInvoice(amount, 'faucet', r_preimage)
     if (!invoice) return errorGeneralServerError(response)
+    // TODO: parallelize
     await saveUserInvoice(invoice, userId)
     await savePreimage(r_preimage)
     await clearBalanceCache(userId)
-    await savePaidLndInvoice(
+    await savePayment(
       {
-        timestamp: Math.floor(+new Date() / 1000),
-        type: 'faucet',
-        value: amount,
         fee: 0,
         memo: 'faucet',
         pay_req: invoice.payment_request,
+        timestamp: Math.floor(+new Date() / 1000),
+        type: 'faucet',
+        value: amount,
       },
       'faucet'
     )

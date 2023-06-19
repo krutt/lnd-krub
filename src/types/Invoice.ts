@@ -1,6 +1,14 @@
 // ~~/src/types/Invoice.ts
 
-// define type
+// define types
+export type AddInvoiceResponse = {
+  add_index: string
+  payment_request: string
+  r_hash: Buffer
+  // optional attributes
+  pay_req?: string // bluewallet: client backwards compatibility
+}
+
 export type Invoice = {
   add_index: string
   amt: number // amount
@@ -11,7 +19,6 @@ export type Invoice = {
   ispaid: boolean
   num_satoshis: string
   num_msat: string
-  pay_req?: string // bluewallet: client backwards compatibility
   payment_hash: string
   payment_request: string
   r_hash: Buffer

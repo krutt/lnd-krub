@@ -4,7 +4,7 @@
 type Feature = {
   is_known: boolean
   is_required: boolean
-  name: 'multi-path-payments' | 'payment-addr' | 'tlv-onion' 
+  name: 'multi-path-payments' | 'payment-addr' | 'tlv-onion'
 }
 
 export type PayReq = {
@@ -14,7 +14,7 @@ export type PayReq = {
   destination: string
   expiry: string
   fallback_addr: string
-  features: { [key:string]: Feature }
+  features: { [key: string]: Feature }
   num_msat: string
   num_satoshis: string
   payment_addr: Buffer

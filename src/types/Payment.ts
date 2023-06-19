@@ -3,7 +3,16 @@
 // imports
 import { PayReq } from './PayReq'
 
-// define type
+// define types
+export type MockPayment = {
+  fee: number
+  memo: string
+  pay_req: string
+  timestamp: number
+  type: 'faucet' | 'paid_invoice'
+  value: number
+}
+
 export type Payment = {
   amt: number
   decoded?: PayReq

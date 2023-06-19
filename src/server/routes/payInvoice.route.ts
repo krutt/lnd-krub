@@ -10,7 +10,6 @@ import {
   loadUserByAuthorization,
   lockFunds,
   getUserIdByPaymentHash,
-  savePaidLndInvoice,
   unlockFunds,
 } from '@/server/stores/user'
 import {
@@ -36,6 +35,7 @@ import {
   fetchPaymentAmountPaid,
   processSendPaymentResponse,
   sendPayment,
+  savePayment,
 } from '@/server/stores/payment'
 
 const subscribeInvoicesCallCallback = async (response: any) => {
@@ -168,14 +168,14 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
 
       // sender spent his balance:
       await clearBalanceCache(userId)
-      await savePaidLndInvoice(
+      await savePayment(
         {
-          timestamp: Math.floor(+new Date() / 1000),
-          type: 'paid_invoice',
-          value: +decoded.num_satoshis + Math.floor(+decoded.num_satoshis * intraHubFee),
           fee: Math.floor(+decoded.num_satoshis * intraHubFee),
           memo: decodeURIComponent(decoded.description),
           pay_req: bolt11,
+          timestamp: Math.floor(+new Date() / 1000),
+          type: 'paid_invoice',
+          value: +decoded.num_satoshis + Math.floor(+decoded.num_satoshis * intraHubFee),
         },
         userId
       )
@@ -207,24 +207,25 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
     await lockFunds(bolt11, decoded, userId)
     let amount = +decoded.num_satoshis
     let fee = Math.floor(amount * forwardReserveFee) + 1
-    let payment = await sendPayment(amount, fee, bolt11)
-    if (!payment || !!payment.payment_error) {
+    let settled = await sendPayment(amount, fee, bolt11)
+    if (!settled || !!settled.payment_error) {
       // payment failed
       /*await */ releaseLock(lockKey)
       return errorPaymentFailed(response)
     }
     // payment callback
     await unlockFunds(bolt11, userId)
-    if (payment.payment_route && payment.payment_route.total_amt_msat) {
-      payment = processSendPaymentResponse(payment, bolt11)
-      payment.pay_req = bolt11
-      payment.decoded = decoded
+    if (settled.payment_route && settled.payment_route.total_amt_msat) {
+      settled = processSendPaymentResponse(settled, bolt11)
+      settled.pay_req = bolt11
+      settled.decoded = decoded
       // payment.payment_route.total_fees = Math.floor(decoded.num_satoshis * forwardReserveFee)
       // payment.payment_route.total_amt = decoded.num_satoshis
-      await savePaidLndInvoice(payment, userId)
+      // TODO: paralellize
+      await savePayment(settled, userId)
       await clearBalanceCache(userId)
       await releaseLock(lockKey)
-      return response.send(payment)
+      return response.send(settled)
     }
     return null
   } else {

@@ -1,9 +1,7 @@
 // ~~/src/server/stores/invoice.ts
 
 // imports
-import type { Invoice } from '@/types'
-import type { Tag } from '@/types'
-import type { PayReq } from '@/types'
+import type { AddInvoiceResponse, Invoice, PayReq, Tag } from '@/types'
 import { PaymentRequestObject, TagData, decode as decodeBOLT11 } from 'bolt11'
 import { cache, lightning } from '@/server/stores'
 import { createHash } from 'node:crypto'
@@ -13,7 +11,7 @@ export const createInvoice = async (
   amount: number,
   memo: string,
   r_preimage: string
-): Promise<Invoice | null> =>
+): Promise<AddInvoiceResponse | null> =>
   await promisify(lightning.addInvoice)
     .bind(lightning)({
       memo,
