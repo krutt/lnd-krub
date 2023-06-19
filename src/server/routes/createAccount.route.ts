@@ -32,7 +32,7 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
   let metadata = {
     accountType: request.body.accounttype?.toString(),
     createdAt: new Date().toISOString(),
-    partnerId: request.body.partnerid?.toString()
+    partnerId: request.body.partnerid?.toString(),
   }
   await saveUserMetadata(metadata, userId)
   return response.send({ login, password })
