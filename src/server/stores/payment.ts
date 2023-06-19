@@ -39,7 +39,6 @@ export const getPaymentHash = async (bolt11: string): Promise<string> => {
  */
 export const isExpired = async (bolt11: string): Promise<boolean> => {
   let decoded = await decodePaymentRequest(bolt11)
-  // @ts-ignore
   return +decoded.timestamp + +decoded.expiry < +new Date() / 1000
 }
 
@@ -121,6 +120,8 @@ export const sendToRouteSync = async (bolt11: string, routes) => {
 
 /**
  * Sets settled amount per payment by specified paymentHash on solid-state cache
+ * @param {String} paymentHash
+ * @param {Number} settleAmount
  * @returns {String}
  */
 export const setPaymentAmountPaid = async (
