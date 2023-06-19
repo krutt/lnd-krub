@@ -1,4 +1,4 @@
-// ~~/src/types/Invoice.ts
+/* ~~/src/types/Invoice.ts */
 
 // define types
 export type AddInvoiceResponse = {

@@ -1,4 +1,4 @@
-// ~~/src/server/routes/info.route.ts
+/* ~~/src/server/routes/info.route.ts */
 
 // imports
 import type { LNDKrubRequest } from '@/types'

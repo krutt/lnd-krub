@@ -1,4 +1,4 @@
-// ~~/src/server/services/bitcoin.ts
+/* ~~/src/server/services/bitcoin.ts */
 
 // imports
 import { URL } from 'node:url'

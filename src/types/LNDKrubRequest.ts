@@ -1,4 +1,4 @@
-// ~~/src/types/LNDKrubRequest.ts
+/* ~~/src/types/LNDKrubRequest.ts */
 
 // imports
 import type { Request } from 'express'

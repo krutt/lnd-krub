@@ -1,4 +1,4 @@
-// ~~/src/server/middlewares/cors.ts
+/* ~~/src/server/middlewares/cors.ts */
 
 // imports
 import type { Handler, NextFunction, Request, Response } from 'express'

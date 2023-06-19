@@ -1,4 +1,4 @@
-// ~~/src/client/main.ts
+/* ~~/src/client/main.ts */
 
 // imports
 import '../assets/styles.css'

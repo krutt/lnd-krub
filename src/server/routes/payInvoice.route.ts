@@ -1,4 +1,4 @@
-// ~~/src/server/routes/payInvoice.route.ts
+/* ~~/src/server/routes/payInvoice.route.ts */
 
 // imports
 import Frisbee from 'frisbee'

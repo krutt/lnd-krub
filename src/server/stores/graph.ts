@@ -1,4 +1,4 @@
-// ~~/src/server/stores/graph.ts
+/* ~~/src/server/stores/graph.ts */
 
 // imports
 import type { Graph } from '@/types'

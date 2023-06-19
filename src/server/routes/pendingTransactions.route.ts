@@ -1,4 +1,4 @@
-// ~~/src/server/routes/pendingTransactions.route.ts
+/* ~~/src/server/routes/pendingTransactions.route.ts */
 
 // imports
 import type { LNDKrubRequest } from '@/types'

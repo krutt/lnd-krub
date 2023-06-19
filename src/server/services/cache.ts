@@ -1,4 +1,4 @@
-// ~~/src/server/services/lightning.ts
+/* ~~/src/server/services/lightning.ts */
 
 // imports
 import { Redis } from 'ioredis'

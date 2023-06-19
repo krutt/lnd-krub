@@ -1,4 +1,4 @@
-// ~~/src/server/stores/payment.ts
+/* ~~/src/server/stores/payment.ts */
 
 // imports
 import type { MockPayment, Payment } from '@/types'

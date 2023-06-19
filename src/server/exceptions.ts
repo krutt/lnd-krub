@@ -1,4 +1,4 @@
-// ~~/src/server/routes/exceptions.ts
+/* ~~/src/server/routes/exceptions.ts */
 
 // imports
 import type { Response } from 'express'

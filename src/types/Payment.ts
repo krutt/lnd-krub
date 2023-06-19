@@ -1,4 +1,4 @@
-// ~~/src/types/Payment.ts
+/* ~~/src/types/Payment.ts */
 
 // imports
 import { PayReq } from './PayReq'

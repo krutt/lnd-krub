@@ -1,4 +1,4 @@
-// ~~/src/server/routes/bitcoinAddress.route.ts
+/* ~~/src/server/routes/bitcoinAddress.route.ts */
 
 // imports
 import type { LNDKrubRequest } from '@/types'

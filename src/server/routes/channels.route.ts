@@ -1,4 +1,4 @@
-// ~~/src/server/routes/channels.route.ts
+/* ~~/src/server/routes/channels.route.ts */
 
 // imports
 import type { LNDKrubRequest } from '@/types'

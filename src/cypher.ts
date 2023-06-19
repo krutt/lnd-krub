@@ -1,4 +1,4 @@
-// ~~/src/server/services/cypher.ts
+/* ~~/src/server/services/cypher.ts */
 
 // imports
 import { Network, Transaction, address, networks, script } from 'bitcoinjs-lib'

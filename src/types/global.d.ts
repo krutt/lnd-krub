@@ -1,4 +1,4 @@
-// ~~/src/server/types/global.d.ts
+/* ~~/src/types/global.d.ts */
 
 declare module 'process' {
   global {

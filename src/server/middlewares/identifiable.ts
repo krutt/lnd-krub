@@ -1,4 +1,4 @@
-// ~~/src/server/middlewares/identifiable.ts
+/* ~~/src/server/middlewares/identifiable.ts */
 
 // imports
 import type { Handler, NextFunction, Response } from 'express'

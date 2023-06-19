@@ -1,4 +1,4 @@
-// ~~/src/index.ts
+/* ~~/src/index.ts */
 
 // imports
 import { BitcoinService } from '@/server/services/bitcoin'

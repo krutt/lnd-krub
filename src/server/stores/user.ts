@@ -1,4 +1,4 @@
-// ~~/src/server/stores/user.ts
+/* ~~/src/server/stores/user.ts */
 
 // imports
 import type { AddInvoiceResponse } from '@/types'
