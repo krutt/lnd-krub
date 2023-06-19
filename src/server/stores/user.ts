@@ -2,7 +2,7 @@
 
 // imports
 import BigNumber from 'bignumber.js'
-import type { Invoice, Payment, User } from '@/types'
+import type { Invoice, Payment, User, UserMetadata } from '@/types'
 import bolt11, { TagData } from 'bolt11'
 import { bitcoin, cache, lightning } from '@/server/stores'
 import { createHash, randomBytes } from 'node:crypto'
@@ -408,7 +408,7 @@ export const saveBalance = async (balance: number, userId: string) => {
   await cache.expire(key, 1800)
 }
 
-export const saveMetadata = async (metadata: any, userId: string): Promise<'OK'> =>
+export const saveUserMetadata = async (metadata: UserMetadata, userId: string): Promise<'OK'> =>
   await cache.set('metadata_for_' + userId, JSON.stringify(metadata))
 
 export const savePaidLndInvoice = async (doc: any, userId: string): Promise<number> =>

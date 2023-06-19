@@ -5,7 +5,7 @@ import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
 import { errorBadArguments, errorSunset } from '@/server/exceptions'
 import { sunset } from '@/configs'
-import { createUser, saveMetadata } from '@/server/stores/user'
+import { createUser, saveUserMetadata } from '@/server/stores/user'
 
 /**
  *
@@ -29,14 +29,12 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
     return errorBadArguments(response)
   if (sunset) return errorSunset(response)
   let { login, password, userId } = await createUser()
-  await saveMetadata(
-    {
-      partnerid: request.body.partnerid,
-      accounttype: request.body.accounttype,
-      created_at: new Date().toISOString(),
-    },
-    userId
-  )
+  let metadata = {
+    accountType: request.body.accounttype?.toString(),
+    createdAt: new Date().toISOString(),
+    partnerId: request.body.partnerid?.toString()
+  }
+  await saveUserMetadata(metadata, userId)
   return response.send({ login, password })
 }
 
