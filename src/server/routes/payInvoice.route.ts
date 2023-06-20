@@ -210,7 +210,7 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
     let settled = await sendPayment(amount, fee, bolt11)
     if (!settled || !!settled.payment_error) {
       // payment failed
-      /*await */ releaseLock(lockKey)
+      await releaseLock(lockKey)
       return errorPaymentFailed(response)
     }
     // payment callback
