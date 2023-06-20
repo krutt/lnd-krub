@@ -5,8 +5,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import lndkrub from '@/index'
 import supertest from 'supertest'
 
-let testLogin: string | null = null
-let testPassword: string | null = null
+let testLogin: null | string = null
+let testPassword: null | string = null
 
 afterAll(() => {
   lndkrub.emit('event:shutdown')
@@ -28,8 +28,8 @@ beforeAll(async () => {
 
 describe('POST /auth x 2', () => {
   it('responds with accessToken and refreshToken key-values', async () => {
-    let testAccessToken: string | null = null
-    let testRefreshToken: string | null = null
+    let testAccessToken: null | string = null
+    let testRefreshToken: null | string = null
     await supertest(lndkrub)
       .post('/auth')
       .query({ type: 'auth' })
