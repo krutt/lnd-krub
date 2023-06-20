@@ -14,8 +14,8 @@ afterAll(() => {
 
 beforeAll(async () => {
   lndkrub.emit('event:startup')
-  let testLogin: string = ''
-  let testPassword: string = ''
+  let testLogin: null | string = null
+  let testPassword: null | string = null
   await supertest(lndkrub)
     .post('/create')
     .set('Accept', 'application/json')
