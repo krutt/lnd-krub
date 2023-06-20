@@ -1,7 +1,7 @@
 // ~~/tests/lndkrub/payInvoice.spec.ts
 
 // imports
-import { Invoice, Payment } from '@/types'
+import { Invoice, Payment, UserAuth } from '@/types'
 import { LightningService } from '@/server/services/lightning'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { externalLND } from 'τ/configs'
@@ -40,8 +40,9 @@ describe('POST /payinvoice with no body', () => {
     await supertest(lndkrub)
       .post('/auth')
       .send({ login, password })
-      .then((response: { body: { access_token: string } }) => {
-        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      .then((response: { body: UserAuth }) => {
+        let { accessToken } = response.body
+        authHeaders = { Authorization: `Bearer ${accessToken}` }
       })
   })
   it('responds with bad arguments error`', async () => {
@@ -68,7 +69,7 @@ describe('POST /payinvoice with test payment request but insufficient balance', 
   let login: string | null = null
   let memo: string = 'test receipient'
   let password: string | null = null
-  let recipient: { access_token?: string; login: string; password: string }
+  let recipient: { accessToken?: string; login: string; password: string }
   beforeAll(async () => {
     await supertest(lndkrub)
       .post('/create')
@@ -79,8 +80,9 @@ describe('POST /payinvoice with test payment request but insufficient balance', 
     await supertest(lndkrub)
       .post('/auth')
       .send({ login, password })
-      .then((response: { body: { access_token: string } }) => {
-        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      .then((response: { body: UserAuth }) => {
+        let { accessToken } = response.body
+        authHeaders = { Authorization: `Bearer ${accessToken}` }
       })
     await supertest(lndkrub)
       .post('/create')
@@ -90,12 +92,12 @@ describe('POST /payinvoice with test payment request but insufficient balance', 
     await supertest(lndkrub)
       .post('/auth')
       .send({ ...recipient })
-      .then((response: { body: { access_token: string } }) => {
-        recipient.access_token = response.body.access_token
+      .then((response: { body: UserAuth }) => {
+        recipient.accessToken = response.body.accessToken
       })
     await supertest(lndkrub)
       .post('/addinvoice')
-      .set({ Authorization: `Bearer ${recipient.access_token}` })
+      .set({ Authorization: `Bearer ${recipient.accessToken}` })
       .send({ amt, memo })
       .then((response: { body: Invoice }) => {
         invoice = response.body.payment_request
@@ -127,7 +129,7 @@ describe('POST /payinvoice with test payment request after receiving sats from f
   let login: string | null = null
   let memo: string = 'test recipient'
   let password: string | null = null
-  let recipient: { access_token?: string; login: string; password: string }
+  let recipient: { accessToken?: string; login: string; password: string }
   beforeAll(async () => {
     await supertest(lndkrub)
       .post('/create')
@@ -138,8 +140,9 @@ describe('POST /payinvoice with test payment request after receiving sats from f
     await supertest(lndkrub)
       .post('/auth')
       .send({ login, password })
-      .then((response: { body: { access_token: string } }) => {
-        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      .then((response: { body: UserAuth }) => {
+        let { accessToken } = response.body
+        authHeaders = { Authorization: `Bearer ${accessToken}` }
       })
 
     await supertest(lndkrub)
@@ -151,12 +154,12 @@ describe('POST /payinvoice with test payment request after receiving sats from f
     await supertest(lndkrub)
       .post('/auth')
       .send({ ...recipient })
-      .then((response: { body: { access_token: string } }) => {
-        recipient.access_token = response.body.access_token
+      .then((response: { body: UserAuth }) => {
+        recipient.accessToken = response.body.accessToken
       })
     await supertest(lndkrub)
       .post('/addinvoice')
-      .set({ Authorization: `Bearer ${recipient.access_token}` })
+      .set({ Authorization: `Bearer ${recipient.accessToken}` })
       .send({ amt, memo })
       .then((response: { body: Invoice }) => {
         invoice = response.body.payment_request
@@ -212,8 +215,9 @@ describe('POST /payinvoice with test external payment request', () => {
     await supertest(lndkrub)
       .post('/auth')
       .send({ login, password })
-      .then((response: { body: { access_token: string } }) => {
-        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      .then((response: { body: UserAuth }) => {
+        let { accessToken } = response.body
+        authHeaders = { Authorization: `Bearer ${accessToken}` }
       })
     await supertest(lndkrub).post('/faucet').set(authHeaders).send({ amt: faucetAmount })
     // external invoice

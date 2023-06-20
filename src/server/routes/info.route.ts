@@ -5,7 +5,7 @@ import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
 import { errorBadAuth, errorLnd } from '@/server/exceptions'
 import { loadNodeInformation } from '@/server/stores/dashblob'
-import { loadUserByAuthorization } from '@/server/stores/user'
+import { loadUserIdByAuthorization } from '@/server/stores/user'
 
 /**
  *
@@ -15,7 +15,7 @@ import { loadUserByAuthorization } from '@/server/stores/user'
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
   console.log('/getinfo', [request.uuid])
-  let userId = await loadUserByAuthorization(request.headers.authorization)
+  let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
   let dashblob = await loadNodeInformation()
   if (!dashblob) return errorLnd(response)

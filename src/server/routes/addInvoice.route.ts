@@ -9,7 +9,7 @@ import {
   errorLnd,
   errorSunsetAddInvoice,
 } from '@/server/exceptions'
-import { loadUserByAuthorization, saveUserInvoice } from '@/server/stores/user'
+import { loadUserIdByAuthorization, saveUserInvoice } from '@/server/stores/user'
 import { createInvoice, savePreimage } from '@/server/stores/invoice'
 import { randomBytes } from 'node:crypto'
 import { sunset } from '@/configs'
@@ -22,7 +22,7 @@ import { sunset } from '@/configs'
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
   console.log('/addinvoice', [request.uuid])
-  let userId = await loadUserByAuthorization(request.headers.authorization)
+  let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
   console.log('/addinvoice', [request.uuid, 'userid: ' + userId])
 

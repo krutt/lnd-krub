@@ -1,14 +1,16 @@
 /* ~~/src/types/User.ts */
 
+export type UserAuth = {
+  access_token?: string // bluewallet: compatibility
+  accessToken: string
+  refresh_token?: string // bluewallet: compatibility
+  refreshToken: string
+}
+
 export type UserMetadata = {
   accountType: string
   createdAt: string
   partnerId: string
 }
 
-export type User = {
-  access_token: string
-  refresh_token: string
-}
-
-export default User
+export default UserAuth

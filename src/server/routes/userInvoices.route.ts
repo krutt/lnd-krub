@@ -4,7 +4,7 @@
 import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
 import { errorBadAuth } from '@/server/exceptions'
-import { getUserInvoices, loadUserByAuthorization } from '@/server/stores/user'
+import { getUserInvoices, loadUserIdByAuthorization } from '@/server/stores/user'
 
 /**
  *
@@ -14,7 +14,7 @@ import { getUserInvoices, loadUserByAuthorization } from '@/server/stores/user'
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
   console.log('/getuserinvoices', [request.uuid])
-  let userId = await loadUserByAuthorization(request.headers.authorization)
+  let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
   console.log('/getuserinvoices', [request.uuid, 'userid: ' + userId])
   let limit: string = request.query.limit?.toString() || '0'

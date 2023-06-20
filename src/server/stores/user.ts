@@ -3,7 +3,7 @@
 // imports
 import type { AddInvoiceResponse } from '@/types'
 import BigNumber from 'bignumber.js'
-import type { Invoice, Payment, User, UserMetadata } from '@/types'
+import type { Invoice, Payment, UserAuth, UserMetadata } from '@/types'
 import { TagData, decode as decodeBOLT11 } from 'bolt11'
 import { bitcoin, cache, lightning } from '@/server/stores'
 import { createHash, randomBytes } from 'node:crypto'
@@ -31,12 +31,12 @@ export const createUser = async (): Promise<{
   return { login, password, userId }
 }
 
-export const fetchAccessTokens = async (userId: string): Promise<User> => {
+export const fetchUserAuth = async (userId: string): Promise<UserAuth> => {
   let tokens: string[] = await Promise.all([
     cache.get('access_token_for_' + userId),
     cache.get('refresh_token_for_' + userId),
   ])
-  return { access_token: tokens[0], refresh_token: tokens[1] }
+  return { accessToken: tokens[0], refreshToken: tokens[1] }
 }
 
 const generateAccessTokens = async (userId: string): Promise<void> => {
@@ -141,7 +141,7 @@ export const lockFunds = async (bolt11: string, decodedInvoice: any, userId: str
  * @param {string} authorization "Bearer ..." like string
  * @returns
  */
-export const loadUserByAuthorization = async (authorization: string): Promise<string | null> => {
+export const loadUserIdByAuthorization = async (authorization: string): Promise<string | null> => {
   if (!authorization) return null
   let access_token = authorization.replace('Bearer ', '')
   let userId = await cache.get('user_id_for_' + access_token)

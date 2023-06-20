@@ -1,6 +1,7 @@
 // ~~/tests/lndkrub/bitcoinAddress.spec.ts
 
 // imports
+import type { UserAuth } from '@/types'
 import lndkrub from '@/index'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import supertest from 'supertest'
@@ -20,7 +21,6 @@ beforeAll(async () => {
     .set('Accept', 'application/json')
     .then((response: { body: { login: string; password: string; userId: string } }) => {
       let { login, password } = response.body
-      // persistence
       testLogin = login
       testPassword = password
     })
@@ -28,10 +28,9 @@ beforeAll(async () => {
     .post('/auth')
     .send({ login: testLogin, password: testPassword })
     .set('Accept', 'application/json')
-    .then((response: { body: { access_token: string; refresh_token: string } }) => {
-      let { access_token } = response.body
-      // persistence
-      authHeaders = { Authorization: `Bearer ${access_token}` }
+    .then((response: { body: UserAuth }) => {
+      let { accessToken } = response.body
+      authHeaders = { Authorization: `Bearer ${accessToken}` }
     })
 })
 
@@ -48,7 +47,6 @@ describe('GET /getbtc x 2', () => {
         expect(address).toBeTruthy()
         expect(address.length).toBe(44)
         expect(address.slice(0, 6)).toStrictEqual('bcrt1q')
-        // persistence
         testBtcAddress = address
       })
   })

@@ -5,7 +5,7 @@ import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
 import { errorBadAuth } from '@/server/exceptions'
 import { fetchPaymentAmountPaid } from '@/server/stores/payment'
-import { loadUserByAuthorization, syncInvoicePaid } from '@/server/stores/user'
+import { loadUserIdByAuthorization, syncInvoicePaid } from '@/server/stores/user'
 
 /**
  *
@@ -15,7 +15,7 @@ import { loadUserByAuthorization, syncInvoicePaid } from '@/server/stores/user'
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
   console.log('/checkpayment', [request.uuid])
-  let userId = await loadUserByAuthorization(request.headers.authorization)
+  let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
   let paid: boolean = true
   let paymentHash: string = request.params.payment_hash

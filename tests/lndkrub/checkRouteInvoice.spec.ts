@@ -1,7 +1,7 @@
 // ~~/tests/lndkrub/checkRouteInvoice.spec.ts
 
 // imports
-import { Invoice } from '@/types'
+import { Invoice, UserAuth } from '@/types'
 import { LightningService } from '@/server/services/lightning'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { externalLND } from 'τ/configs'
@@ -40,8 +40,9 @@ describe('GET /checkrouteinvoice with no query', () => {
     await supertest(lndkrub)
       .post('/auth')
       .send({ login, password })
-      .then((response: { body: { access_token: string } }) => {
-        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      .then((response: { body: UserAuth }) => {
+        let { accessToken } = response.body
+        authHeaders = { Authorization: `Bearer ${accessToken}` }
       })
   })
   it('responds with bad arguments error`', async () => {
@@ -67,7 +68,7 @@ describe('GET /checkrouteinvoice with test payment request created internally', 
   let login: string | null = null
   let memo: string = 'internal invoice'
   let password: string | null = null
-  let recipient: { access_token?: string; login: string; password: string }
+  let recipient: { accessToken?: string; login: string; password: string }
   beforeAll(async () => {
     await supertest(lndkrub)
       .post('/create')
@@ -78,8 +79,9 @@ describe('GET /checkrouteinvoice with test payment request created internally', 
     await supertest(lndkrub)
       .post('/auth')
       .send({ login, password })
-      .then((response: { body: { access_token: string } }) => {
-        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      .then((response: { body: UserAuth }) => {
+        let { accessToken } = response.body
+        authHeaders = { Authorization: `Bearer ${accessToken}` }
       })
 
     await supertest(lndkrub)
@@ -90,12 +92,12 @@ describe('GET /checkrouteinvoice with test payment request created internally', 
     await supertest(lndkrub)
       .post('/auth')
       .send({ ...recipient })
-      .then((response: { body: { access_token: string } }) => {
-        recipient.access_token = response.body.access_token
+      .then((response: { body: UserAuth }) => {
+        recipient.accessToken = response.body.accessToken
       })
     await supertest(lndkrub)
       .post('/addinvoice')
-      .set({ Authorization: `Bearer ${recipient.access_token}` })
+      .set({ Authorization: `Bearer ${recipient.accessToken}` })
       .send({ amt, memo })
       .then((response: { body: Invoice }) => {
         invoice = response.body.payment_request
@@ -137,8 +139,9 @@ describe('GET /checkrouteinvoice with test payment request created externally', 
     await supertest(lndkrub)
       .post('/auth')
       .send({ login, password })
-      .then((response: { body: { access_token: string } }) => {
-        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      .then((response: { body: UserAuth }) => {
+        let { accessToken } = response.body
+        authHeaders = { Authorization: `Bearer ${accessToken}` }
       })
     // external invoice
     let { payment_request } = await promisify(lnext.addInvoice).bind(lnext)({

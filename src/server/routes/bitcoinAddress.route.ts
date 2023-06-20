@@ -6,7 +6,7 @@ import type { Response } from 'express'
 import { errorBadAuth, errorSunsetAddInvoice } from '@/server/exceptions'
 import { sunset } from '@/configs'
 import {
-  loadUserByAuthorization,
+  loadUserIdByAuthorization,
   generateUserAddress,
   getUserAddress,
   watchAddress,
@@ -20,7 +20,7 @@ import {
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
   console.log('/getbtc', [request.uuid])
-  let userId = await loadUserByAuthorization(request.headers.authorization)
+  let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) {
     return errorBadAuth(response)
   }

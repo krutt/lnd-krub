@@ -7,7 +7,7 @@ import type { Response } from 'express'
 import {
   calculateBalance,
   clearBalanceCache,
-  loadUserByAuthorization,
+  loadUserIdByAuthorization,
   lockFunds,
   getUserIdByPaymentHash,
   unlockFunds,
@@ -101,7 +101,7 @@ const subscribeInvoicesCallCallback = async (response: any) => {
  * @returns {Express.Response}
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-  let userId: null | string = await loadUserByAuthorization(request.headers.authorization)
+  let userId: null | string = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
   let identityPubkey: string = await fetchIdentityPubkey()
   let bolt11: string = request.body.invoice

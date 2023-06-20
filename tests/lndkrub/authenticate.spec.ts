@@ -1,6 +1,7 @@
 // ~~/tests/lndkrub/authenticate.spec.ts
 
 // imports
+import type { UserAuth } from '@/types'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import lndkrub from '@/index'
 import supertest from 'supertest'
@@ -20,7 +21,6 @@ beforeAll(async () => {
     .set('Accept', 'application/json')
     .then((response: { body: { login: string; password: string } }) => {
       let { login, password } = response.body
-      // persistence
       testLogin = login
       testPassword = password
     })
@@ -37,35 +37,34 @@ describe('POST /auth x 2', () => {
       .set('Accept', 'application/json')
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((response: { body: { access_token: string; refresh_token: string } }) => {
-        let { access_token, refresh_token } = response.body
-        expect(access_token).toBeTruthy()
-        expect(access_token.length).toBe(40)
-        expect(refresh_token).toBeTruthy()
-        expect(refresh_token.length).toBe(40)
-        // persistence
-        testAccessToken = access_token
-        testRefreshToken = refresh_token
+      .then((response: { body: UserAuth }) => {
+        let { accessToken, refreshToken } = response.body
+        expect(accessToken).toBeTruthy()
+        expect(accessToken.length).toBe(40)
+        expect(refreshToken).toBeTruthy()
+        expect(refreshToken.length).toBe(40)
+        testAccessToken = accessToken
+        testRefreshToken = refreshToken
       })
     await supertest(lndkrub)
       .post('/auth')
       .query({ type: 'auth' })
-      .send({ refresh_token: testRefreshToken })
+      .send({ refreshToken: testRefreshToken })
       .set('Accept', 'application/json')
       .expect(200)
       .expect('Content-Type', /json/)
-      .then((response: { body: { access_token: string; refresh_token: string } }) => {
-        let { access_token, refresh_token } = response.body
-        expect(access_token).toBeTruthy()
-        expect(access_token.length).toBe(40)
-        expect(refresh_token).toBeTruthy()
-        expect(refresh_token.length).toBe(40)
-        expect(access_token.length).not.toStrictEqual(testAccessToken)
+      .then((response: { body: UserAuth }) => {
+        let { accessToken, refreshToken } = response.body
+        expect(accessToken).toBeTruthy()
+        expect(accessToken.length).toBe(40)
+        expect(refreshToken).toBeTruthy()
+        expect(refreshToken.length).toBe(40)
+        expect(accessToken.length).not.toStrictEqual(testAccessToken)
         testAccessToken = testAccessToken || ''
-        expect(access_token.length).toBe(testAccessToken.length)
-        expect(refresh_token).not.toStrictEqual(testRefreshToken)
+        expect(accessToken.length).toBe(testAccessToken.length)
+        expect(refreshToken).not.toStrictEqual(testRefreshToken)
         testRefreshToken = testRefreshToken || ''
-        expect(refresh_token.length).toBe(testRefreshToken.length)
+        expect(refreshToken.length).toBe(testRefreshToken.length)
       })
   })
 })

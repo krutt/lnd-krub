@@ -8,7 +8,7 @@ import {
   calculateBalance,
   generateUserAddress,
   getUserAddress,
-  loadUserByAuthorization,
+  loadUserIdByAuthorization,
 } from '@/server/stores/user'
 
 /**
@@ -19,7 +19,7 @@ import {
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
   console.log('/balance', [request.uuid])
-  let userId = await loadUserByAuthorization(request.headers.authorization)
+  let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
   console.log('/balance', [request.uuid, 'userid: ' + userId])
   if (!(await getUserAddress(userId))) await generateUserAddress(userId) // onchain address needed further

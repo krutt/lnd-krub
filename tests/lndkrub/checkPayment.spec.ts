@@ -1,6 +1,7 @@
 // ~~/tests/lndkrub/checkPayment.spec.ts
 
 // imports
+import type { UserAuth } from '@/types'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import lndkrub from '@/index'
 import { randomBytes } from 'node:crypto'
@@ -28,8 +29,9 @@ describe('GET /checkpayment/ without payment hash', () => {
     await supertest(lndkrub)
       .post('/auth')
       .send({ login, password })
-      .then((response: { body: { access_token: string } }) => {
-        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      .then((response: { body: UserAuth }) => {
+        let { accessToken } = response.body
+        authHeaders = { Authorization: `Bearer ${accessToken}` }
       })
   })
   it('responds with 404 Not Found`', async () => {
@@ -51,8 +53,9 @@ describe('GET /checkpayment/ with randomly generated payment hash', () => {
     await supertest(lndkrub)
       .post('/auth')
       .send({ login, password })
-      .then((response: { body: { access_token: string } }) => {
-        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      .then((response: { body: UserAuth }) => {
+        let { accessToken } = response.body
+        authHeaders = { Authorization: `Bearer ${accessToken}` }
       })
   })
   it('responds with empty payment status`', async () => {
@@ -75,7 +78,7 @@ describe('GET /checkpayment/ payment hash from paying invoice', () => {
     let invoice: string | null = null
     let login: string | null = null
     let password: string | null = null
-    let recipient: { access_token?: string; login: string; password: string }
+    let recipient: { accessToken?: string; login: string; password: string }
     await supertest(lndkrub)
       .post('/create')
       .then((response: { body: { login: string; password: string } }) => {
@@ -85,8 +88,9 @@ describe('GET /checkpayment/ payment hash from paying invoice', () => {
     await supertest(lndkrub)
       .post('/auth')
       .send({ login, password })
-      .then((response: { body: { access_token: string } }) => {
-        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      .then((response: { body: UserAuth }) => {
+        let { accessToken } = response.body
+        authHeaders = { Authorization: `Bearer ${accessToken}` }
       })
 
     await supertest(lndkrub)
@@ -98,12 +102,12 @@ describe('GET /checkpayment/ payment hash from paying invoice', () => {
     await supertest(lndkrub)
       .post('/auth')
       .send({ ...recipient })
-      .then((response: { body: { access_token: string } }) => {
-        recipient.access_token = response.body.access_token
+      .then((response: { body: UserAuth }) => {
+        recipient.accessToken = response.body.accessToken
       })
     await supertest(lndkrub)
       .post('/addinvoice')
-      .set({ Authorization: `Bearer ${recipient.access_token}` })
+      .set({ Authorization: `Bearer ${recipient.accessToken}` })
       .send({ amt: 200, memo: 'test recipient' })
       .then((response: { body: { payment_request: string } }) => {
         invoice = response.body.payment_request

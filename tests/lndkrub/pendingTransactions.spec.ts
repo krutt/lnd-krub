@@ -2,7 +2,7 @@
 
 // imports
 import { BitcoinService } from '@/server/services/bitcoin'
-import { Transaction } from '@/types'
+import { Transaction, UserAuth } from '@/types'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import lndkrub from '@/index'
@@ -32,8 +32,9 @@ describe('GET /getpending when creating a fresh account', () => {
     await supertest(lndkrub)
       .post('/auth')
       .send({ login, password })
-      .then((response: { body: { access_token: string } }) => {
-        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      .then((response: { body: UserAuth }) => {
+        let { accessToken } = response.body
+        authHeaders = { Authorization: `Bearer ${accessToken}` }
       })
   })
   it('responds with a list of empty pending transactions', async () => {
@@ -66,8 +67,9 @@ describe('GET /getpending after sending new transaction to address', () => {
     await supertest(lndkrub)
       .post('/auth')
       .send({ login, password })
-      .then((response: { body: { access_token: string } }) => {
-        authHeaders = { Authorization: `Bearer ${response.body.access_token}` }
+      .then((response: { body: UserAuth }) => {
+        let { accessToken } = response.body
+        authHeaders = { Authorization: `Bearer ${accessToken}` }
       })
     await supertest(lndkrub)
       .get('/getbtc')

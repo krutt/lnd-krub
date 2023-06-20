@@ -6,7 +6,7 @@ import type { Response } from 'express'
 import { calculateBalance, clearBalanceCache } from '@/server/stores/user'
 import { createInvoice } from '@/server/stores/invoice'
 import { errorBadAuth, errorGeneralServerError } from '@/server/exceptions'
-import { loadUserByAuthorization, saveUserInvoice } from '@/server/stores/user'
+import { loadUserIdByAuthorization, saveUserInvoice } from '@/server/stores/user'
 import { markAsPaidInDatabase, savePreimage } from '@/server/stores/invoice'
 import { savePayment } from '@/server/stores/payment'
 import { randomBytes } from 'node:crypto'
@@ -19,7 +19,7 @@ import { randomBytes } from 'node:crypto'
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
   console.log('/faucet', [request.uuid])
-  let userId = await loadUserByAuthorization(request.headers.authorization)
+  let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
 
   let amount = parseInt(request.body.amt || request.body.amount || 0)

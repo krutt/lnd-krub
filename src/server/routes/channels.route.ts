@@ -4,7 +4,7 @@
 import type { LNDKrubRequest } from '@/types'
 import type { Response } from 'express'
 import { errorBadAuth, errorLnd } from '@/server/exceptions'
-import { loadUserByAuthorization } from '@/server/stores/user'
+import { loadUserIdByAuthorization } from '@/server/stores/user'
 import { listChannels } from '@/server/stores/channel'
 
 /**
@@ -15,7 +15,7 @@ import { listChannels } from '@/server/stores/channel'
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
   console.log('/channels', [request.uuid])
-  let userId = await loadUserByAuthorization(request.headers.authorization)
+  let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
   let channels = await listChannels()
   if (!channels) return errorLnd(response)
