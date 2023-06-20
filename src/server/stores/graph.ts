@@ -15,9 +15,9 @@ const TTL: number = 120000
  * @returns {Graph}
  */
 export const describeLightningGraph = async (): Promise<Graph> => {
-  let graph = JSON.parse(await cache.get(KEY))
+  let graph: Graph = JSON.parse(await cache.get(KEY))
   if (!graph) {
-    let graph: { edges: any } = await promisify(lightning.describeGraph)
+    graph = await promisify(lightning.describeGraph)
       .bind(lightning)({ include_unannounced: true })
       .catch(console.error)
     if (graph) await cache.setex(KEY, TTL, JSON.stringify(graph))
