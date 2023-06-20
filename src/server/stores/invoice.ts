@@ -81,7 +81,9 @@ export const listInvoices = async (): Promise<Array<Invoice>> => {
 export const lookupInvoice = async (paymentHash: string): Promise<Invoice | null> => {
   return await promisify(lightning.lookupInvoice)
     .bind(lightning)({ r_hash_str: paymentHash })
-    .catch(console.error)
+    .catch(() => {
+      /* Error: 5 NOT_FOUND: unable to locate invoice */
+    })
 }
 
 export const markAsPaidInDatabase = async (bolt11: string) => {
