@@ -11,7 +11,7 @@ import helmet from 'helmet'
 import identifiable from '@/server/middlewares/identifiable'
 import { loadNodeInformation } from '@/server/stores/dashblob'
 import morgan from 'morgan'
-import { postRateLimit, rateLimit } from '@/configs'
+import { postRateLimit, prodFaucet, rateLimit } from '@/configs'
 import rateLimiter from 'express-rate-limit'
 
 // services
@@ -97,13 +97,13 @@ if (isProduction) {
   app.use(cookieParser(process.env.COOKIE_SECRET))
   let csurf = require('tiny-csrf')
   app.use(csurf(process.env.CSRF_SECRET, ['PUT']))
-} else {
-  /**
-   * development: unprotected dashboard endpoint and faucet endpoint
-   */
-  router.post('/faucet', faucet)
 }
 router.put('/dashboard', dashboard)
+
+/**
+ * enable faucet endpoint if development environment or production faucet set to true
+ */
+if (!isProduction || prodFaucet) router.post('/faucet', faucet)
 
 app.use('/', router)
 
