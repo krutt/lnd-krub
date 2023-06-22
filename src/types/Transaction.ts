@@ -12,8 +12,8 @@ export type Transaction = {
   time_stamp: string
   total_fees: string
   tx_hash: string
-  type?: string
-  value?: number
+  type: string
+  value: number
 }
 
 export default Transaction
