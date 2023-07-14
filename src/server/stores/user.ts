@@ -1,9 +1,8 @@
 /* ~~/src/server/stores/user.ts */
 
 // imports
-import type { AddInvoiceResponse } from '@/types'
+import type { AddInvoiceResponse, Invoice, Payment, UserAuth, UserMetadata } from '@/types'
 import BigNumber from 'bignumber.js'
-import type { Invoice, Payment, UserAuth, UserMetadata } from '@/types'
 import { TagData, decode as decodeBOLT11 } from 'bolt11'
 import { bitcoin, cache, lightning } from '@/server/stores'
 import { createHash, randomBytes } from 'node:crypto'
