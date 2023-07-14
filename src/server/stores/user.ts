@@ -4,7 +4,7 @@
 import type { AddInvoiceResponse, Invoice, Payment, UserAuth, UserMetadata } from '@/types'
 import BigNumber from 'bignumber.js'
 import { TagData, decode as decodeBOLT11 } from 'bolt11'
-import { bitcoin, cache, lightning } from '@/server/stores'
+import { bitcoin, cache, lightning, prisma } from '@/server/stores'
 import { createHash, randomBytes } from 'node:crypto'
 import { decodeRawHex } from '@/cypher'
 import { lookupInvoice } from '@/server/stores/invoice'
@@ -12,60 +12,8 @@ import { obtainLock, releaseLock } from '@/server/stores/lock'
 import { promisify } from 'node:util'
 import { fetchPaymentAmountPaid, setPaymentAmountPaid } from './payment'
 
-export const addAddress = async (address: string, userId: string): Promise<'OK'> =>
-  await cache.set('bitcoin_address_for_' + userId, address)
-
-export const clearBalanceCache = async (userId: string): Promise<number> =>
-  await cache.del('balance_for_' + userId)
-
-export const createUser = async (): Promise<{
-  login: string
-  password: string
-  userId: string
-}> => {
-  let login = randomBytes(10).toString('hex')
-  let password = randomBytes(10).toString('hex')
-  let userId = randomBytes(24).toString('hex')
-  await saveUserToDatabase(login, password, userId)
-  return { login, password, userId }
-}
-
-export const fetchUserAuth = async (userId: string): Promise<UserAuth> => {
-  let tokens: string[] = await Promise.all([
-    cache.get('access_token_for_' + userId),
-    cache.get('refresh_token_for_' + userId),
-  ])
-  return { accessToken: tokens[0], refreshToken: tokens[1] }
-}
-
-const generateAccessTokens = async (userId: string): Promise<void> => {
-  let access_token = randomBytes(20).toString('hex')
-  let refresh_token = randomBytes(20).toString('hex')
-
-  await cache.set('user_id_for_' + access_token, userId)
-  await cache.set('user_id_for_' + refresh_token, userId)
-  await cache.set('access_token_for_' + userId, access_token)
-  await cache.set('refresh_token_for_' + userId, refresh_token)
-}
-
-export const getUserAddress = async (userId: string) => {
-  return await cache.get('bitcoin_address_for_' + userId)
-}
-
-/**
- * LNDKrub no longer relies on redis balance as source of truth, this is
- * more a cache now. See `calculateBalance()` to get correct balance.
- *
- * @returns {Promise<number>} Balance available to spend
- */
-export const getBalance = async (userId: string) => {
-  let balance = parseInt(await cache.get('balance_for_' + userId)) * 1
-  if (!balance) {
-    balance = await calculateBalance(userId)
-    await saveBalance(balance, userId)
-  }
-  return balance
-}
+export const addAddress = async (address: string, userId: string) =>
+  await prisma.user.update({ data: { address }, where: { userId } })
 
 /**
  * Accounts for all possible transactions in user's account and
@@ -117,6 +65,54 @@ export const getLockedPayments = async (userId: string) => {
   return result
 }
 
+export const clearBalanceCache = async (userId: string): Promise<number> =>
+  await cache.del('balance_for_' + userId)
+
+export const createUser = async (): Promise<{
+  login: string
+  password: string
+  userId: string
+}> => {
+  let login = randomBytes(10).toString('hex')
+  let password = randomBytes(10).toString('hex')
+  let userId = randomBytes(24).toString('hex')
+  await saveUserToDatabase(login, password, userId)
+  return { login, password, userId }
+}
+
+export const fetchUserAuth = async (userId: string): Promise<UserAuth> => {
+  let { accessToken, refreshToken } = await prisma.user.findFirst({ where: { userId } })
+  return { accessToken, refreshToken }
+}
+
+const generateAccessTokens = async (userId: string): Promise<void> => {
+  let accessToken = randomBytes(20).toString('hex')
+  let refreshToken = randomBytes(20).toString('hex')
+  let data = { accessToken, refreshToken }
+  await prisma.user.update({ data, where: { userId } })
+}
+
+export const getUserAddress = async (userId: string) => {
+  let user = await prisma.user.findFirst({ where: { userId } })
+  return user.address
+}
+
+/**
+ * LNDKrub no longer relies on redis balance as source of truth, this is
+ * more a cache now. See `calculateBalance()` to get correct balance.
+ *
+ * @returns {Promise<number>} Balance available to spend
+ */
+export const getBalance = async (userId: string) => {
+  let user = await prisma.user.findFirst({ where: { userId } })
+  let balance = user.balance
+  if (!balance) {
+    balance = await calculateBalance(userId)
+    await saveBalance(balance, userId)
+  }
+  return balance
+}
+
 /**
  * Adds invoice to a list of user's locked payments.
  * Used to calculate balance till the lock is lifted (payment is in
@@ -142,24 +138,30 @@ export const lockFunds = async (bolt11: string, decodedInvoice: any, userId: str
  */
 export const loadUserIdByAuthorization = async (authorization: string): Promise<string | null> => {
   if (!authorization) return null
-  let access_token = authorization.replace('Bearer ', '')
-  let userId = await cache.get('user_id_for_' + access_token)
-  return userId ? userId : null
+  let accessToken = authorization.replace('Bearer ', '')
+  let user = await prisma.user.findFirst({ where: { accessToken } })
+  return user ? user.userId : null
 }
 
-export const loadUserByRefreshToken = async (refresh_token: string): Promise<string | null> => {
-  let userId = await cache.get('user_id_for_' + refresh_token)
-  await generateAccessTokens(userId)
-  return userId ? userId : null
+export const loadUserByRefreshToken = async (refreshToken: string): Promise<string | null> => {
+  let user = await prisma.user.findFirst({ where: { refreshToken } })
+  if (user) {
+    await generateAccessTokens(user.userId)
+    return user.userId
+  }
+  return null
 }
 
 export const loadUserByLoginAndPassword = async (
   login: string,
   password: string
 ): Promise<string | null> => {
-  let userId = await cache.get('user_' + login + '_' + hashPassword(password))
-  await generateAccessTokens(userId)
-  return userId ? userId : null
+  let user = await prisma.user.findFirst({ where: { login, password: hashPassword(password) } })
+  if (user) {
+    await generateAccessTokens(user.userId)
+    return user.userId
+  }
+  return null
 }
 
 /**
@@ -425,8 +427,8 @@ export const saveUserInvoice = async (response: AddInvoiceResponse, userId: stri
 }
 
 const saveUserToDatabase = async (login: string, password: string, userId: string) => {
-  let key = 'user_' + login + '_' + hashPassword(password)
-  await cache.set(key, userId)
+  let data = { login, password: hashPassword(password), userId }
+  await prisma.user.create({ data })
 }
 
 export const syncInvoicePaid = async (paymentHash: string, userId: string) => {
