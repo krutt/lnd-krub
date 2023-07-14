@@ -1,0 +1,79 @@
+// ~/prisma/schema.prisma
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Invoice {
+  id             Int      @id @default(autoincrement())
+  addIndex       String
+  amount         Int
+  description    String
+  destination    String
+  expiry         Int
+  expireTime     Int
+  isPaid         Boolean  @default(false)
+  numMilliSats   Int
+  paymentHash    String
+  paymentRequest String
+  rHash          String
+  type           String   @default("user_invoice")
+  // relations
+  user           User     @relation(fields: [userId], references: [id])
+  userId         Int
+  // timestamps
+  createdAt      DateTime
+  updatedAt      DateTime
+}
+
+model Payment {
+  id              Int      @id @default(autoincrement())
+  description     String
+  expireTime      Int
+  fee             Int
+  isPaid          Boolean  @default(false)
+  memo            String   @default("")
+  paymentError    String
+  paymentHash     String
+  paymentPreimage String
+  payReq          String
+  type            String
+  value           Int
+  // relations
+  route           Route?
+  user            User     @relation(fields: [userId], references: [id])
+  userId          Int
+  // timestamps
+  createdAt       DateTime
+  updatedAt       DateTime
+}
+
+model Route {
+  id                   Int     @id @default(autoincrement())
+  totalAmount          Int
+  totalAmountMilliSats Int
+  totalFees            Int
+  // relations
+  payment              Payment @relation(fields: [paymentId], references: [id])
+  paymentId            Int     @unique
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  accessToken  String    @unique
+  login        String    @unique
+  password     String
+  refreshToken String    @unique
+  // relations
+  invoices     Invoice[]
+  payments     Payment[]
+  // timestamps
+  createdAt    DateTime
+  updatedAt    DateTime
+}
