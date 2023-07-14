@@ -18,7 +18,7 @@ export const lnd = {
   tlsCertPath: process.env.LND_TLSCERT_PATH || './tls.cert',
 }
 export const postRateLimit = 100
-export const prodFaucet: boolean = (process.env.PROD_FAUCET == 'true')
+export const prodFaucet: boolean = process.env.PROD_FAUCET == 'true'
 export const rateLimit = 200
 export const redis = {
   port: parseInt(process.env.REDIS_PORT || '6379'),
