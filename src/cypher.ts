@@ -2,7 +2,7 @@
 
 // imports
 import { Network, Transaction, address, networks, script } from 'bitcoinjs-lib'
-import classify from 'bitcoinjs-lib/src/classify'
+import { output as classifyOutput } from 'bitcoinjs-lib/src/classify'
 
 // types
 type Input = {
@@ -52,7 +52,7 @@ let decodeOutput = (network: Network, transaction: Transaction): Output[] => {
       scriptPubKey: {
         asm: script.toASM(out.script),
         hex: out.script.toString('hex'),
-        type: classify.output(out.script),
+        type: classifyOutput(out.script),
         addresses: [],
       },
     }
