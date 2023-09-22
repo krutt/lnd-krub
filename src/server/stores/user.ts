@@ -348,22 +348,23 @@ const hashPassword = (value: string) => createHash('sha256').update(value).diges
  */
 const listTransactions = async () => {
   let result = []
-  if (!!bitcoin) {
-    result = await bitcoin
-      .listTransactions()
-      .then(data =>
-        data.result.map(transaction => {
-          let { address, amount, category, confirmations } = transaction
-          let time = transaction.blocktime || transaction.time
-          return { address, amount, category, confirmations, time }
-        })
-      )
-      .catch(async err => {
-        console.warn('listtransactions error:', err)
-        let transactions = await cache.get('listtransactions')
-        return !transactions ? [] : JSON.parse(transactions)
-      })
-  } else if (!!lightning) {
+  // if (!!bitcoin) {
+  //   result = await bitcoin
+  //     .listTransactions()
+  //     .then(data =>
+  //       data.result.map(transaction => {
+  //         let { address, amount, category, confirmations } = transaction
+  //         let time = transaction.blocktime || transaction.time
+  //         return { address, amount, category, confirmations, time }
+  //       })
+  //     )
+  //     .catch(async err => {
+  //       console.warn('listtransactions error:', err)
+  //       let transactions = await cache.get('listtransactions')
+  //       return !transactions ? [] : JSON.parse(transactions)
+  //     })
+  // } else if (!!lightning) {
+  if (!!lightning) {
     console.log('get chain transactions via lnd')
     let transactions = await promisify(lightning.getTransactions)
       .bind(lightning)({})
