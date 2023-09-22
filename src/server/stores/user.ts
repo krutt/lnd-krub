@@ -191,7 +191,12 @@ export const generateUserAddress = async (userId: string): Promise<void> => {
         return null
       })
       if (!info) {
-        await bitcoin.importAddress(address, address).catch(err => console.error(err))
+        try {
+          await bitcoin.importAddress(address, address).catch(err => console.error(err))
+        } catch (err) {
+          console.warn('importaddress error:', err)
+          console.warn('unable to import address to bitcoin-service')
+        }
       }
     }
   }
