@@ -10,8 +10,9 @@ import {
   credentials,
   loadPackageDefinition,
 } from '@grpc/grpc-js'
-import { readFileSync } from 'fs'
 import { PackageDefinition, loadSync } from '@grpc/proto-loader'
+import { promisify } from 'node:util'
+import { readFileSync } from 'node:fs'
 
 // consts
 const loaderOptions = {
@@ -23,7 +24,6 @@ const loaderOptions = {
 }
 const packageDefinition: PackageDefinition = loadSync(lnd.protoPath, loaderOptions)
 const protoDescriptor: GrpcObject = loadPackageDefinition(packageDefinition)
-
 interface LnSvc {
   LnSvc: LnSvc
   new (url: string, creds: ChannelCredentials): LnSvc
@@ -41,7 +41,12 @@ interface LnSvc {
   sendPaymentSync: Function
   sendToRouteSync: Function
 }
-const LnRpc = protoDescriptor.lnrpc as { Lightning?: LnSvc }
+interface UnlockSvc {
+  Unlocker: UnlockSvc
+  new (url: string, cred: ChannelCredentials): UnlockSvc
+  unlockWallet: Function
+}
+const LnRpc = protoDescriptor.lnrpc as { Lightning?: LnSvc; WalletUnlocker?: UnlockSvc }
 
 export class LightningService extends LnRpc.Lightning {
   constructor(
@@ -63,4 +68,33 @@ export class LightningService extends LnRpc.Lightning {
   }
 }
 
-export default LightningService
+export class WalletUnlocker extends LnRpc.WalletUnlocker {
+  constructor(
+    host: string = lnd.host,
+    macaroonPath: string = lnd.macaroonPath,
+    port: number = lnd.port,
+    tlsCertPath: string = lnd.tlsCertPath
+  ) {
+    let lndCert: Buffer = readFileSync(tlsCertPath)
+    let sslCreds: ChannelCredentials = credentials.createSsl(lndCert)
+    let macaroon: string = readFileSync(macaroonPath).toString('hex')
+    let macaroonCreds: CallCredentials = credentials.createFromMetadataGenerator((_, callback) => {
+      let metadata: Metadata = new Metadata()
+      metadata.add('macaroon', macaroon)
+      callback(null, metadata)
+    })
+    let creds: ChannelCredentials = credentials.combineChannelCredentials(sslCreds, macaroonCreds)
+    super(`${host}:${port}`, creds)
+  }
+}
+if (!!lnd.password) {
+  console.log('Unlocking wallet...')
+  let unlocker: WalletUnlocker = new WalletUnlocker()
+  promisify(unlocker.unlockWallet).bind(unlocker)({ wallet_password: lnd.password })
+    .then(response => {
+      console.log('unlockWallet:', response)
+    })
+    .catch(console.error)
+}
+
+export default LnRpc.Lightning
