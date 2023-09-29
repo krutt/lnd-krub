@@ -90,7 +90,8 @@ export class WalletUnlocker extends LnRpc.WalletUnlocker {
 if (!!lnd.password) {
   console.log('Unlocking wallet...')
   let unlocker: WalletUnlocker = new WalletUnlocker()
-  promisify(unlocker.unlockWallet).bind(unlocker)({ wallet_password: lnd.password })
+  let wallet_password = Buffer.from(lnd.password).toString('base64')
+  promisify(unlocker.unlockWallet).bind(unlocker)({ wallet_password })
     .then(response => {
       console.log('unlockWallet:', response)
     })
