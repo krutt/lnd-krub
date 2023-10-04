@@ -7,6 +7,7 @@ import { TagData, decode as decodeBOLT11 } from 'bolt11'
 import { bitcoin, cache, lightning, prisma } from '@/server/stores'
 import { createHash, randomBytes } from 'node:crypto'
 import { decodeRawHex } from '@/cypher'
+import { forwardReserveFee } from '@/configs'
 import { lookupInvoice } from '@/server/stores/invoice'
 import { obtainLock, releaseLock } from '@/server/stores/lock'
 import { promisify } from 'node:util'
@@ -45,7 +46,7 @@ export const calculateBalance = async (userId: string) => {
   for (let paym of lockedPayments) {
     // locked payments are processed in scripts/process-locked-payments.js
     // @ts-ignore
-    balance -= +paym.amount + /* feelimit */ Math.floor(paym.amount * forwardFee)
+    balance -= +paym.amount + /* feelimit */ Math.floor(paym.amount * forwardReserveFee)
   }
 
   return balance
