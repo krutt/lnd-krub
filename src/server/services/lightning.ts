@@ -91,7 +91,8 @@ if (!!lnd.password) {
   console.log('Unlocking wallet...')
   let unlocker: WalletUnlocker = new WalletUnlocker()
   let wallet_password = Buffer.from(lnd.password).toString('base64')
-  promisify(unlocker.unlockWallet).bind(unlocker)({ wallet_password })
+  promisify(unlocker.unlockWallet)
+    .bind(unlocker)({ wallet_password })
     .then(response => {
       console.log('unlockWallet:', response)
     })
