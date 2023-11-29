@@ -126,47 +126,56 @@
         >
         <rect
           fill='url(#ensign-red)'
-          height='100px'
-          rx='50px'
-          ry='40px'
-          width='200px'
-          x='25px'
+          height='140.5px'
+          rx='41px'
+          ry='43px'
+          width='205.5px'
+          x='25.5px'
           y='25px'
           />
         <rect
           fill='url(#ensign-white)'
-          height='100px'
-          rx='50px'
-          ry='40px'
-          width='200px'
-          x='25px'
+          height='115px'
+          rx='41px'
+          ry='43px'
+          width='205.5px'
+          x='25.5px'
           y='50px'
           />
         <rect
           fill='url(#ensign-blue)'
-          height='100px'
-          rx='50px'
-          ry='40px'
-          width='200px'
-          x='25px'
-          y='70px'
+          height='140.5px'
+          rx='41px'
+          ry='43px'
+          width='205.5px'
+          x='25.5px'
+          y='74px'
           />
-        <rect
+        <rect visibility='hidden'
           fill='url(#ensign-white)'
-          height='100px'
-          rx='50px'
-          ry='40px'
+          height='115px'
+          rx='41px'
+          ry='43px'
           width='200px'
           x='25px'
           y='100px'
           />
         <rect
+          fill='url(#ensign-white)'
+          height='115px'
+          rx='41px'
+          ry='43px'
+          width='205.5px'
+          x='25.5px'
+          y='101px'
+          />
+        <rect
           fill='url(#ensign-red)'
           height='110px'
-          rx='50px'
-          ry='40px'
-          width='200px'
-          x='25px'
+          rx='41px'
+          ry='43px'
+          width='205.5px'
+          x='25.5px'
           y='125px'
           />
       </g>
@@ -175,13 +184,13 @@
   <polyline id='zap'
     fill="white"
     points='
-      174.5, 156
-      143, 187.5
-      157, 187.5
-      147.5, 216
-      179, 184.5
-      164, 184.5
-      174.5, 156
+      179.5, 156
+      148, 187.5
+      162, 187.5
+      152.5, 216
+      184, 184.5
+      169, 184.5
+      179.5, 156
     '
     stroke="white"
     stroke-linecap='round'
