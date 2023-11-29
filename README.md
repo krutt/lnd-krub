@@ -8,6 +8,8 @@
 [![Fork](https://img.shields.io/badge/fork-BlueWallet/LndHub-beige?logo=github)](https://github.com/BlueWallet/LndHub)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+![LNDKrub Banner](./public/lndkrub-banner.svg "LNDKrub Banner")
+
 Rewritten wrapper for Lightning Network Daemon in TypeScript based on [LNDHub](github.com/BlueWallet/LndHub).
 This is a tribute to the amazing work done by [BlueWallet Team](github.com/BlueWallet) with
 some creative differences, as followed:
