@@ -4,6 +4,10 @@
 [![Lightning](https://img.shields.io/badge/lightning-792EE5?logo=lightning)](https://mempool.space/lightning)
 [![Fork](https://img.shields.io/badge/fork-BlueWallet/LndHub-beige?logo=github)](https://github.com/BlueWallet/LndHub)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Top](https://img.shields.io/github/languages/top/krutt/lnd-krub)](.)
+[![Languages](https://img.shields.io/github/languages/count/krutt/lnd-krub)](.)
+[![Size](https://img.shields.io/github/repo-size/krutt/lnd-krub)](.)
+[![Last commit](https://img.shields.io/github/last-commit/krutt/lnd-krub/master)](.)
 
 ![LNDKrub Banner](./public/lndkrub-banner.svg "LNDKrub Banner")
 
