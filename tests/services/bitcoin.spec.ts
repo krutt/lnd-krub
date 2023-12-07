@@ -36,16 +36,17 @@ describe('get network information', () => {
   })
 })
 
-describe('list transactions for all', () => {
-  it('responds with all available transactions', async () => {
-    let { error, id, result } = await bitcoin.listTransactions()
-    expect(error).toBeFalsy()
-    expect(id).toBeTruthy()
-    expect(id).toBeTypeOf('string')
-    expect(id.length).toBe(36)
-    expect(id.replaceAll('-', '').length).toBe(32)
-    expect(result).toBeTypeOf('object') // array
-    expect(result.length).toBeTypeOf('number')
-    expect(result.length).toBeGreaterThan(0)
-  })
-})
+// TODO: uncomment if bitcoind deployed with wallet loaded
+// describe('list transactions for all', () => {
+//   it('responds with all available transactions', async () => {
+//     let { error, id, result } = await bitcoin.listTransactions()
+//     expect(error).toBeFalsy()
+//     expect(id).toBeTruthy()
+//     expect(id).toBeTypeOf('string')
+//     expect(id.length).toBe(36)
+//     expect(id.replaceAll('-', '').length).toBe(32)
+//     expect(result).toBeTypeOf('object') // array
+//     expect(result.length).toBeTypeOf('number')
+//     expect(result.length).toBeGreaterThan(0)
+//   })
+// })
