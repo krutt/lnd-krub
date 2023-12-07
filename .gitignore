@@ -2,6 +2,10 @@
 admin.macaroon
 tls.cert
 
+# Target authentication used by tests
+target-admin.macaroon
+target-tls.cert
+
 # Build
 dist
 
