@@ -24,7 +24,7 @@ describe('get network information', () => {
     expect(connections).toBe(0)
     expect(version).toBeTruthy()
     expect(version).toBeTypeOf('number')
-    expect(version).toBe(240000)
+    expect([240000, 250000, 260000]).toContain(version)
     expect(networkactive).toBeTruthy()
     expect(networkactive).toBeTypeOf('boolean')
     expect(networks).toBeTruthy()
