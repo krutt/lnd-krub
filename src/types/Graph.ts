@@ -1,7 +1,6 @@
 /* ~~/src/types/Graph.ts */
 
 type Feature = {
-  /* TODO: Probably need some attributes here. */
   is_known: boolean
   is_required: boolean
   name:
