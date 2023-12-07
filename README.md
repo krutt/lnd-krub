@@ -9,7 +9,7 @@
 [![Size](https://img.shields.io/github/repo-size/krutt/lnd-krub)](.)
 [![Last commit](https://img.shields.io/github/last-commit/krutt/lnd-krub/master)](.)
 
-![LNDKrub Banner](./public/lndkrub-banner.svg "LNDKrub Banner")
+![LNDKrub Banner](./public/lndkrub-banner.svg 'LNDKrub Banner')
 
 > 🚧 **Warning**
 > This project is in early development, it does however work with real sats! Always use amounts you don't mind losing.
