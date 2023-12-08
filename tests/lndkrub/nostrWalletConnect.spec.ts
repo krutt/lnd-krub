@@ -35,7 +35,7 @@ describe('POST /nwc', () => {
         expect(url.pathname).toBe(pubkey)
         let relay = url.searchParams.get('relay')
         expect(relay).toBeTruthy()
-        expect(relay).toBe('wss://localhost:7000') // tentative
+        expect(relay).toBe('wss://localhost:7000') // TODO: tentative
         let secret = url.searchParams.get('secret')
         expect(secret).toBeTruthy()
         expect(secret.length).toBe(44)
