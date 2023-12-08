@@ -1,0 +1,72 @@
+/**
+ * This script gets all locked payments from our database and cross-checks them with actual
+ * sentout payments from LND. If locked payment is in there we moe locked payment to array of real payments for the user
+ * (it is effectively spent coins by user), if not - we attempt to pay it again (if it is not too old).
+ */
+// import { User, Paym } from '../src/models/'
+// const config = require('../config')
+
+
+(async () => {
+  console.log('locked payments')
+  // let keys = await redis.keys('locked_payments_for_*')
+  // keys = User._shuffle(keys)
+
+  // console.log('fetching listPayments...')
+  // let tempPaym = new Paym(redis, bitcoinclient, lightning)
+  // let listPayments = await tempPaym.listPayments()
+  // // DEBUG let listPayments = JSON.parse(fs.readFileSync('listpayments.txt').toString('ascii'))
+  // console.log('done', 'got', listPayments['payments'].length, 'payments')
+
+  // for (let key of keys) {
+  //   const userid = key.replace('locked_payments_for_', '')
+  //   console.log('===================================================================================')
+  //   console.log('userid=', userid)
+  //   let user = new User(redis, bitcoinclient, lightning)
+  //   user._userid = userid
+  //   let lockedPayments = await user.getLockedPayments()
+  //   // DEBUG let lockedPayments = [{ pay_req : 'lnbc108130n1pshdaeupp58kw9djt9vcdx26wkdxl07tgncdmxz2w7s9hzul45tf8gfplme94sdqqcqzzgxqrrssrzjqw8c7yfutqqy3kz8662fxutjvef7q2ujsxtt45csu0k688lkzu3ld93gutl3k6wauyqqqqryqqqqthqqpysp5jcmk82hypuud0lhpf66dg3w5ta6aumc4w9g9sxljazglq9wkwstq9qypqsqnw8hwwauvzrala3g4yrkgazk2l2fh582j9ytz7le46gmsgglvmrknx842ej9z4c63en5866l8tpevm8cwul8g94kf2nepppn256unucp43jnsw',   amount: 10813, timestamp: 1635186606 }]
+
+  //   for (let lockedPayment of lockedPayments) {
+  //     let daysPassed = (+new Date() / 1000 - lockedPayment.timestamp) / 3600 / 24
+  //     console.log('processing lockedPayment=', lockedPayment, daysPassed, 'days passed')
+
+  //     let payment = new Paym(redis, bitcoinclient, lightning)
+  //     payment.setInvoice(lockedPayment.pay_req)
+
+  //     // first things first:
+  //     // trying to lookup this stuck payment in an array of delivered payments
+  //     let isPaid = false
+  //     for (let sentPayment of listPayments['payments']) {
+  //       if ((await payment.getPaymentHash()) == sentPayment.payment_hash) {
+  //         console.log('found this payment in listPayments array, so it is paid successfully')
+  //         let sendResult = payment.processSendPaymentResponse({ payment_error: 'already paid' } /* hacky */) // adds fees
+  //         if (sendResult.decoded.num_satoshis == 0) {
+  //           // zero sat invoice, get corect sat number from the lockedPayment info
+  //           sendResult.decoded.num_satoshis = lockedPayment.amount + Math.ceil(lockedPayment.amount * forwardFee)
+  //           sendResult.decoded.num_msat = sendResult.decoded.num_satoshis * 1000
+  //           sendResult.payment_route.total_fees = 0
+  //           sendResult.payment_route.total_amt = sendResult.decoded.num_satoshis
+  //         }
+  //         console.log('saving paid invoice:', sendResult)
+  //         await user.savePaidLndInvoice(sendResult)
+  //         await user.unlockFunds(lockedPayment.pay_req)
+  //         isPaid = true
+  //         console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', await payment.getPaymentHash(), sentPayment.payment_hash)
+  //         break
+  //       }
+  //     }
+  //     // could not find...
+
+  //     if (daysPassed > 1) {
+  //       // could not find in listpayments array too late to retry
+  //       if (!isPaid) {
+  //         console.log('very old payment, evict the lock')
+  //         await user.unlockFunds(lockedPayment.pay_req)
+  //       }
+  //     }
+  //   }
+  // }
+  // console.log('done')
+  // process.exit()
+})()

@@ -13,13 +13,12 @@
       "@/*": ["./src/*"],
       "τ/*": ["./tests/*"]
     },
-    "outDir": "./dist",
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": false,
     "target": "ESNext",
     "useDefineForClassFields": true
   },
-  "include": ["src", "tests"],
+  "include": ["jobs", "src", "tests"],
   "exclude": ["src/client"]
 }
