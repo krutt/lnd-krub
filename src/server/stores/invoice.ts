@@ -66,7 +66,11 @@ export const getPreimage = async (bolt11: string): Promise<string> => {
  *
  * @return {Promise<array>}
  */
-export const listInvoices = async (): Promise<Array<Invoice>> => {
+export const listInvoices = async (): Promise<{
+  invoices: Array<Invoice>
+  last_index_offset: string
+  first_index_offset: string
+}> => {
   return await promisify(lightning.listInvoices)
     .bind(lightning)({
       num_max_invoices: 99000111,
