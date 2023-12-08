@@ -67,6 +67,7 @@ import dashboard from '@/server/routes/dashboard.route'
 import decodeInvoice from '@/server/routes/decodeInvoice.route'
 import faucet from '@/server/routes/faucet.route'
 import info from '@/server/routes/info.route'
+import nostrWalletConnect from '@/server/routes/nostrWalletConnect.route'
 import pendingTransactions from '@/server/routes/pendingTransactions.route'
 import payInvoice from '@/server/routes/payInvoice.route'
 // import queryRoutes from '@/server/routes/queryRoutes.route'
@@ -86,6 +87,7 @@ router.get('/getinfo', postLimiter, info)
 router.get('/getpending', postLimiter, pendingTransactions)
 router.get('/gettxs', postLimiter, transactions)
 router.get('/getuserinvoices', postLimiter, userInvoices)
+router.post('/nwc', postLimiter, nostrWalletConnect)
 router.post('/payinvoice', postLimiter, payInvoice)
 // router.get('/queryroutes/:source/:dest/:amt', queryRoutes)
 
