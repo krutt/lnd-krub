@@ -15,7 +15,7 @@ import { randomBytes } from 'node:crypto'
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
   console.log('/nwc', [request.uuid])
   let { pubkey } = request.body
-  let relay: string = 'wss://localhost:7000'  // TODO: tentative
+  let relay: string = 'wss://localhost:7000' // TODO: tentative
   if (!pubkey) return errorBadAuth(response)
   let secret: string = randomBytes(32).toString('base64')
   let connection: string = `nostr+walletconnect:${pubkey}`

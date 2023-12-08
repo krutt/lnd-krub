@@ -54,7 +54,20 @@ describe('POST /nwc', () => {
         }
         event.pubkey = pubkey
         let utf8Encoder = new TextEncoder()
-        event.id = bytesToHex(sha256(utf8Encoder.encode(JSON.stringify([0, event.pubkey, event.created_at, event.kind, event.tags, event.content]))))
+        event.id = bytesToHex(
+          sha256(
+            utf8Encoder.encode(
+              JSON.stringify([
+                0,
+                event.pubkey,
+                event.created_at,
+                event.kind,
+                event.tags,
+                event.content,
+              ])
+            )
+          )
+        )
         event.sig = bytesToHex(schnorr.sign(event.id, privkey))
         let pool: SimplePool = new SimplePool()
         await pool.publish([relay], event)
