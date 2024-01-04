@@ -46,7 +46,11 @@ export const isExpired = async (bolt11: string): Promise<boolean> => {
  *
  * @returns
  */
-export const listPayments = async (): Promise<Array<Payment>> =>
+export const listPayments = async (): Promise<{
+  first_index_offset: string // number-like
+  last_index_offset: string // number-like
+  payments: Array<Payment>
+}> =>
   await promisify(lightning.listPayments)
     .bind(lightning)({})
     .catch(err => {
