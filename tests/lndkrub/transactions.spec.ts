@@ -52,10 +52,7 @@ describe('GET /gettxs', () => {
 describe('POST /faucet then GET /gettxs', () => {
   let amt: number = 1_000
   beforeAll(async () => {
-    await supertest(lndkrub)
-      .post('/faucet')
-      .send({ amt })
-      .set(authHeaders)
+    await supertest(lndkrub).post('/faucet').send({ amt }).set(authHeaders)
   })
   it('responds with empty list of transactions', async () => {
     await supertest(lndkrub)

@@ -65,7 +65,7 @@ Under renovation.
 
 ### Aesir
 
-[Aesir](https://github.com/krutt/aesir) is the preferred option for setting up local Lightning 
+[Aesir](https://github.com/krutt/aesir) is the preferred option for setting up local Lightning
 environment used in tests and experiments for this project. You must have [Docker Daemon](https://docs.docker.com/get-docker/)
 as well as [Python 3.8+](https://www.python.org/downloads/) installed in your local enviroment to
 make use of `aesir` command. The following command helps you deploy a local cluster where you can
@@ -106,7 +106,7 @@ wait ! The database deployed by `aesir` command still does not have the required
 to keep track of accounts. You must create our very own `PrismaClient` first and migrate the latest
 database schema to the `postgres` container with the following commands.
 
-```sh
+````sh
 $ yarn prisma:generate # OR pnpm run prisma:generate
 > ✔ Generated Prisma Client (5.0.0 | library) to ./node_modules/@prisma/client in 101ms
 > You can now start using Prisma Client in your code. Reference: https://pris.ly/d/client
@@ -131,7 +131,7 @@ $ yarn prisma:migrate # OR pnpm run prisma:migrate
 >     └─ migration.sql
 >
 > Your database is now in sync with your schema.
-```
+````
 
 With `aesir mine` running in the background, you will be able to run all tests successfully with
 the following commands.
