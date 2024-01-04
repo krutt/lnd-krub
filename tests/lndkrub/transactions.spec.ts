@@ -48,3 +48,36 @@ describe('GET /gettxs', () => {
       })
   })
 })
+
+describe('POST /faucet then GET /gettxs', () => {
+  let amt: number = 1_000
+  beforeAll(async () => {
+    await supertest(lndkrub)
+      .post('/faucet')
+      .send({ amt })
+      .set(authHeaders)
+  })
+  it('responds with empty list of transactions', async () => {
+    await supertest(lndkrub)
+      .get('/balance')
+      .set(authHeaders)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then((response: { body: { BTC: { AvailableBalance: number } } }) => {
+        let { BTC } = response.body
+        expect(BTC).toBeTruthy()
+        expect(BTC.AvailableBalance).toBeTypeOf('number')
+        expect(BTC.AvailableBalance).toBe(amt)
+      })
+    await supertest(lndkrub)
+      .get('/gettxs')
+      .set(authHeaders)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .then((response: { body: Transaction[] }) => {
+        let transactions = response.body
+        expect(transactions).toBeTruthy()
+        expect(transactions.length).toBe(1) // Must recognize faucet transaction
+      })
+  })
+})
