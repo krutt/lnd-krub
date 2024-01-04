@@ -57,23 +57,63 @@ yarn
 
 Under renovation.
 
-### Run in docker
-
-Under renovation.
-
 ### Reference client implementation
 
 Under renovation.
 
-### Contributions
+## Contributions
 
-Under renovation.
+### Aesir
+
+[Aesir](https://github.com/krutt/aesir) is the preferred option for setting up local Lightning 
+environment used in tests and experiments for this project. You must have [Docker Daemon](https://docs.docker.com/get-docker/)
+as well as [Python 3.8+](https://www.python.org/downloads/) installed in your local enviroment to
+make use of `aesir` command. The following command helps you deploy a local cluster where you can
+interact with one `bitcoind` node active as well as two Lightning Node Daemons (LNDs) named `ping`
+and `pong` with inbound and outbound liquidity channels to one another.
+
+```sh
+$ aesir deploy --with-postgres --with-redis
+> Deploy duo cluster:                        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:01
+> Generate addresses:                        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+> Mine initial capital for parties:          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+$ aesir ping-pong
+> Fetch LND nodekeys:                        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+> Open channels:                             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+> <Channel 'aesir-ping --> aesir-pong' : txid='aa8d740e604746d946200fda22665a8d6a0766641895f9599da5264dceb0ea64'>
+> <Channel 'aesir-pong --> aesir-ping' : txid='a36b213f47fdfe851bf06a5b1cfd34afb43c18330f26bc9a064810f512bb6876'>
+```
 
 ### Tests
 
-Under renovation.
+After having local test environment setup using [Aesir](https://github.com/krutt/aesir), please copy
+certificate files and macaroon files from local containers to your root folder with the following
+commands.
 
-### Responsible disclosure
+```sh
+$ docker cp aesir-ping:/home/lnd/.lnd/tls.cert tls.cert
+> Successfully copied 2.56kB to /Users/mackasitt/workspaces/lnd-krub/tls.cert
+$ docker cp aesir-ping:/home/lnd/.lnd/data/chain/bitcoin/regtest/admin.macaroon admin.macaroon
+> Successfully copied 2.05kB to /Users/mackasitt/workspaces/lnd-krub/admin.macaroon
+$ docker cp aesir-pong:/home/lnd/.lnd/tls.cert target-tls.cert
+> Successfully copied 2.56kB to /Users/mackasitt/workspaces/lnd-krub/target-tls.cert
+$ docker cp aesir-pong:/home/lnd/.lnd/data/chain/bitcoin/regtest/admin.macaroon target-admin.macaroon
+> Successfully copied 2.05kB to /Users/mackasitt/workspaces/lnd-krub/target-admin.macaroon
+```
+
+Now you will have all the necessary authentications on your file system ready to run tests with the
+following command.
+
+```sh
+$ yarn test
+# OR
+$ pnpm run test
+...
+```
+
+Test files are located under `tests/` directory found under root folder of this project.
+
+## Responsible disclosures
 
 Found critical bugs/vulnerabilities? Please email them to aekasitt.g+github@siamintech.co.th Thanks!
 
