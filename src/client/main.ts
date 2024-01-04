@@ -122,7 +122,7 @@ let render = (dashblob: Dashblob, channels: Channel[], qrBuffer: string | undefi
         {{/uris}}
       </div>
       <footer>
-        <a href="https://github.com/aekasitt/lnd-krub" target="_blank">about</a>
+        <a href="https://github.com/krutt/lnd-krub" target="_blank">about</a>
       </footer>
     </div>
   `,
