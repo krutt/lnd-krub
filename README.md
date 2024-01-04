@@ -101,8 +101,40 @@ $ docker cp aesir-pong:/home/lnd/.lnd/data/chain/bitcoin/regtest/admin.macaroon 
 > Successfully copied 2.05kB to /Users/mackasitt/workspaces/lnd-krub/target-admin.macaroon
 ```
 
-Now you will have all the necessary authentications on your file system ready to run tests with the
-following command.
+Now you will have all the necessary authentications on your file system ready to run tests, but
+wait ! The database deployed by `aesir` command still does not have the required database `krubdb`
+to keep track of accounts. You must create our very own `PrismaClient` first and migrate the latest
+database schema to the `postgres` container with the following commands.
+
+```sh
+$ yarn prisma:generate # OR pnpm run prisma:generate
+> ✔ Generated Prisma Client (5.0.0 | library) to ./node_modules/@prisma/client in 101ms
+> You can now start using Prisma Client in your code. Reference: https://pris.ly/d/client
+> ```
+> import { PrismaClient } from '@prisma/client'
+> const prisma = new PrismaClient()
+> ```
+> ✨  Done in 0.89s.
+$ yarn prisma:migrate # OR pnpm run prisma:migrate
+> Environment variables loaded from .env
+> Prisma schema loaded from prisma/schema.prisma
+> Datasource "db": PostgreSQL database "krubdb", schema "public" at "localhost:5432"
+>
+> PostgreSQL database krubdb created at localhost:5432
+>
+> Applying migration `20230714202934_init`
+>
+> The following migration(s) have been applied:
+>
+> migrations/
+>   └─ 20230714202934_init/
+>     └─ migration.sql
+>
+> Your database is now in sync with your schema.
+```
+
+With `aesir mine` running in the background, you will be able to run all tests successfully with
+the following commands.
 
 ```sh
 $ yarn test
