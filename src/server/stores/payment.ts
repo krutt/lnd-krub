@@ -3,7 +3,7 @@
 // imports
 import type { MockPayment, Payment } from '@/types'
 import { forwardReserveFee, intraHubFee } from '@/configs'
-import { cache, lightning } from '@/server/stores'
+import { cache, lightning, prisma } from '@/server/stores'
 import { decodePaymentRequest } from '@/server/stores/invoice'
 import { promisify } from 'node:util'
 
@@ -93,7 +93,28 @@ export const queryRoutes = async (bolt11: string): Promise<any> => {
 export const savePayment = async (
   payment: MockPayment | Payment,
   userId: string
-): Promise<number> => await cache.rpush('txs_for_' + userId, JSON.stringify(payment))
+): Promise<number> => {
+  let { fee, memo, type, value } = payment
+  let user = await prisma.user.findFirst({ where: { userId } })
+  if (!user) {
+    return 0
+  }
+  let data = {
+    description: (payment as Payment).description,
+    expireTime: payment.timestamp,
+    fee,
+    memo,
+    paymentError: (payment as Payment).payment_error,
+    paymentHash: (payment as Payment).payment_hash,
+    paymentPreimage: (payment as Payment).payment_preimage,
+    payReq: payment.pay_req,
+    type,
+    userId: user.id,
+    value
+  }
+  let created = await prisma.payment.create({ data })
+  return !!created ? 1 : 0
+}
 
 export const sendPayment = async (
   amount: number,
