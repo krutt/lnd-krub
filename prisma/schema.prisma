@@ -34,7 +34,7 @@ model Invoice {
 
 model Payment {
   id              Int      @id @default(autoincrement())
-  description     String
+  description     String?
   expireTime      Int
   fee             Int
   isPaid          Boolean  @default(false)
