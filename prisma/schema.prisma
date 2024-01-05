@@ -39,9 +39,9 @@ model Payment {
   fee             Int
   isPaid          Boolean  @default(false)
   memo            String   @default("")
-  paymentError    String   @default("")
-  paymentHash     String
-  paymentPreimage String
+  paymentError    String?
+  paymentHash     String?
+  paymentPreimage String?
   payReq          String
   type            String
   value           Int

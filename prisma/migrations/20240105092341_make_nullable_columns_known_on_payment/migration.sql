@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Payment" ALTER COLUMN "paymentError" DROP NOT NULL,
+ALTER COLUMN "paymentError" DROP DEFAULT,
+ALTER COLUMN "paymentHash" DROP NOT NULL,
+ALTER COLUMN "paymentPreimage" DROP NOT NULL;
