@@ -5,6 +5,7 @@ import { lnd } from '@/configs'
 import {
   CallCredentials,
   ChannelCredentials,
+  ChannelOptions,
   GrpcObject,
   Metadata,
   credentials,
@@ -26,7 +27,7 @@ const packageDefinition: PackageDefinition = loadSync(lnd.protoPath, loaderOptio
 const protoDescriptor: GrpcObject = loadPackageDefinition(packageDefinition)
 interface LnSvc {
   LnSvc: LnSvc
-  new (url: string, creds: ChannelCredentials): LnSvc
+  new (url: string, creds: ChannelCredentials, options: ChannelOptions): LnSvc
   addInvoice: Function
   decodePayReq: Function
   describeGraph: Function
@@ -43,7 +44,7 @@ interface LnSvc {
 }
 interface UnlockSvc {
   Unlocker: UnlockSvc
-  new (url: string, cred: ChannelCredentials): UnlockSvc
+  new (url: string, cred: ChannelCredentials, options: ChannelOptions): UnlockSvc
   unlockWallet: Function
 }
 const LnRpc = protoDescriptor.lnrpc as { Lightning?: LnSvc; WalletUnlocker?: UnlockSvc }
@@ -64,7 +65,10 @@ export class LightningService extends LnRpc.Lightning {
       callback(null, metadata)
     })
     let creds: ChannelCredentials = credentials.combineChannelCredentials(sslCreds, macaroonCreds)
-    super(`${host}:${port}`, creds)
+    let options: ChannelOptions = {
+      'grpc.max_receive_message_length': 20_000_000
+    }
+    super(`${host}:${port}`, creds, options)
   }
 }
 
@@ -84,7 +88,10 @@ export class WalletUnlocker extends LnRpc.WalletUnlocker {
       callback(null, metadata)
     })
     let creds: ChannelCredentials = credentials.combineChannelCredentials(sslCreds, macaroonCreds)
-    super(`${host}:${port}`, creds)
+    let options: ChannelOptions = {
+      'grpc.max_receive_message_length': 20_000_000
+    }
+    super(`${host}:${port}`, creds, options)
   }
 }
 if (!!lnd.password) {
