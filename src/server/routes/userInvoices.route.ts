@@ -12,7 +12,7 @@ import { getUserInvoices, loadUserIdByAuthorization } from '@/server/stores/user
  * @param {Express.Response} response
  * @returns {Express.Response}
  */
-export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {)
+export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
   let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
   let limit: string = request.query.limit?.toString() || '0'
