@@ -13,7 +13,6 @@ import { queryRoutes } from '@/server/stores/route'
  * @returns {Express.Response}
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-  console.log('/queryroutes', [request.uuid])
   let amount: number = parseInt(request.params.amt || request.params.amount || '0')
   let destination: string = request.params.dest || request.params.destination
   let source: string = request.params.source || request.params.src

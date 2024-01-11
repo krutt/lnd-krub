@@ -14,7 +14,6 @@ import { loadNodeInformation } from '@/server/stores/dashblob'
  * @returns {Express.Response}
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-  console.log('/dashboard', [request.uuid])
   return await Promise.all([loadNodeInformation(), listChannels()])
     .then(results => response.send(results))
     .catch(() => errorLnd(response))

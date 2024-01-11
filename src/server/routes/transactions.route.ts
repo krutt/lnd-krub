@@ -20,10 +20,8 @@ import {
  * @returns {Express.Response}
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-  console.log('/gettxs', [request.uuid])
   let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
-  console.log('/gettxs', [request.uuid, 'userid: ' + userId])
 
   if (!(await getUserAddress(userId))) await generateUserAddress(userId) // onchain addr needed further
   try {
@@ -40,7 +38,7 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
     }
     return response.send(transactions)
   } catch (err) {
-    console.log('', [request.uuid, 'error gettxs:', err.message, 'userid:', userId])
+    console.error('', [request.uuid, 'error gettxs:', err.message, 'userid:', userId])
     return response.send([])
   }
 }

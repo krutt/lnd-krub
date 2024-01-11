@@ -13,7 +13,6 @@ import { randomBytes } from 'node:crypto'
  * @returns {Express.Response}
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-  console.log('/nwc', [request.uuid])
   let { pubkey } = request.body
   let relay: string = 'wss://localhost:7000' // TODO: tentative
   if (!pubkey) return errorBadAuth(response)

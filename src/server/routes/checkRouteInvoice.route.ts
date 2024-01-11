@@ -14,7 +14,6 @@ import { loadUserIdByAuthorization } from '@/server/stores/user'
  * @returns {Express.Response}
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-  console.log('/checkrouteinvoice', [request.uuid])
   let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
   let bolt11 = request.query.invoice

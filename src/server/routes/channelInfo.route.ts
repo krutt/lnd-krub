@@ -12,7 +12,6 @@ import { describeLightningGraph } from '@/server/stores/graph'
  * @returns {Express.Response}
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-  console.log('/getchaninfo', [request.uuid])
   let { edges } = await describeLightningGraph()
   if (!!edges) {
     for (let edge of edges) {

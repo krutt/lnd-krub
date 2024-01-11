@@ -18,10 +18,8 @@ import {
  * @returns {Express.Response}
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-  console.log('/getpending', [request.uuid])
   let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
-  console.log('/getpending', [request.uuid, 'userid: ' + userId])
   if (!(await getUserAddress(userId))) await generateUserAddress(userId) // onchain address needed further
   return response.send(await getPendingTransactions(userId))
 }

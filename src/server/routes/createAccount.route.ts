@@ -14,7 +14,6 @@ import { createUser, saveUserMetadata } from '@/server/stores/user'
  * @returns {Express.Response}
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-  console.log('/create', [request.uuid])
   // Valid if the partnerid isn't there or is a string (same with accounttype)
   if (
     !(

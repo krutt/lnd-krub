@@ -21,10 +21,8 @@ import { sunset } from '@/configs'
  * @returns {Express.Response}
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-  console.log('/addinvoice', [request.uuid])
   let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
-  console.log('/addinvoice', [request.uuid, 'userid: ' + userId])
 
   if (!request.body.amt || /*stupid NaN*/ !(request.body.amt > 0))
     return errorBadArguments(response)

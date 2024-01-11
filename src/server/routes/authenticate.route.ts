@@ -17,7 +17,6 @@ import {
  * @returns {Express.Response}
  */
 export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
-  console.log('/auth', [request.uuid])
   let login: null | string = request.body.login
   let password: null | string = request.body.password
   let refreshToken: null | string = request.body.refreshToken || request.body.refresh_token // bluewallet: compatibility
