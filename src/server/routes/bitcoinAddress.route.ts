@@ -19,9 +19,7 @@ import {
  */
 export const route = async (request: Request, response: Response): Promise<Response> => {
   let userId = await loadUserIdByAuthorization(request.headers.authorization)
-  if (!userId) {
-    return errorBadAuth(response)
-  }
+  if (!userId) return errorBadAuth(response)
   if (sunset) return errorSunsetAddInvoice(response)
   let address = await getUserAddress(userId)
   if (!address) await generateUserAddress(userId)

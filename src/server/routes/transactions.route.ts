@@ -21,7 +21,6 @@ import {
 export const route = async (request: Request, response: Response): Promise<Response> => {
   let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
-
   if (!(await getUserAddress(userId))) await generateUserAddress(userId) // onchain addr needed further
   try {
     let transactions = await getTransactions(userId)

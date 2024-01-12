@@ -19,7 +19,6 @@ import { randomBytes } from 'node:crypto'
 export const route = async (request: Request, response: Response): Promise<Response> => {
   let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
-
   let amount = parseInt(request.body.amt || request.body.amount || 0)
   if (amount) {
     let r_preimage = randomBytes(32).toString('base64')
