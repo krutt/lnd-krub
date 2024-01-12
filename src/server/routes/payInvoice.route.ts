@@ -170,10 +170,12 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
       await clearBalanceCache(userId)
       await savePayment(
         {
+          decoded: {
+            timestamp: Math.floor(+new Date() / 1000)
+          },
           fee: Math.floor(+decoded.num_satoshis * intraHubFee),
           memo: decodeURIComponent(decoded.description),
           pay_req: bolt11,
-          timestamp: Math.floor(+new Date() / 1000),
           type: 'paid_invoice',
           value: +decoded.num_satoshis + Math.floor(+decoded.num_satoshis * intraHubFee),
         },
