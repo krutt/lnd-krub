@@ -102,7 +102,7 @@ export const savePayment = async (
   }
   let data = {
     description: (payment as Payment).description,
-    expireTime: timestamp,
+    expireTime: +timestamp,
     fee,
     memo,
     paymentError: (payment as Payment).payment_error,
