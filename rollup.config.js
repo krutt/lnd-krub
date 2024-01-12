@@ -10,8 +10,8 @@ let plugins = [commonJS(), resolve(), typescript()]
 module.exports = {
   type: 'module',
   input: {
-    locked: 'jobs/locked_payments.ts',
-    unpaid: 'jobs/unpaid_invoices.ts',
+    locked: 'src/jobs/locked_payments.ts',
+    unpaid: 'src/jobs/unpaid_invoices.ts',
   },
   output: {
     dir: 'cronjobs',

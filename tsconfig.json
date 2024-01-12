@@ -19,6 +19,6 @@
     "target": "ESNext",
     "useDefineForClassFields": true
   },
-  "include": ["jobs", "src", "tests"],
+  "include": ["src", "tests"],
   "exclude": ["src/client"]
 }
