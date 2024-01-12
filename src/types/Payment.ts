@@ -5,10 +5,12 @@ import { PayReq } from './PayReq'
 
 // define types
 export type MockPayment = {
+  decoded: {
+    timestamp: number
+  }
   fee: number
   memo: string
   pay_req: string
-  timestamp: number
   type: 'faucet' | 'paid_invoice'
   value: number
 }
