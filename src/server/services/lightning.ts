@@ -66,7 +66,7 @@ export class LightningService extends LnRpc.Lightning {
     })
     let creds: ChannelCredentials = credentials.combineChannelCredentials(sslCreds, macaroonCreds)
     let options: ChannelOptions = {
-      'grpc.max_receive_message_length': 20_000_000
+      'grpc.max_receive_message_length': 20_000_000,
     }
     super(`${host}:${port}`, creds, options)
   }
@@ -89,7 +89,7 @@ export class WalletUnlocker extends LnRpc.WalletUnlocker {
     })
     let creds: ChannelCredentials = credentials.combineChannelCredentials(sslCreds, macaroonCreds)
     let options: ChannelOptions = {
-      'grpc.max_receive_message_length': 20_000_000
+      'grpc.max_receive_message_length': 20_000_000,
     }
     super(`${host}:${port}`, creds, options)
   }

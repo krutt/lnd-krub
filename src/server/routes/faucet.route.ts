@@ -33,7 +33,7 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
     await savePayment(
       {
         decoded: {
-          timestamp: Math.floor(+new Date() / 1000)
+          timestamp: Math.floor(+new Date() / 1000),
         },
         fee: 0,
         memo: 'faucet',

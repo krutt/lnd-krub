@@ -107,11 +107,11 @@ export const savePayment = async (
     memo,
     paymentError: (payment as Payment).payment_error,
     paymentHash: (payment as Payment).payment_hash?.toString(),
-    paymentPreimage: (payment as Payment).payment_preimage?.toString(), 
+    paymentPreimage: (payment as Payment).payment_preimage?.toString(),
     payReq: payment.pay_req,
     type,
     userId: user.id,
-    value
+    value,
   }
   let created = await prisma.payment.create({ data })
   return !!created ? 1 : 0

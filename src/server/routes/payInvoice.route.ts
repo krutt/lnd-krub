@@ -162,7 +162,7 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
       await savePayment(
         {
           decoded: {
-            timestamp: Math.floor(+new Date() / 1000)
+            timestamp: Math.floor(+new Date() / 1000),
           },
           fee: Math.floor(+decoded.num_satoshis * intraHubFee),
           memo: decodeURIComponent(decoded.description),
@@ -215,8 +215,8 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
       // payment.payment_route.total_fees = Math.floor(decoded.num_satoshis * forwardReserveFee)
       // payment.payment_route.total_amt = decoded.num_satoshis
       // TODO: paralellize
-      settled["type"] = 'paid_invoice'
-      settled["value"] = +settled.decoded.num_satoshis
+      settled['type'] = 'paid_invoice'
+      settled['value'] = +settled.decoded.num_satoshis
       await savePayment(settled, userId)
       await clearBalanceCache(userId)
       await releaseLock(lockKey)
