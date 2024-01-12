@@ -36,7 +36,7 @@ model Payment {
   id              Int      @id @default(autoincrement())
   description     String?
   expireTime      Int
-  fee             Int
+  fee             Int      @default(0)
   isPaid          Boolean  @default(false)
   memo            String   @default("")
   paymentError    String?
