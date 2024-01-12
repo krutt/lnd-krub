@@ -371,7 +371,6 @@ const listTransactions = async () => {
   //     })
   // } else if (!!lightning) {
   if (!!lightning) {
-    console.log('get chain transactions via lnd')
     let transactions = await promisify(lightning.getTransactions)
       .bind(lightning)({})
       .then((data: { transactions: Array<any> }) => data.transactions)

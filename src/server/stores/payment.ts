@@ -142,7 +142,6 @@ export const sendToRouteSync = async (bolt11: string, routes) => {
     payment_hash_string: decoded?.payment_hash,
     route: routes[0],
   }
-  console.log('sendToRouteSync:', { request })
   let route = await promisify(lightning.sendToRouteSync)
     .bind(lightning)(request)
     .catch(console.error)

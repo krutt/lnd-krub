@@ -120,7 +120,7 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
   }
 
   let balance: number = await calculateBalance(userId).catch(err => {
-    console.log('', [request.uuid, 'error running calculateBalance():', err.message])
+    console.error(['error running calculateBalance():', err.message])
     return -1
   })
   if (balance < 0) {
