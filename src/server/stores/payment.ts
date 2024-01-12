@@ -95,13 +95,14 @@ export const savePayment = async (
   userId: string
 ): Promise<number> => {
   let { fee, memo, type, value } = payment
+  let { timestamp } = payment.decoded
   let user = await prisma.user.findFirst({ where: { userId } })
   if (!user) {
     return 0
   }
   let data = {
     description: (payment as Payment).description,
-    expireTime: payment.timestamp,
+    expireTime: timestamp,
     fee,
     memo,
     paymentError: (payment as Payment).payment_error,
