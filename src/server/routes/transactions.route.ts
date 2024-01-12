@@ -1,8 +1,7 @@
 /* ~~/src/server/routes/transactions.route.ts */
 
 // imports
-import type { LNDKrubRequest } from '@/types/LNDKrubRequest'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 import { errorBadAuth } from '@/server/exceptions'
 import { forwardReserveFee } from '@/configs'
 import {
@@ -15,11 +14,11 @@ import {
 
 /**
  *
- * @param {LNDKrubRequest} request
+ * @param {Express.Request} request
  * @param {Express.Response} response
  * @returns {Express.Response}
  */
-export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
+export const route = async (request: Request, response: Response): Promise<Response> => {
   let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
 
@@ -38,7 +37,7 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
     }
     return response.send(transactions)
   } catch (err) {
-    console.error('', [request.uuid, 'error gettxs:', err.message, 'userid:', userId])
+    console.error(['error gettxs:', err.message, 'userid:', userId])
     return response.send([])
   }
 }

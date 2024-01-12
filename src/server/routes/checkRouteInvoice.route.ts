@@ -1,19 +1,18 @@
 /* ~~/src/server/routes/checkRouteInvoice.route.ts */
 
 // imports
-import type { LNDKrubRequest } from '@/types'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 import { decodePaymentRequest } from '@/server/stores/invoice'
 import { errorBadAuth, errorGeneralServerError, errorNotAValidInvoice } from '@/server/exceptions'
 import { loadUserIdByAuthorization } from '@/server/stores/user'
 
 /**
  *
- * @param {LNDKrubRequest} request
+ * @param {Express.Request} request
  * @param {Express.Response} response
  * @returns {Express.Response}
  */
-export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
+export const route = async (request: Request, response: Response): Promise<Response> => {
   let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) return errorBadAuth(response)
   let bolt11 = request.query.invoice

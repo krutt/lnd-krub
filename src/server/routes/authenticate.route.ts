@@ -1,8 +1,7 @@
 /* ~~/src/server/routes/authenticate.route.ts */
 
 // imports
-import type { LNDKrubRequest } from '@/types'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 import { errorBadAuth, errorBadArguments } from '@/server/exceptions'
 import {
   fetchUserAuth,
@@ -12,11 +11,11 @@ import {
 
 /**
  *
- * @param {LNDKrubRequest} request
+ * @param {Express.Request} request
  * @param {Express.Response} response
  * @returns {Express.Response}
  */
-export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
+export const route = async (request: Request, response: Response): Promise<Response> => {
   let login: null | string = request.body.login
   let password: null | string = request.body.password
   let refreshToken: null | string = request.body.refreshToken || request.body.refresh_token // bluewallet: compatibility

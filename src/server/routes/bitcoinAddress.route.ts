@@ -1,8 +1,7 @@
 /* ~~/src/server/routes/bitcoinAddress.route.ts */
 
 // imports
-import type { LNDKrubRequest } from '@/types'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 import { errorBadAuth, errorSunsetAddInvoice } from '@/server/exceptions'
 import { sunset } from '@/configs'
 import {
@@ -14,11 +13,11 @@ import {
 
 /**
  *
- * @param {LNDKrubRequest} request
+ * @param {Express.Request} request
  * @param {Express.Response} response
  * @returns {Express.Response}
  */
-export const route = async (request: LNDKrubRequest, response: Response): Promise<Response> => {
+export const route = async (request: Request, response: Response): Promise<Response> => {
   let userId = await loadUserIdByAuthorization(request.headers.authorization)
   if (!userId) {
     return errorBadAuth(response)
