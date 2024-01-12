@@ -105,7 +105,6 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
   if (!userId) return errorBadAuth(response)
   let identityPubkey: string = await fetchIdentityPubkey()
   let bolt11: string = request.body.invoice
-  console.log('/payinvoice', [request.uuid, 'userid: ' + userId, 'invoice: ' + bolt11])
 
   if (!bolt11) return errorBadArguments(response)
   let freeAmount = 0
@@ -137,13 +136,6 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
     // 'tip' invoices
     decoded.num_satoshis = freeAmount.toFixed(0)
   }
-
-  console.log('/payinvoice', [
-    request.uuid,
-    'balance: ' + balance,
-    'num_satoshis: ' + decoded.num_satoshis,
-  ])
-
   if (
     balance >=
     +decoded.num_satoshis + Math.floor(+decoded.num_satoshis * forwardReserveFee) + 1
@@ -153,7 +145,6 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
       // this is internal invoice
       // now, receiver add balance
       let recipientId = await getUserIdByPaymentHash(decoded.payment_hash)
-      console.log('Recipient:', recipientId)
       if (!recipientId) {
         await releaseLock(lockKey)
         return errorGeneralServerError(response)
