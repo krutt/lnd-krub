@@ -32,10 +32,12 @@ export const route = async (request: LNDKrubRequest, response: Response): Promis
     await clearBalanceCache(userId)
     await savePayment(
       {
+        decoded: {
+          timestamp: Math.floor(+new Date() / 1000)
+        },
         fee: 0,
         memo: 'faucet',
         pay_req: invoice.payment_request,
-        timestamp: Math.floor(+new Date() / 1000),
         type: 'faucet',
         value: amount,
       },
