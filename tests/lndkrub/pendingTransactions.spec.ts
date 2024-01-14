@@ -77,7 +77,7 @@ describe('GET /getpending after sending new transaction to address', () => {
       .then((response: { body: [{ address: string }] }) => {
         address = response.body[0].address
       })
-    await bitcoin.getWalletInfo().catch(async () =>  await bitcoin.createWallet('test'))
+    await bitcoin.getWalletInfo().catch(async () => await bitcoin.createWallet('test'))
     let { result } = await bitcoin.getNewAddress()
     expect(result).toBeTruthy()
     expect(result.slice(0, 5)).toStrictEqual('bcrt1')
