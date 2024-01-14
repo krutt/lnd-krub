@@ -103,7 +103,8 @@ if (!!lnd.password) {
     .then(response => {
       console.log('unlockWallet:', response)
     })
-    .catch(console.error)
+    // .catch(console.error)
+    .catch(_ => {})
 }
 
 export default LnRpc.Lightning
