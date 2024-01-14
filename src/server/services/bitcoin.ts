@@ -26,13 +26,22 @@ export class BitcoinService {
 
   // methods
 
+  createWallet = async (walletName: string) => this._rpc.request('createwallet', [walletName])
+
   generateBlock = async (address: string) => await this._rpc.request('generateblock', [address, []])
+
+  generateToAddress = async (blocks: number, address: string) =>
+    await this._rpc.request('generatetoaddress', [blocks, address])
 
   getAddressInfo = async (address: string) => await this._rpc.request('getaddressinfo', [address])
 
   getBlockchainInfo = async () => await this._rpc.request('getblockchaininfo', [])
 
   getNetworkInfo = async () => await this._rpc.request('getnetworkinfo', [])
+
+  getNewAddress = async () => await this._rpc.request('getnewaddress', [])
+
+  getWalletInfo = async () => await this._rpc.request('getwalletinfo', [])
 
   getRawMempool = async () => await this._rpc.request('getrawmempool', [])
 
