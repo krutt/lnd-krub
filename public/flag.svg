@@ -1,0 +1,180 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg
+  height='800px'
+  version='1.1'
+  viewBox='0 0 800 800'
+  xmlns='http://www.w3.org/2000/svg'
+  xmlns:xlink='http://www.w3.org/1999/xlink'
+  xmlns:space='default'
+  width='800px'
+  >
+  <defs>
+    <filter
+      filterUnits="objectBoundingBox"
+      height="151.2%"
+      id="filter-1"
+      width="152.5%"
+      x="-26.2%"
+      y="-25.6%"
+      >
+      <feOffset
+        dx="0"
+        dy="1"
+        in="SourceAlpha"
+        result="shadowOffsetOuter1"
+        />
+      <feGaussianBlur
+        in="shadowOffsetOuter1" 
+        stdDeviation="2"
+        result="shadowBlurOuter1"
+        />
+      <feColorMatrix
+        in="shadowBlurOuter1"
+        result="shadowMatrixOuter1"
+        type="matrix"
+        values="
+          0 0 0 0 0
+          0 0 0 0 0
+          0 0 0 0 0
+          0 0 0 0.1 0
+        "/>
+      <feMerge>
+        <feMergeNode
+          in="shadowMatrixOuter1"
+          />
+        <feMergeNode
+          in="SourceGraphic"
+          />
+      </feMerge>
+    </filter>
+    <linearGradient
+      id="ensign-red"
+      x1="50%"
+      x2="50%"
+      y1="2.83824061%"
+      y2="100%"
+      >
+      <stop
+        offset="0%"
+        stop-color="#A51931"
+        />
+      <stop
+        offset="100%"
+        stop-color="#ED2B2A" 
+        />
+    </linearGradient>
+    <linearGradient
+      id="ensign-blue"
+      x1="50%"
+      x2="50%"
+      y1="0%"
+      y2="97.8843027%"
+      >
+      <stop
+        offset="0%"
+        stop-color="#2D2A4A"
+        />
+      <stop
+        offset="100%"
+        stop-color="#2F5FB3"
+        />
+    </linearGradient>
+    <linearGradient
+      id="ensign-white"
+      x1="50%"
+      x2="50%" 
+      y1="2.72534321%"
+      y2="100%"
+      >
+        <stop
+          offset="0%"
+          stop-color="#F4F5F8"
+          />
+        <stop
+          offset="100%"
+          stop-color="#FFFFFF"
+          />
+    </linearGradient>
+  </defs>
+  <g
+    fill='none'
+    fill-rule='evenodd'
+    id='LNDkrub'
+    stroke='none'
+    stroke-width='1'
+    >
+    <g
+      id='lndkrub-logo'
+      >
+      <g
+        filter='url(#filter-1)'
+        id='flag'
+        >
+        <rect
+          fill='url(#ensign-red)'
+          height='56%'
+          width='100%'
+          x='0'
+          y='0'
+          />
+        <rect
+          fill='url(#ensign-white)'
+          height='46%'
+          rx='20%'
+          ry='21%'
+          width='100%'
+          x='0'
+          y='15%'
+          />
+        <rect
+          fill='url(#ensign-blue)'
+          height='56%'          
+          rx='20%'
+          ry='21%'
+          width='100%'
+          x='0'
+          y='25%'
+          />
+        <rect
+          fill='url(#ensign-white)'
+          height='46%'
+          rx='20%'
+          ry='21%'
+          width='100%'
+          x='0'
+          y='40%'
+          />
+        <path
+          d="
+            M40 400
+            h600
+            q160,0 160,168
+            v252
+            h-800
+            v-252
+            q0,-168 160,-168
+            z
+          "
+          fill='url(#ensign-red)'
+          />
+      </g>
+        <polyline id='zap'
+          fill="white"
+          points='
+            179.5, 156
+            148, 187.5
+            162, 187.5
+            152.5, 216
+            184, 184.5
+            169, 184.5
+            179.5, 156
+          '
+          stroke="white"
+          stroke-linecap='round'
+          stroke-linejoin='round'
+          stroke-width='6'
+          transform='scale(3.4)'
+          />
+    </g>
+  </g>
+</svg>
