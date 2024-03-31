@@ -151,15 +151,6 @@
           x='25.5px'
           y='74px'
           />
-        <rect visibility='hidden'
-          fill='url(#ensign-white)'
-          height='115px'
-          rx='41px'
-          ry='43px'
-          width='200px'
-          x='25px'
-          y='100px'
-          />
         <rect
           fill='url(#ensign-white)'
           height='115px'
